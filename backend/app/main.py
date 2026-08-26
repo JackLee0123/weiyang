@@ -1,4 +1,5 @@
 from contextlib import asynccontextmanager
+import mimetypes
 import os
 
 from fastapi import FastAPI
@@ -68,4 +69,6 @@ frontend_dist = os.environ.get("FRONTEND_DIST")
 if not frontend_dist:
     frontend_dist = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", "apps", "frontend", "dist"))
 if os.path.isdir(frontend_dist):
+    # PWA 清单需要标准 MIME，否则浏览器会拒绝其作为 Web App Manifest。
+    mimetypes.add_type("application/manifest+json", ".webmanifest")
     app.mount("/", StaticFiles(directory=frontend_dist, html=True), name="frontend")
