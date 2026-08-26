@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 300" width="1000" height="300">
+  <!-- light canvas -->
+  <rect width="1000" height="300" fill="#f6f8fa"/>
+  <!-- mark -->
+  <g transform="translate(70,26) scale(0.485)">
+    <path
+      d="M 256 118 C 154 118 82 190 82 277 C 82 369 159 435 256 435 C 353 435 430 369 430 277 C 430 231 410 190 379 164"
+      fill="none" stroke="#0f766e" stroke-width="46" stroke-linecap="round" stroke-linejoin="round"
+    />
+    <path
+      d="M 169 246 L 246 328 L 374 159"
+      fill="none" stroke="#0f766e" stroke-width="52" stroke-linecap="round" stroke-linejoin="round"
+    />
+  </g>
+  <!-- wordmark -->
+  <text x="360" y="150" font-family="'Microsoft YaHei','PingFang SC',sans-serif" font-size="112" font-weight="700" fill="#0f172a">未央</text>
+  <text x="362" y="210" font-family="'Microsoft YaHei','PingFang SC',sans-serif" font-size="34" letter-spacing="2" fill="#0f766e">Everlong · 记录 & 排期</text>
+  <rect x="360" y="236" width="420" height="3" rx="1.5" fill="#0f766e" opacity="0.35"/>
+</svg>

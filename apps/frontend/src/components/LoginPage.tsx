@@ -1,8 +1,9 @@
 import { useEffect, useRef, useState } from 'react'
-import { ArrowRight, CalendarRange, Eye, EyeOff, LockKeyhole, Mail, Moon, Sun, UserRound } from 'lucide-react'
+import { ArrowRight, Eye, EyeOff, LockKeyhole, Mail, Moon, Sun, UserRound } from 'lucide-react'
 import { api } from '../lib/api'
 import { setAuth } from '../lib/auth'
 import type { Theme } from '../lib/theme'
+import { BrandMark } from './BrandMark'
 
 type AuthMode = 'login' | 'register' | 'forgot'
 
@@ -173,7 +174,7 @@ export function LoginPage({ theme, onToggleTheme, onLogin }: LoginPageProps) {
       <div className="w-full max-w-sm rounded-lg border border-line bg-surface p-6 shadow-soft dark:border-slate-700 dark:bg-slate-900">
         <div className="flex flex-col items-center text-center">
           <div className="flex h-12 w-12 items-center justify-center rounded-md bg-brand text-white shadow-sm">
-            <CalendarRange size={24} />
+            <BrandMark size={26} />
           </div>
           <h1 className="mt-4 text-xl font-semibold text-ink dark:text-slate-100">{title}</h1>
           <p className="mt-1 text-sm text-ink-muted dark:text-slate-400">{subtitle}</p>

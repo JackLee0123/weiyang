@@ -1,7 +1,8 @@
-import { Activity, BookOpen, CalendarCheck, CalendarDays, CalendarRange, History, List, LogOut, MonitorDown, Moon, Plane, Plus, Route, Sun, Users } from 'lucide-react'
+import { Activity, BookOpen, CalendarCheck, CalendarDays, History, List, LogOut, MonitorDown, Moon, Plane, Plus, Route, Sun, Users } from 'lucide-react'
 import { useEffect, useState, type ReactNode } from 'react'
 import type { Theme } from '../lib/theme'
 import type { View } from '../lib/types'
+import { BrandMark } from './BrandMark'
 
 const NAV: { key: View; label: string; icon: typeof CalendarCheck }[] = [
   { key: 'today', label: '今日', icon: CalendarCheck },
@@ -116,7 +117,7 @@ export function Sidebar({
     <>
       <header className="sticky top-0 z-30 flex h-14 items-center gap-3 border-b border-line bg-surface/95 px-4 backdrop-blur dark:border-slate-700 dark:bg-slate-900/95 md:hidden">
         <div className="flex h-8 w-8 items-center justify-center rounded-md bg-brand text-white">
-          <CalendarRange size={18} />
+          <BrandMark size={18} />
         </div>
         <div>
           <p className="text-sm font-semibold text-ink dark:text-slate-100">未央 · Everlong</p>
@@ -152,7 +153,7 @@ export function Sidebar({
       <aside className="hidden w-60 shrink-0 flex-col border-r border-line bg-surface dark:border-slate-700 dark:bg-slate-900 md:flex">
         <div className="flex items-center gap-2.5 px-4 py-4">
           <div className="flex h-9 w-9 items-center justify-center rounded-md bg-brand text-white shadow-sm">
-            <CalendarRange size={19} />
+            <BrandMark size={19} />
           </div>
           <div>
             <p className="text-sm font-semibold text-ink dark:text-slate-100">未央 · Everlong</p>

@@ -12,7 +12,7 @@ export interface ChangelogEntry {
   items: ChangelogItem[]
 }
 
-export const CURRENT_VERSION = 'v0.4.0'
+export const CURRENT_VERSION = 'v0.4.5'
 
 export const CHANGELOG_KIND_META: Record<ChangelogKind, { label: string; className: string }> = {
   feature: { label: '新增', className: 'bg-teal-50 text-teal-700 dark:bg-teal-500/15 dark:text-teal-300' },
@@ -22,6 +22,16 @@ export const CHANGELOG_KIND_META: Record<ChangelogKind, { label: string; classNa
 }
 
 export const CHANGELOG: ChangelogEntry[] = [
+  {
+    version: 'v0.4.5',
+    date: '2026-08-27',
+    title: '未央品牌标志',
+    items: [
+      { kind: 'feature', text: '全新「未央环」标志：不闭合的环象征尚未结束、仍在途中，环上的对勾代表抵达与完成' },
+      { kind: 'feature', text: '登录页与侧栏品牌位换成新标志，应用图标与浏览器页签同步更新' },
+      { kind: 'improvement', text: 'PWA 图标改为满版品牌色以适配安全区，桌面端与移动端更统一' },
+    ],
+  },
   {
     version: 'v0.4.0',
     date: '2026-08-27',
