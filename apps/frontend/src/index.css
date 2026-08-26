@@ -1,0 +1,156 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  color-scheme: light;
+  --app-bg: #f6f8fa;
+  --surface: #ffffff;
+  --surface-muted: #f6f8fa;
+  --surface-soft: #f1f5f9;
+  --text: #0f172a;
+  --text-soft: #475569;
+  --text-muted: #64748b;
+  --text-faint: #94a3b8;
+  --line: #e2e8f0;
+  --line-soft: #eef2f6;
+  --brand: #0f766e;
+  --brand-deep: #115e59;
+  --brand-soft: #ccfbf1;
+  --brand-ink: #134e4a;
+}
+
+.dark {
+  color-scheme: dark;
+  --app-bg: #0f172a;
+  --surface: #1e293b;
+  --surface-muted: #172033;
+  --surface-soft: #253247;
+  --text: #e2e8f0;
+  --text-soft: #cbd5e1;
+  --text-muted: #94a3b8;
+  --text-faint: #64748b;
+  --line: #334155;
+  --line-soft: #293548;
+  --brand: #2dd4bf;
+  --brand-deep: #5eead4;
+  --brand-soft: #134e4a;
+  --brand-ink: #ccfbf1;
+}
+
+html,
+body,
+#root {
+  height: 100%;
+}
+
+body {
+  margin: 0;
+  font-family: 'Inter', 'PingFang SC', 'Microsoft YaHei', system-ui, sans-serif;
+  background: var(--app-bg);
+  color: var(--text);
+  -webkit-font-smoothing: antialiased;
+}
+
+* {
+  scrollbar-width: thin;
+  scrollbar-color: var(--line-strong, #cbd5e1) transparent;
+}
+
+*::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+*::-webkit-scrollbar-thumb {
+  background: var(--line-strong, #cbd5e1);
+  border-radius: 8px;
+}
+
+.dark *::-webkit-scrollbar-thumb {
+  background: #475569;
+}
+
+input[type='time']::-webkit-calendar-picker-indicator {
+  opacity: 0.5;
+}
+
+@layer components {
+  .btn {
+    @apply inline-flex items-center justify-center gap-2 rounded-md px-3 py-2 text-sm font-medium transition-colors duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand focus-visible:ring-offset-2 focus-visible:ring-offset-white disabled:cursor-not-allowed disabled:opacity-45 dark:focus-visible:ring-offset-slate-900;
+  }
+  .btn-primary {
+    @apply btn bg-brand text-white shadow-sm hover:bg-brand-deep active:bg-brand-deep disabled:hover:bg-brand;
+  }
+  .btn-ghost {
+    @apply btn border border-transparent text-ink-soft hover:bg-surface-soft hover:text-ink dark:text-slate-300 dark:hover:bg-white/10 dark:hover:text-white;
+  }
+  .field {
+    @apply w-full rounded-md border border-line bg-surface px-3 py-2 text-sm text-ink shadow-sm transition-colors placeholder:text-ink-faint focus:border-brand focus:outline-none focus:ring-2 focus:ring-brand/20 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-100 dark:placeholder:text-slate-500;
+  }
+  .label {
+    @apply mb-1.5 block text-xs font-medium text-ink-muted dark:text-slate-400;
+  }
+  .panel {
+    @apply rounded-lg border border-line bg-surface shadow-panel dark:border-slate-700 dark:bg-slate-800;
+  }
+  .section-title {
+    @apply text-sm font-semibold text-ink dark:text-slate-100;
+  }
+}
+
+/* Focus Flight immersive scene */
+.flight-sky {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, #7dd3fc 0%, #bae6fd 45%, #fef3c7 100%);
+  transition: background 0.3s ease;
+}
+.dark .flight-sky {
+  background: linear-gradient(180deg, #0b1026 0%, #1e293b 60%, #334155 100%);
+}
+
+.flight-cloud {
+  position: absolute;
+  left: -20%;
+  height: 10vh;
+  border-radius: 9999px;
+  background: rgba(255, 255, 255, 0.55);
+  filter: blur(18px);
+  opacity: 0.8;
+  animation: cloud-drift linear infinite;
+}
+.dark .flight-cloud {
+  background: rgba(148, 163, 184, 0.16);
+  opacity: 0.7;
+}
+
+@keyframes cloud-drift {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(140vw);
+  }
+}
+
+.flight-map {
+  --map-ocean: #e0ecf7;
+  --map-land: #cfe3d0;
+  --map-coast: #9fb3a2;
+  --map-grid: rgba(100, 116, 139, 0.14);
+  --map-route-remain: #9fb6c7;
+  --map-route-flown: #0f766e;
+  --map-pin: #0f766e;
+  --map-text: #334155;
+}
+
+.dark .flight-map {
+  --map-ocean: #0b1220;
+  --map-land: #16202f;
+  --map-coast: #2e4058;
+  --map-grid: rgba(148, 163, 184, 0.12);
+  --map-route-remain: #33506b;
+  --map-route-flown: #2dd4bf;
+  --map-pin: #2dd4bf;
+  --map-text: #cbd5e1;
+}
