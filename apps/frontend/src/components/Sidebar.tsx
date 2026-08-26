@@ -1,4 +1,5 @@
-import { Activity, BookOpen, CalendarCheck, CalendarDays, CalendarRange, History, List, LogOut, Moon, Plane, Plus, Route, Sun, Users } from 'lucide-react'
+import { Activity, BookOpen, CalendarCheck, CalendarDays, CalendarRange, History, List, LogOut, MonitorDown, Moon, Plane, Plus, Route, Sun, Users } from 'lucide-react'
+import { useEffect, useState, type ReactNode } from 'react'
 import type { Theme } from '../lib/theme'
 import type { View } from '../lib/types'
 
@@ -13,6 +14,49 @@ const NAV: { key: View; label: string; icon: typeof CalendarCheck }[] = [
 
 const CHANGELOG_NAV = { key: 'changelog', label: '更新日志', icon: History } as const
 const ADMIN_NAV = { key: 'admin', label: '用户管理', icon: Users } as const
+
+function InstallAppButton({ className, compact = false }: { className?: string; compact?: boolean }) {
+  const [deferred, setDeferred] = useState<BeforeInstallPromptEvent | null>(null)
+  const [installed, setInstalled] = useState(false)
+
+  useEffect(() => {
+    const onPrompt = (event: Event) => {
+      event.preventDefault()
+      setDeferred(event as BeforeInstallPromptEvent)
+    }
+    const onInstalled = () => {
+      setInstalled(true)
+      setDeferred(null)
+    }
+    window.addEventListener('beforeinstallprompt', onPrompt)
+    window.addEventListener('appinstalled', onInstalled)
+    return () => {
+      window.removeEventListener('beforeinstallprompt', onPrompt)
+      window.removeEventListener('appinstalled', onInstalled)
+    }
+  }, [])
+
+  if (installed || !deferred) return null
+
+  const handleClick = async () => {
+    const promptEvent = deferred
+    setDeferred(null)
+    try {
+      await promptEvent.prompt()
+      const choice = await promptEvent.userChoice
+      if (choice.outcome === 'accepted') setInstalled(true)
+    } catch {
+      // 已安装或浏览器不再允许弹出时静默处理
+    }
+  }
+
+  return (
+    <button className={className} onClick={handleClick}>
+      <MonitorDown size={compact ? 15 : 16} />
+      安装应用
+    </button>
+  )
+}
 
 export function Sidebar({
   view,
@@ -40,6 +84,7 @@ export function Sidebar({
   const renderNav = (
     compact = false,
     items: { key: View; label: string; icon: typeof CalendarCheck }[] = NAV,
+    trailing?: ReactNode,
   ) => (
     <nav className={`${compact ? 'flex gap-1 overflow-x-auto' : 'flex-1 space-y-1 px-2 py-2'}`}>
       {items.map((item) => {
@@ -63,6 +108,7 @@ export function Sidebar({
           </button>
         )
       })}
+      {trailing}
     </nav>
   )
 
@@ -93,7 +139,14 @@ export function Sidebar({
       </header>
 
       <div className="sticky top-14 z-20 border-b border-line bg-surface/95 px-2 py-1.5 backdrop-blur dark:border-slate-700 dark:bg-slate-900/95 md:hidden">
-        {renderNav(true, [...NAV, CHANGELOG_NAV, ...(isAdmin ? [ADMIN_NAV] : [])])}
+        {renderNav(
+          true,
+          [...NAV, CHANGELOG_NAV, ...(isAdmin ? [ADMIN_NAV] : [])],
+          <InstallAppButton
+            compact
+            className="flex shrink-0 items-center gap-1.5 rounded-md px-3 py-2 text-xs font-medium text-ink-soft hover:bg-surface-soft hover:text-ink dark:text-slate-300 dark:hover:bg-white/5 dark:hover:text-slate-100"
+          />,
+        )}
       </div>
 
       <aside className="hidden w-60 shrink-0 flex-col border-r border-line bg-surface dark:border-slate-700 dark:bg-slate-900 md:flex">
@@ -114,6 +167,7 @@ export function Sidebar({
             <Plane size={16} />
             专注航班
           </button>
+          <InstallAppButton className="btn-ghost w-full justify-center" />
           {user && (
             <div className="flex items-center gap-2 rounded-md bg-surface-soft px-3 py-2 dark:bg-white/5">
               <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-brand/15 text-xs font-semibold text-brand-ink dark:bg-white/10 dark:text-teal-200">

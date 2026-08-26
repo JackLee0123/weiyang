@@ -1,18 +1,15 @@
 {
-  "name": "planner-desktop",
+  "name": "everlong",
   "version": "0.1.0",
   "private": true,
-  "description": "未央 · Everlong — 本地任务计划客户端 MVP：提前排期 + 每日记录，Electron + FastAPI + MySQL/MariaDB",
+  "description": "未央 · Everlong — 本地任务计划客户端 MVP：提前排期 + 每日记录，React + FastAPI + MySQL/MariaDB",
   "scripts": {
     "dev": "concurrently -k -n backend,frontend -c blue,green \"pnpm dev:backend\" \"pnpm dev:frontend\"",
     "dev:backend": "cd backend && uv run uvicorn app.main:app --host 127.0.0.1 --port 8000 --reload",
     "dev:frontend": "pnpm --filter frontend dev",
-    "dev:desktop": "pnpm --filter desktop dev",
     "gen:api": "pnpm --filter frontend gen:api",
     "build": "pnpm build:frontend",
     "build:frontend": "pnpm --filter frontend build",
-    "build:backend": "cd backend && uv run pyinstaller --noconfirm --clean backend.spec",
-    "build:desktop": "pnpm --filter desktop build",
     "test": "pnpm test:backend && pnpm test:frontend",
     "test:backend": "cd backend && uv run pytest -q",
     "test:frontend": "pnpm --filter frontend test:run"

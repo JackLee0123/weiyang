@@ -7,7 +7,6 @@
 - 前端：React 18 + TypeScript + Vite + Tailwind CSS + TanStack Query + date-fns
 - 后端：Python 3.12 + FastAPI + SQLAlchemy 2 + Alembic + PyMySQL
 - 数据库：MySQL 5.7+ / MariaDB（开发可用 SQLite 兜底）
-- 桌面：Electron + electron-builder（Windows 安装包）
 - 测试：pytest（后端）、Vitest + Testing Library（前端）、Playwright（端到端）
 
 ## 目录结构
@@ -15,7 +14,6 @@
 ```
 apps/
   frontend/            React 前端（三视图）
-  desktop/             Electron 桌面壳 + electron-builder 配置
 backend/               FastAPI 后端 + Alembic 迁移 + 测试
   app/
     routers/           plans / records / stats / backup / health
@@ -31,7 +29,7 @@ backend/               FastAPI 后端 + Alembic 迁移 + 测试
 - pnpm 9+
 - Python 3.12+
 - uv（后端依赖管理）
-- MySQL 5.7+ / MariaDB（生产与桌面客户端；开发可不用）
+- MySQL 5.7+ / MariaDB（生产环境；开发可不用）
 
 ## 快速开始（开发模式）
 
@@ -96,32 +94,18 @@ pnpm test:frontend  # 前端 Vitest
 python .build/e2e.py
 ```
 
-## 打包桌面客户端（Electron）
+## 网页端安装为应用（PWA）
 
-1. 构建前端：
+网页端像 YouTube / GitHub 那样支持“点击即安装成应用”：
+浏览器打开 `http://127.0.0.1:5173` 后（Chrome/Edge 等），地址栏会出现「安装」图标，
+侧边栏也会在可安装时出现「安装应用」按钮，点击即弹出安装确认，装好后会在开始菜单/桌面生成
+应用入口，并支持离线打开外壳界面。
 
-   ```powershell
-   pnpm build:frontend
-   ```
-
-2. 用 PyInstaller 生成 `backend.exe`：
-
-   ```powershell
-   cd backend
-   uv run pyinstaller --noconfirm --clean backend.spec
-   Copy-Item dist\backend.exe ..\apps\desktop\resources\backend\backend.exe
-   cd ..
-   ```
-
-3. 将可移植 MariaDB 放到 `apps/desktop/resources/mariadb`（保持 `bin/mariadbd.exe` 结构）。若未放置，主进程会回退到外部 MySQL，读取环境变量 `DATABASE_URL`。
-
-4. 打包：
-
-   ```powershell
-   pnpm build:desktop
-   ```
-
-   安装包输出在 `apps/desktop/release/`。
+- 需要满足 PWA 可安装条件：本地用 `localhost` 或 `127.0.0.1`（Chrome 视为安全源）；
+  正式部署必须走 HTTPS。
+- 配套文件：`apps/frontend/public/manifest.webmanifest`（应用名、图标、主题色）与
+  `apps/frontend/public/sw.js`（离线缓存外壳；`/api` 请求始终走网络，不写入缓存）。
+- 图标取自品牌图标，构建前端时(`pnpm build:frontend`)会一并打包，无需额外配置。
 
 ## API 一览
 

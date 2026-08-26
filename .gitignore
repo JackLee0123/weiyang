@@ -16,4 +16,5 @@ __pycache__/
 *.tsbuildinfo
 backend/data/
 backend/dist/
-apps/desktop/out/
+# stray empty file accidentally created by a shell redirect
+-w
