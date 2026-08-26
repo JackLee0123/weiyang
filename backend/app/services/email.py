@@ -138,8 +138,11 @@ def _deliver(msg: EmailMessage) -> dict:
 def send_verification_email(to_email: str, code: str, ttl_seconds: int, kind: str = "register") -> dict:
     """发送验证码邮件。未配置 SMTP 时进入开发模式，返回 dev_code 供联调。"""
     if not is_configured():
-        logger.warning("SMTP 未配置，开发模式：%s 的 %s 验证码为 %s", kind, to_email, code)
-        return {"delivered": False, "dev_code": code}
+        # 仅当显式开启开发模式时才回显验证码；生产环境下直接报错，绝不泄露。
+        if settings.dev_mode:
+            logger.warning("SMTP 未配置，开发模式：%s 的 %s 验证码为 %s", kind, to_email, code)
+            return {"delivered": False, "dev_code": code}
+        raise EmailSendError("邮件服务未配置，无法发送验证码")
 
     msg = _build_verification_message(to_email, code, ttl_seconds, kind)
     return _deliver(msg)

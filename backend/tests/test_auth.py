@@ -13,11 +13,11 @@ def test_send_code_respects_cooldown(client):
     assert second.status_code == 429
 
 
-def test_register_with_valid_code(client):
+def test_register_with_valid_code(client, captcha_ok):
     code = client.post("/api/auth/send-code", json={"email": "c@example.com"}).json()["dev_code"]
     response = client.post(
         "/api/auth/register",
-        json={"name": "小明", "email": "c@example.com", "password": "Secret1!", "code": code},
+        json={"name": "小明", "email": "c@example.com", "password": "Secret1!", "code": code, "captcha_token": captcha_ok()},
     )
     assert response.status_code == 201
     data = response.json()
@@ -31,12 +31,12 @@ def test_register_with_valid_code(client):
 def test_register_requires_valid_code(client):
     response = client.post(
         "/api/auth/register",
-        json={"name": "小红", "email": "d@example.com", "password": "Secret1!", "code": "000000"},
+        json={"name": "小红", "email": "d@example.com", "password": "Secret1!", "code": "000000", "captcha_token": "x"},
     )
     assert response.status_code == 400
 
 
-def test_register_enforces_password_policy(client):
+def test_register_enforces_password_policy(client, captcha_ok):
     code = client.post("/api/auth/send-code", json={"email": "g@example.com"}).json()["dev_code"]
     base = {"name": "小张", "email": "g@example.com", "code": code}
     # 少于 8 位
@@ -44,46 +44,47 @@ def test_register_enforces_password_policy(client):
     # 8 位但只含小写字母一种类型
     assert client.post("/api/auth/register", json={**base, "password": "abcdefgh"}).status_code == 422
     # 满足规则即可注册
-    assert client.post("/api/auth/register", json={**base, "password": "Ab1!xxxx"}).status_code == 201
+    assert client.post("/api/auth/register", json={**base, "password": "Ab1!xxxx", "captcha_token": captcha_ok()}).status_code == 201
 
 
-def test_register_rejects_duplicate_email(client):
+def test_register_rejects_duplicate_email(client, captcha_ok):
     code = client.post("/api/auth/send-code", json={"email": "e@example.com"}).json()["dev_code"]
-    payload = {"name": "小李", "email": "e@example.com", "password": "Secret1!", "code": code}
+    payload = {"name": "小李", "email": "e@example.com", "password": "Secret1!", "code": code, "captcha_token": captcha_ok()}
     assert client.post("/api/auth/register", json=payload).status_code == 201
     assert client.post("/api/auth/register", json=payload).status_code == 409
 
 
-def test_login_with_registered_user(client):
+def test_login_with_registered_user(client, captcha_ok):
     code = client.post("/api/auth/send-code", json={"email": "f@example.com"}).json()["dev_code"]
     client.post(
         "/api/auth/register",
-        json={"name": "小刚", "email": "f@example.com", "password": "Secret1!", "code": code},
+        json={"name": "小刚", "email": "f@example.com", "password": "Secret1!", "code": code, "captcha_token": captcha_ok()},
     )
-    login = client.post("/api/auth/login", json={"email": "f@example.com", "password": "Secret1!"})
+    login = client.post("/api/auth/login", json={"email": "f@example.com", "password": "Secret1!", "captcha_token": captcha_ok()})
     assert login.status_code == 200
     token = login.json()["token"]
-    assert client.post("/api/auth/login", json={"email": "f@example.com", "password": "wrong"}).status_code == 401
-    assert client.post("/api/auth/login", json={"email": "nope@example.com", "password": "Secret1!"}).status_code == 401
+    cap = captcha_ok()
+    assert client.post("/api/auth/login", json={"email": "f@example.com", "password": "wrong", "captcha_token": cap}).status_code == 401
+    assert client.post("/api/auth/login", json={"email": "nope@example.com", "password": "Secret1!", "captcha_token": cap}).status_code == 401
 
     headers = {"Authorization": f"Bearer {token}"}
     assert client.post("/api/auth/logout", headers=headers).status_code == 204
     assert client.get("/api/plans", headers=headers).status_code == 401
 
 
-def test_forgot_and_reset_password(client):
+def test_forgot_and_reset_password(client, captcha_ok):
     code = client.post("/api/auth/send-code", json={"email": "h@example.com"}).json()["dev_code"]
     session = client.post(
         "/api/auth/register",
-        json={"name": "小何", "email": "h@example.com", "password": "Old1!abcd", "code": code},
+        json={"name": "小何", "email": "h@example.com", "password": "Old1!abcd", "code": code, "captcha_token": captcha_ok()},
     ).json()
     old_token = session["token"]
 
     # 未注册邮箱：404
-    assert client.post("/api/auth/forgot-password", json={"email": "nope@example.com"}).status_code == 404
+    assert client.post("/api/auth/forgot-password", json={"email": "nope@example.com", "captcha_token": captcha_ok()}).status_code == 404
 
     # 已注册邮箱：生成重置验证码（测试为开发模式，返回 dev_code）
-    reset_code = client.post("/api/auth/forgot-password", json={"email": "h@example.com"}).json()["dev_code"]
+    reset_code = client.post("/api/auth/forgot-password", json={"email": "h@example.com", "captcha_token": captcha_ok()}).json()["dev_code"]
     assert reset_code
 
     # 错误验证码：400
@@ -104,7 +105,8 @@ def test_forgot_and_reset_password(client):
     assert response.json()["message"]
 
     # 旧密码失效，新密码可登录
-    assert client.post("/api/auth/login", json={"email": "h@example.com", "password": "Old1!abcd"}).status_code == 401
-    assert client.post("/api/auth/login", json={"email": "h@example.com", "password": "New1!zzzz"}).status_code == 200
+    cap = captcha_ok()
+    assert client.post("/api/auth/login", json={"email": "h@example.com", "password": "Old1!abcd", "captcha_token": cap}).status_code == 401
+    assert client.post("/api/auth/login", json={"email": "h@example.com", "password": "New1!zzzz", "captcha_token": cap}).status_code == 200
     # 原登录令牌已被吊销
     assert client.get("/api/plans", headers={"Authorization": f"Bearer {old_token}"}).status_code == 401

@@ -40,10 +40,12 @@ class RegisterIn(PasswordPolicy):
     name: str = Field(..., min_length=2, max_length=80)
     email: str = Field(..., pattern=EMAIL_RE, max_length=255)
     code: str = Field(..., min_length=4, max_length=10)
+    captcha_token: str = Field(..., min_length=1, max_length=128)
 
 
 class ForgotPasswordIn(BaseModel):
     email: str = Field(..., pattern=EMAIL_RE, max_length=255)
+    captcha_token: str = Field(..., min_length=1, max_length=128)
 
 
 class ResetPasswordIn(PasswordPolicy):
@@ -58,6 +60,7 @@ class ResetPasswordOut(BaseModel):
 class LoginIn(BaseModel):
     email: str = Field(..., max_length=255)
     password: str = Field(..., max_length=128)
+    captcha_token: str = Field(..., min_length=1, max_length=128)
 
 
 class SendCodeOut(BaseModel):
@@ -65,6 +68,27 @@ class SendCodeOut(BaseModel):
     expires_in: int
     cooldown: int
     dev_code: Optional[str] = None
+
+
+class CaptchaCreateOut(BaseModel):
+    captcha_id: str
+    background: str
+    piece: str
+    piece_y: int
+    piece_width: int
+    piece_height: int
+    width: int
+    height: int
+    target_x: Optional[int] = None
+
+
+class CaptchaVerifyIn(BaseModel):
+    captcha_id: str
+    x: float
+
+
+class CaptchaVerifyOut(BaseModel):
+    captcha_token: str
 
 
 class AuthUserOut(BaseModel):

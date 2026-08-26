@@ -14,6 +14,14 @@ class Settings(BaseSettings):
     # 是否在启动时自动建表（开发便利；生产走 Alembic 迁移）
     auto_create_tables: bool = True
 
+    # 开发模式：SMTP 未配置时允许把验证码随接口返回，方便本地联调。
+    # 生产必须为 false，绝不能在响应里回显验证码。
+    dev_mode: bool = False
+
+    # 若部署在反向代理（nginx / Cloudflare）之后，需要信任 X-Forwarded-For
+    # 以拿到真实客户端 IP，用于限流。开启前请确保只有受信任的代理能直连后端。
+    trust_proxy_headers: bool = False
+
     # 邮件验证码（注册）：配置 SMTP 后才会真实发送；未配置时走“开发模式”，
     # 接口会把验证码原样返回，便于本地联调。
     smtp_host: str = ""

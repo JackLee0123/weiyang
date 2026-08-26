@@ -4,6 +4,8 @@ import type {
   AuthSession,
   AuthUser,
   Backup,
+  CaptchaChallenge,
+  CaptchaResult,
   FeedbackResponse,
   HeatmapDay,
   LoginPayload,
@@ -61,6 +63,12 @@ function qs(params: Record<string, string | number | undefined>): string {
 }
 
 export const api = {
+  createCaptcha() {
+    return request<CaptchaChallenge>('/captcha', { method: 'POST' })
+  },
+  verifyCaptcha(payload: { captcha_id: string; x: number }) {
+    return request<CaptchaResult>('/captcha/verify', { method: 'POST', body: JSON.stringify(payload) })
+  },
   sendCode(email: string) {
     return request<SendCodeResult>('/auth/send-code', { method: 'POST', body: JSON.stringify({ email }) })
   },
@@ -70,8 +78,8 @@ export const api = {
   login(payload: LoginPayload) {
     return request<AuthSession>('/auth/login', { method: 'POST', body: JSON.stringify(payload) })
   },
-  sendResetCode(email: string) {
-    return request<SendCodeResult>('/auth/forgot-password', { method: 'POST', body: JSON.stringify({ email }) })
+  sendResetCode(email: string, captcha_token: string) {
+    return request<SendCodeResult>('/auth/forgot-password', { method: 'POST', body: JSON.stringify({ email, captcha_token }) })
   },
   resetPassword(payload: ResetPasswordPayload) {
     return request<{ message: string }>('/auth/reset-password', { method: 'POST', body: JSON.stringify(payload) })

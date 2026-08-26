@@ -123,6 +123,22 @@ export interface SendCodeResult {
   dev_code?: string | null
 }
 
+export interface CaptchaChallenge {
+  captcha_id: string
+  background: string
+  piece: string
+  piece_y: number
+  piece_width: number
+  piece_height: number
+  width: number
+  height: number
+  target_x?: number | null
+}
+
+export interface CaptchaResult {
+  captcha_token: string
+}
+
 export interface FeedbackResponse {
   submitted: boolean
   message: string
@@ -150,11 +166,13 @@ export interface RegisterPayload {
   email: string
   password: string
   code: string
+  captcha_token: string
 }
 
 export interface LoginPayload {
   email: string
   password: string
+  captcha_token: string
 }
 
 export interface ResetPasswordPayload {

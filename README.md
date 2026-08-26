@@ -112,10 +112,12 @@ python .build/e2e.py
 | 方法 | 路径 | 说明 |
 | --- | --- | --- |
 | GET | `/api/health` | 健康检查 |
+| POST | `/api/captcha` | 生成拼图验证（背景图 + 拼块，缺口位置仅存服务端） |
+| POST | `/api/captcha/verify` | 校验拼图滑动位置，通过后返回一次性凭证 |
 | POST | `/api/auth/send-code` | 发送邮箱验证码（未配置 SMTP 时返回开发模式验证码） |
-| POST | `/api/auth/register` | 邮箱验证码注册，返回访问令牌 |
-| POST | `/api/auth/login` | 邮箱密码登录，返回访问令牌 |
-| POST | `/api/auth/forgot-password` | 发送重置密码验证码到邮箱 |
+| POST | `/api/auth/register` | 邮箱验证码 + 拼图凭证注册，返回访问令牌 |
+| POST | `/api/auth/login` | 邮箱密码 + 拼图凭证登录，返回访问令牌 |
+| POST | `/api/auth/forgot-password` | 邮箱 + 拼图凭证发送重置密码验证码 |
 | POST | `/api/auth/reset-password` | 使用邮箱验证码重置密码 |
 | POST | `/api/auth/logout` | 吊销当前访问令牌 |
 | GET/POST | `/api/plans` | 查询（支持 `start/end/status/category/q`）/ 新建计划 |

@@ -4,6 +4,7 @@ import { api } from '../lib/api'
 import { setAuth } from '../lib/auth'
 import type { Theme } from '../lib/theme'
 import { BrandMark } from './BrandMark'
+import { Captcha } from './Captcha'
 
 type AuthMode = 'login' | 'register' | 'forgot'
 
@@ -43,6 +44,7 @@ export function LoginPage({ theme, onToggleTheme, onLogin }: LoginPageProps) {
   const [cooldown, setCooldown] = useState(0)
   const [error, setError] = useState('')
   const [info, setInfo] = useState('')
+  const [captchaToken, setCaptchaToken] = useState<string | null>(null)
   const codeInputRef = useRef<HTMLInputElement>(null)
 
   const switchMode = (next: AuthMode) => {
@@ -53,6 +55,7 @@ export function LoginPage({ theme, onToggleTheme, onLogin }: LoginPageProps) {
     setConfirmPassword('')
     setCode('')
     setLoading(false)
+    setCaptchaToken(null)
   }
 
   useEffect(() => {
@@ -70,9 +73,13 @@ export function LoginPage({ theme, onToggleTheme, onLogin }: LoginPageProps) {
     }
     setError('')
     setInfo('')
+    if (mode === 'forgot' && !captchaToken) {
+      setError('请先完成拼图验证')
+      return
+    }
     setSendingCode(true)
     try {
-      const result = mode === 'forgot' ? await api.sendResetCode(email) : await api.sendCode(email)
+      const result = mode === 'forgot' ? await api.sendResetCode(email, captchaToken!) : await api.sendCode(email)
       setInfo(result.message)
       if (result.dev_code) setInfo(`${result.message}，开发模式验证码：${result.dev_code}`)
       setCooldown(result.cooldown)
@@ -105,6 +112,11 @@ export function LoginPage({ theme, onToggleTheme, onLogin }: LoginPageProps) {
       setError('')
       setLoading(true)
       try {
+        if (!captchaToken) {
+          setError('请先完成拼图验证')
+          setLoading(false)
+          return
+        }
         await api.resetPassword({ email, code: code.trim(), password })
         switchMode('login')
         setInfo('密码已重置，请用新密码登录')
@@ -137,11 +149,21 @@ export function LoginPage({ theme, onToggleTheme, onLogin }: LoginPageProps) {
     setLoading(true)
     try {
       if (mode === 'register') {
-        const session = await api.register({ name: name.trim(), email, password, code: code.trim() })
+        if (!captchaToken) {
+          setError('请先完成拼图验证')
+          setLoading(false)
+          return
+        }
+        const session = await api.register({ name: name.trim(), email, password, code: code.trim(), captcha_token: captchaToken })
         setAuth(session.token, { id: session.id, email: session.email, name: session.name, is_admin: session.is_admin, is_active: session.is_active }, true)
         onLogin(true)
       } else {
-        const session = await api.login({ email, password })
+        if (!captchaToken) {
+          setError('请先完成拼图验证')
+          setLoading(false)
+          return
+        }
+        const session = await api.login({ email, password, captcha_token: captchaToken })
         setAuth(session.token, { id: session.id, email: session.email, name: session.name, is_admin: session.is_admin, is_active: session.is_active }, remember)
         onLogin(remember)
       }
@@ -229,7 +251,7 @@ export function LoginPage({ theme, onToggleTheme, onLogin }: LoginPageProps) {
                   type="button"
                   className="btn-ghost shrink-0 whitespace-nowrap border border-line dark:border-slate-600"
                   onClick={() => void requestCode()}
-                  disabled={sendingCode || cooldown > 0}
+                  disabled={sendingCode || cooldown > 0 || (mode === 'forgot' && !captchaToken)}
                 >
                   {cooldown > 0 ? `重新发送 ${cooldown}s` : sendingCode ? '发送中…' : '获取验证码'}
                 </button>
@@ -309,6 +331,11 @@ export function LoginPage({ theme, onToggleTheme, onLogin }: LoginPageProps) {
             </div>
           )}
 
+          <div>
+            <label className="label">拼图验证</label>
+            <Captcha key={mode} onValid={setCaptchaToken} />
+          </div>
+
           {mode === 'login' && (
             <div className="flex items-center justify-between gap-3">
               <label className="flex items-center gap-2 text-sm text-ink-soft dark:text-slate-300">
@@ -350,7 +377,10 @@ export function LoginPage({ theme, onToggleTheme, onLogin }: LoginPageProps) {
               !email ||
               !password ||
               (mode === 'register' && (!name.trim() || !confirmPassword || !code.trim())) ||
-              (mode === 'forgot' && (!confirmPassword || !code.trim()))
+              (mode === 'register' && !captchaToken) ||
+              (mode === 'forgot' && (!confirmPassword || !code.trim())) ||
+              (mode === 'forgot' && !captchaToken) ||
+              (mode === 'login' && !captchaToken)
             }
           >
             {loading

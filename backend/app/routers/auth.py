@@ -1,6 +1,6 @@
 from datetime import timedelta
 
-from fastapi import APIRouter, Depends, Header, HTTPException
+from fastapi import APIRouter, Depends, Header, HTTPException, Request
 from sqlalchemy.orm import Session
 
 from .. import repository, schemas
@@ -8,8 +8,10 @@ from ..config import settings
 from ..database import get_db
 from ..deps import get_current_user
 from ..models import now_utc
-from ..services import email
+from ..services import captcha, email
 from ..services.email import EmailSendError
+from ..services.net import client_ip
+from ..services.ratelimit import rate_limiter
 from ..services.security import hash_password, hash_token, new_token, verify_password
 from ..services.verification import ResendTooSoonError, consume_code, request_code
 
@@ -34,8 +36,21 @@ def _issue_session(db: Session, user) -> schemas.AuthSessionOut:
     )
 
 
+def _enforce(request: Request, name: str, key: str, limit: int, window: int) -> None:
+    if not rate_limiter.allow(f"auth:{name}:{key}", limit, window):
+        raise HTTPException(status_code=429, detail="请求过于频繁，请稍后再试")
+
+
+def _ensure_verification_email_ready() -> None:
+    """生产环境必须配置 SMTP，否则拒绝发码；开发模式（dev_mode）下允许回显验证码。"""
+    if not email.is_configured() and not settings.dev_mode:
+        raise HTTPException(status_code=503, detail="邮件服务未配置，暂时无法发送验证码，请稍后再试")
+
+
 @router.post("/send-code", response_model=schemas.SendCodeOut)
-def send_code(data: schemas.SendCodeIn):
+def send_code(data: schemas.SendCodeIn, request: Request):
+    _ensure_verification_email_ready()
+    _enforce(request, "code", f"ip:{client_ip(request)}", limit=30, window=3600)
     try:
         code = request_code(
             "register",
@@ -71,9 +86,12 @@ def send_code(data: schemas.SendCodeIn):
 
 
 @router.post("/register", response_model=schemas.AuthSessionOut, status_code=201)
-def register(data: schemas.RegisterIn, db: Session = Depends(get_db)):
+def register(data: schemas.RegisterIn, request: Request, db: Session = Depends(get_db)):
+    _enforce(request, "register", f"ip:{client_ip(request)}", limit=10, window=300)
     if repository.get_user_by_email(db, data.email):
         raise HTTPException(status_code=409, detail="该邮箱已注册，请直接登录")
+    if not captcha.is_token_valid(data.captcha_token):
+        raise HTTPException(status_code=400, detail="拼图验证失败，请重新验证")
     if not consume_code("register", data.email, data.code):
         raise HTTPException(status_code=400, detail="验证码错误或已过期")
     user = repository.create_user(
@@ -86,7 +104,11 @@ def register(data: schemas.RegisterIn, db: Session = Depends(get_db)):
 
 
 @router.post("/login", response_model=schemas.AuthSessionOut)
-def login(data: schemas.LoginIn, db: Session = Depends(get_db)):
+def login(data: schemas.LoginIn, request: Request, db: Session = Depends(get_db)):
+    _enforce(request, "login", f"ip:{client_ip(request)}", limit=10, window=300)
+    _enforce(request, "login-email", f"email:{data.email}", limit=10, window=300)
+    if not captcha.is_token_valid(data.captcha_token):
+        raise HTTPException(status_code=400, detail="拼图验证失败，请重新验证")
     user = repository.get_user_by_email(db, data.email)
     if not user or not verify_password(data.password, user.password_hash):
         raise HTTPException(status_code=401, detail="邮箱或密码错误")
@@ -101,7 +123,11 @@ def me(current_user=Depends(get_current_user)):
 
 
 @router.post("/forgot-password", response_model=schemas.SendCodeOut)
-def forgot_password(data: schemas.ForgotPasswordIn, db: Session = Depends(get_db)):
+def forgot_password(data: schemas.ForgotPasswordIn, request: Request, db: Session = Depends(get_db)):
+    _ensure_verification_email_ready()
+    _enforce(request, "code", f"ip:{client_ip(request)}", limit=30, window=3600)
+    if not captcha.is_token_valid(data.captcha_token):
+        raise HTTPException(status_code=400, detail="拼图验证失败，请重新验证")
     if not repository.get_user_by_email(db, data.email):
         raise HTTPException(status_code=404, detail="该邮箱未注册")
     try:

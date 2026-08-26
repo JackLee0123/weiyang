@@ -10,7 +10,7 @@ from .config import settings
 from .database import Base, SessionLocal, engine
 from . import repository
 from .services.security import hash_password
-from .routers import admin, auth, backup, feedback, health, plans, records, reports, stats
+from .routers import admin, auth, backup, captcha, feedback, health, plans, records, reports, stats
 
 
 def _bootstrap_super_admin() -> None:
@@ -51,6 +51,7 @@ app.add_middleware(
 
 for router in (
     health.router,
+    captcha.router,
     auth.router,
     plans.router,
     records.router,
