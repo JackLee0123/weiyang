@@ -1,0 +1,43 @@
+name: Deploy Everlong
+
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    env:
+      HOST: 8.130.29.119
+      REMOTE_DIR: /opt/everlong
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Deploy to server
+        env:
+          DEPLOY_SSH_KEY: ${{ secrets.DEPLOY_SSH_KEY }}
+        run: |
+          set -euo pipefail
+          mkdir -p "$HOME/.ssh"
+          printf '%s' "$DEPLOY_SSH_KEY" > "$HOME/.ssh/deploy_key"
+          chmod 600 "$HOME/.ssh/deploy_key"
+          KEY="$HOME/.ssh/deploy_key"
+          SSH_OPTS="-i $KEY -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null"
+
+          echo "[deploy] syncing source to ${HOST}:${REMOTE_DIR}"
+          rsync -az --delete \
+            -e "ssh $SSH_OPTS" \
+            --exclude "node_modules" \
+            --exclude ".venv" \
+            --exclude "dist" \
+            --exclude ".env" \
+            --exclude ".git" \
+            --exclude "__pycache__" \
+            --exclude ".build" \
+            --exclude ".github" \
+            ./ "root@${HOST}:${REMOTE_DIR}/"
+
+          echo "[deploy] running deploy.sh on server"
+          ssh $SSH_OPTS "root@${HOST}" "bash ${REMOTE_DIR}/deploy.sh"
