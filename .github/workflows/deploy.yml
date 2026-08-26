@@ -1,8 +1,6 @@
 name: Deploy Everlong
 
 on:
-  push:
-    branches: [ main ]
   workflow_dispatch:
 
 jobs:
