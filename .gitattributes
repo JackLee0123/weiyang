@@ -1,0 +1,2 @@
+# 保证仓库内 shell 脚本恒为 LF 行尾，避免在 Linux 服务器/CI 上因 CRLF 报错
+*.sh text eol=lf
