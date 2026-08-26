@@ -38,7 +38,7 @@ async def lifespan(app: FastAPI):
     yield
 
 
-app = FastAPI(title="Planner API", version="0.1.0", lifespan=lifespan)
+app = FastAPI(title="未央 · Everlong API", version="0.4.0", lifespan=lifespan)
 
 app.add_middleware(
     CORSMiddleware,

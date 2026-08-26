@@ -21,7 +21,7 @@ class Settings(BaseSettings):
     smtp_user: str = ""
     smtp_password: str = ""
     smtp_from: str = ""
-    smtp_from_name: str = "计划表"
+    smtp_from_name: str = "未央 · Everlong"
     smtp_use_ssl: bool = True
     smtp_starttls: bool = False
     # 问题反馈收件邮箱；留空时回退到 SMTP_USER（即发件邮箱）。
@@ -33,6 +33,10 @@ class Settings(BaseSettings):
     # 若该邮箱尚未注册，则用配置的密码创建管理员账号（仅作首次引导，请设置强密码）。
     super_admin_email: str = ""
     super_admin_password: str = ""
+
+    # 品牌信息（邮件、API 标题等处使用）
+    app_name: str = "未央 · Everlong"
+    app_tagline: str = "提前排期，每日记录"
 
     @property
     def cors_origin_list(self) -> list[str]:

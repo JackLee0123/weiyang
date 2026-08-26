@@ -1,6 +1,6 @@
 [project]
 name = "planner-backend"
-version = "0.1.0"
+version = "0.4.0"
 description = "本地任务计划客户端后端：FastAPI + SQLAlchemy + MySQL/MariaDB"
 requires-python = ">=3.12"
 dependencies = [

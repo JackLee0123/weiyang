@@ -12,7 +12,7 @@ export interface ChangelogEntry {
   items: ChangelogItem[]
 }
 
-export const CURRENT_VERSION = 'v0.3.0'
+export const CURRENT_VERSION = 'v0.4.0'
 
 export const CHANGELOG_KIND_META: Record<ChangelogKind, { label: string; className: string }> = {
   feature: { label: '新增', className: 'bg-teal-50 text-teal-700 dark:bg-teal-500/15 dark:text-teal-300' },
@@ -22,6 +22,16 @@ export const CHANGELOG_KIND_META: Record<ChangelogKind, { label: string; classNa
 }
 
 export const CHANGELOG: ChangelogEntry[] = [
+  {
+    version: 'v0.4.0',
+    date: '2026-08-27',
+    title: '品牌化验证码邮件',
+    items: [
+      { kind: 'feature', text: '注册与重置密码验证码邮件全面改版，统一带上「未央 · Everlong」品牌名与品牌色' },
+      { kind: 'improvement', text: '邮件改为纯文本 + 适配主流客户端的 HTML 双版本，验证码更醒目、提示更友好' },
+      { kind: 'improvement', text: '登录与注册界面同步展示完整品牌名，验证码发送文案更贴心' },
+    ],
+  },
   {
     version: 'v0.3.0',
     date: '2026-08-24',

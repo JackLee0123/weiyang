@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { ArrowRight, CalendarRange, Eye, EyeOff, LockKeyhole, Mail, Moon, Sun, UserRound } from 'lucide-react'
 import { api } from '../lib/api'
 import { setAuth } from '../lib/auth'
@@ -42,6 +42,7 @@ export function LoginPage({ theme, onToggleTheme, onLogin }: LoginPageProps) {
   const [cooldown, setCooldown] = useState(0)
   const [error, setError] = useState('')
   const [info, setInfo] = useState('')
+  const codeInputRef = useRef<HTMLInputElement>(null)
 
   const switchMode = (next: AuthMode) => {
     setMode(next)
@@ -74,6 +75,7 @@ export function LoginPage({ theme, onToggleTheme, onLogin }: LoginPageProps) {
       setInfo(result.message)
       if (result.dev_code) setInfo(`${result.message}，开发模式验证码：${result.dev_code}`)
       setCooldown(result.cooldown)
+      codeInputRef.current?.focus()
     } catch {
       setError(mode === 'forgot' ? '重置验证码发送失败，请确认邮箱已注册' : '验证码发送失败，请稍后重试')
     } finally {
@@ -148,12 +150,13 @@ export function LoginPage({ theme, onToggleTheme, onLogin }: LoginPageProps) {
     }
   }
 
-  const title = mode === 'login' ? '登录 · 未央' : mode === 'register' ? '创建账号' : '重置密码'
+  const title =
+    mode === 'login' ? '登录 · 未央 Everlong' : mode === 'register' ? '创建账号 · 未央 Everlong' : '重置密码 · 未央 Everlong'
   const subtitle =
     mode === 'login'
       ? '长日未央 · 把计划落笔，把日子记下'
       : mode === 'register'
-        ? '开始记录你的计划与每日生活'
+        ? '欢迎来到未央 Everlong，从一份计划开始'
         : '通过邮箱验证码重置你的登录密码'
 
   return (
@@ -240,6 +243,7 @@ export function LoginPage({ theme, onToggleTheme, onLogin }: LoginPageProps) {
               </label>
               <input
                 id="code"
+                ref={codeInputRef}
                 className="field"
                 type="text"
                 inputMode="numeric"
