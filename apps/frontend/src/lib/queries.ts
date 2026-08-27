@@ -1,6 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { api } from './api'
-import type { AdminUserUpdate, PlanPayload, RecordEntryPayload } from './types'
+import type { AdminUserUpdate, CourseDraft, PeriodTime, PlanPayload, RecordEntryPayload } from './types'
 
 export function usePlans(params: { start?: string; end?: string; status?: string; category?: string; q?: string } = {}) {
   return useQuery({ queryKey: ['plans', params], queryFn: () => api.fetchPlans(params) })
@@ -64,4 +64,37 @@ export function useAdminMutations() {
   })
   const remove = useMutation({ mutationFn: (id: number) => api.deleteUser(id), onSuccess: refresh })
   return { update, remove }
+}
+
+export function useCourses(term?: string) {
+  return useQuery({ queryKey: ['courses', term ?? ''], queryFn: () => api.fetchCourses({ term }) })
+}
+
+export function useTimetableSettings() {
+  return useQuery({ queryKey: ['timetable-settings'], queryFn: () => api.fetchTimetableSettings() })
+}
+
+export function useTimetableMutations() {
+  const qc = useQueryClient()
+  const refresh = () => {
+    qc.invalidateQueries({ queryKey: ['courses'] })
+    qc.invalidateQueries({ queryKey: ['timetable-settings'] })
+    qc.invalidateQueries({ queryKey: ['plans'] })
+    qc.invalidateQueries({ queryKey: ['stats'] })
+  }
+  const save = useMutation({
+    mutationFn: (value: { term: string; courses: CourseDraft[]; week1_date?: string; period_times?: PeriodTime[] }) =>
+      api.saveCourses(value),
+    onSuccess: refresh,
+  })
+  const remove = useMutation({ mutationFn: (id: number) => api.deleteCourse(id), onSuccess: refresh })
+  const generate = useMutation({
+    mutationFn: (value: { term: string; week_start: string }) => api.generatePlans(value),
+    onSuccess: refresh,
+  })
+  const updateSettings = useMutation({
+    mutationFn: (value: Partial<{ active_term: string; week1_date: string; period_times: PeriodTime[] }>) => api.updateTimetableSettings(value),
+    onSuccess: refresh,
+  })
+  return { save, remove, generate, updateSettings }
 }

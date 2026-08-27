@@ -1,4 +1,4 @@
-import { Activity, BookOpen, CalendarCheck, CalendarDays, History, List, LogOut, MonitorDown, Moon, Plane, Plus, Route, Sun, Users } from 'lucide-react'
+import { Activity, BookOpen, CalendarCheck, CalendarDays, CalendarRange, History, List, LogOut, MonitorDown, Moon, Plane, Plus, Route, Sun, Users } from 'lucide-react'
 import { useEffect, useState, type ReactNode } from 'react'
 import type { Theme } from '../lib/theme'
 import type { View } from '../lib/types'
@@ -9,6 +9,7 @@ const NAV: { key: View; label: string; icon: typeof CalendarCheck }[] = [
   { key: 'weiyang', label: '未央', icon: Route },
   { key: 'memory', label: '回忆', icon: BookOpen },
   { key: 'calendar', label: '日历', icon: CalendarDays },
+  { key: 'timetable', label: '课表', icon: CalendarRange },
   { key: 'heatmap', label: '活跃度', icon: Activity },
   { key: 'list', label: '全部', icon: List },
 ]

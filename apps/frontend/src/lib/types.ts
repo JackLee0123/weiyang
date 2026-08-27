@@ -181,4 +181,69 @@ export interface ResetPasswordPayload {
   password: string
 }
 
-export type View = 'today' | 'weiyang' | 'calendar' | 'list' | 'heatmap' | 'memory' | 'changelog' | 'admin'
+export interface PeriodTime {
+  start: string
+  end: string
+}
+
+export interface Course {
+  id: number
+  term: string
+  name: string
+  code?: string | null
+  teacher?: string | null
+  location?: string | null
+  day_of_week: number
+  start_period: number
+  end_period: number
+  week_mask?: string | null
+  week_label?: string | null
+  credit?: number | null
+  course_type?: string | null
+  created_at: string
+}
+
+export interface CourseDraft {
+  term: string
+  name: string
+  code?: string | null
+  teacher?: string | null
+  location?: string | null
+  day_of_week: number
+  start_period: number
+  end_period: number
+  week_mask?: string | null
+  week_label?: string | null
+  credit?: number | null
+  course_type?: string | null
+}
+
+export interface TimetableSettings {
+  active_term: string
+  week1_date?: string | null
+  period_times: PeriodTime[]
+}
+
+export interface ParseTimetableResult {
+  term?: string | null
+  courses: CourseDraft[]
+  warnings: string[]
+}
+
+export interface WiseduCaptcha {
+  captcha_token: string
+  image: string
+}
+
+export interface CourseBulkResult {
+  term: string
+  saved: number
+}
+
+export interface GeneratePlansResult {
+  created: number
+  skipped_past: number
+  skipped_duplicate: number
+}
+
+export type View = 'today' | 'weiyang' | 'calendar' | 'list' | 'heatmap' | 'memory' | 'timetable' | 'changelog' | 'admin'

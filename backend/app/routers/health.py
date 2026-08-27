@@ -7,4 +7,4 @@ router = APIRouter(prefix="/api", tags=["health"])
 
 @router.get("/health", response_model=HealthOut)
 def health_check() -> HealthOut:
-    return HealthOut(status="ok", version="0.4.0")
+    return HealthOut(status="ok", version="0.5.0")

@@ -12,7 +12,7 @@
 
 - 裸 IP 走 HTTP，邮箱 + 密码 + 登录令牌均为明文。公开后务必启用 HTTPS。
 - 最简方案：购买域名，用 certbot 申请 Let's Encrypt 证书，套用 `deploy/nginx-everlong.conf`。
-- 域名解析完成后：`sudo certbot --nginx -d your-domain.com`，然后 `sudo nginx -s reload`。
+- 域名解析完成后：`sudo certbot --nginx -d everlong.net.cn -d www.everlong.net.cn`，然后 `sudo nginx -s reload`。
 - 套 nginx 反代后，在 `.env` 里把 `TRUST_PROXY_HEADERS=true`，才能让限流拿到真实客户端 IP。
 
 ## 3. 公网暴露面

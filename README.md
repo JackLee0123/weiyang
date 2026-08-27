@@ -127,8 +127,19 @@ python .build/e2e.py
 | GET | `/api/stats/overview?start=&end=` | 完成率、类别分布、连续记录天数 |
 | GET | `/api/stats/heatmap?start=&end=` | 按天聚合的活跃度（完成计划数 + 记录数） |
 | POST | `/api/backup/export` / `/api/backup/import` | 导出 / 导入备份 |
+| POST | `/api/timetable/parse` | 解析上传的 Excel / HTML / ICS 或粘贴文本，返回课表预览（不保存） |
+| POST | `/api/timetable/wisedu/captcha` | 获取金智教务登录验证码（一次性会话） |
+| POST | `/api/timetable/wisedu/fetch` | 临时登录金智教务并抓取课表（不保存账号密码） |
+| POST | `/api/timetable/courses` | 保存某学期课表并更新设置（默认替换该学期） |
+| GET/DELETE | `/api/timetable/courses` / `/api/timetable/courses/:id` | 查询 / 删除课表课程 |
+| GET/PATCH | `/api/timetable/settings` | 读写学期、开学第 1 周、各节次时间 |
+| POST | `/api/timetable/generate-plans` | 把某周课程批量生成到日历计划 |
 
 除 `health` 与 `auth` 外，其余接口都需要在请求头携带 `Authorization: Bearer <token>`，
 数据按登录账号隔离，每个账号只能看到自己的计划与记录。
 
-界面提供 **今日 / 日历 / 活跃度 / 全部** 四个视图：今日用于当天计划勾选与补记，日历按月份浏览，活跃度展示过去 12 个月的 GitHub 风格热力图，全部用于搜索和按状态/分类筛选。
+界面提供 **今日 / 未央 / 回忆 / 日历 / 课表 / 活跃度 / 全部** 等视图：今日用于当天计划勾选与补记，日历按月份浏览，课表以周网格展示课程并可一键生成课程计划，活跃度展示过去 12 个月的 GitHub 风格热力图，全部用于搜索和按状态/分类筛选。
+
+金智教务抓取默认针对新疆政法学院教务系统（课表站 `jwxt.xjzfu.edu.cn` + 统一身份认证
+`authserver.xjzfu.edu.cn`），可通过环境变量覆盖：
+`WISEDU_BASE_URL`、`WISEDU_AUTH_URL`、`WISEDU_CAPTCHA_PATH`、`WISEDU_LOGIN_PATH`、`WISEDU_TIMETABLE_PATH`。

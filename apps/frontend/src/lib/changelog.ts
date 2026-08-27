@@ -12,7 +12,7 @@ export interface ChangelogEntry {
   items: ChangelogItem[]
 }
 
-export const CURRENT_VERSION = 'v0.4.5'
+export const CURRENT_VERSION = 'v0.5.0'
 
 export const CHANGELOG_KIND_META: Record<ChangelogKind, { label: string; className: string }> = {
   feature: { label: '新增', className: 'bg-teal-50 text-teal-700 dark:bg-teal-500/15 dark:text-teal-300' },
@@ -22,6 +22,18 @@ export const CHANGELOG_KIND_META: Record<ChangelogKind, { label: string; classNa
 }
 
 export const CHANGELOG: ChangelogEntry[] = [
+  {
+    version: 'v0.5.0',
+    date: '2026-08-27',
+    title: '课表导入与课程计划',
+    items: [
+      { kind: 'feature', text: '新增「课表」视图，用周网格展示每周课程，可切换周次查看' },
+      { kind: 'feature', text: '支持从教务系统一键抓取课表，或导入 Excel / HTML / ICS 文件与粘贴文本' },
+      { kind: 'feature', text: '一键把某周课程生成到日历计划，与今日、日历、全部视图联动' },
+      { kind: 'improvement', text: '开学第一周、各节次时间可自定义，方便与本校作息对齐' },
+      { kind: 'notice', text: '教务系统抓取仅本次登录使用学号与密码，应用不保存任何学校账号' },
+    ],
+  },
   {
     version: 'v0.4.5',
     date: '2026-08-27',

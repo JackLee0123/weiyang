@@ -10,7 +10,7 @@ from .config import settings
 from .database import Base, SessionLocal, engine
 from . import repository
 from .services.security import hash_password
-from .routers import admin, auth, backup, captcha, feedback, health, plans, records, reports, stats
+from .routers import admin, auth, backup, captcha, feedback, health, plans, records, reports, stats, timetable
 
 
 def _bootstrap_super_admin() -> None:
@@ -39,7 +39,7 @@ async def lifespan(app: FastAPI):
     yield
 
 
-app = FastAPI(title="未央 · Everlong API", version="0.4.0", lifespan=lifespan)
+app = FastAPI(title="未央 · Everlong API", version="0.5.0", lifespan=lifespan)
 
 app.add_middleware(
     CORSMiddleware,
@@ -60,6 +60,7 @@ for router in (
     backup.router,
     feedback.router,
     admin.router,
+    timetable.router,
 ):
     app.include_router(router)
 

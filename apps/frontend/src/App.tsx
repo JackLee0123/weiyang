@@ -10,6 +10,7 @@ import { MemoryView } from './views/MemoryView'
 import { CalendarView } from './views/CalendarView'
 import { HeatmapView } from './views/HeatmapView'
 import { ListView } from './views/ListView'
+import { TimetableView } from './views/TimetableView'
 import { ChangelogView } from './views/ChangelogView'
 import { AdminView } from './views/AdminView'
 import { todayISO } from './lib/date'
@@ -118,6 +119,7 @@ export default function App() {
               }}
             />
           )}
+          {view === 'timetable' && <TimetableView />}
           {view === 'list' && <ListView />}
           {view === 'changelog' && <ChangelogView />}
           {view === 'admin' && user?.is_admin && <AdminView meId={user.id} />}

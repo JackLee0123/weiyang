@@ -3,7 +3,7 @@ from __future__ import annotations
 from datetime import datetime, timezone
 from typing import Optional
 
-from sqlalchemy import Boolean, DateTime, ForeignKey, Integer, String, Text
+from sqlalchemy import Boolean, DateTime, Float, ForeignKey, Integer, JSON, String, Text
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from .database import Base
@@ -56,6 +56,7 @@ class Plan(Base):
     status: Mapped[str] = mapped_column(String(20), default="pending", nullable=False)
     priority: Mapped[str] = mapped_column(String(10), default="medium", nullable=False)
     category: Mapped[str] = mapped_column(String(50), default="默认", nullable=False)
+    source: Mapped[str] = mapped_column(String(20), default="manual", nullable=False)
     created_at: Mapped[datetime] = mapped_column(DateTime, default=now_utc, nullable=False)
     updated_at: Mapped[datetime] = mapped_column(DateTime, default=now_utc, onupdate=now_utc, nullable=False)
 
@@ -79,3 +80,36 @@ class Record(Base):
     created_at: Mapped[datetime] = mapped_column(DateTime, default=now_utc, nullable=False)
 
     linked_plan: Mapped[Optional[Plan]] = relationship(back_populates="records")
+
+
+class Course(Base):
+    __tablename__ = "courses"
+    __table_args__ = {"mysql_charset": "utf8mb4"}
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+    user_id: Mapped[int] = mapped_column(ForeignKey("users.id", ondelete="CASCADE"), index=True, nullable=False)
+    term: Mapped[str] = mapped_column(String(20), index=True, nullable=False)
+    name: Mapped[str] = mapped_column(String(200), nullable=False)
+    code: Mapped[Optional[str]] = mapped_column(String(50), nullable=True)
+    teacher: Mapped[Optional[str]] = mapped_column(String(80), nullable=True)
+    location: Mapped[Optional[str]] = mapped_column(String(120), nullable=True)
+    day_of_week: Mapped[int] = mapped_column(Integer, nullable=False)
+    start_period: Mapped[int] = mapped_column(Integer, nullable=False)
+    end_period: Mapped[int] = mapped_column(Integer, nullable=False)
+    week_mask: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
+    week_label: Mapped[Optional[str]] = mapped_column(String(80), nullable=True)
+    credit: Mapped[Optional[float]] = mapped_column(Float, nullable=True)
+    course_type: Mapped[Optional[str]] = mapped_column(String(50), nullable=True)
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=now_utc, nullable=False)
+
+
+class TimetableSettings(Base):
+    __tablename__ = "timetable_settings"
+    __table_args__ = {"mysql_charset": "utf8mb4"}
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+    user_id: Mapped[int] = mapped_column(ForeignKey("users.id", ondelete="CASCADE"), unique=True, index=True, nullable=False)
+    active_term: Mapped[str] = mapped_column(String(20), default="", nullable=False)
+    week1_date: Mapped[Optional[str]] = mapped_column(String(10), nullable=True)
+    period_times: Mapped[Optional[dict]] = mapped_column(JSON, nullable=True)
+    updated_at: Mapped[datetime] = mapped_column(DateTime, default=now_utc, onupdate=now_utc, nullable=False)

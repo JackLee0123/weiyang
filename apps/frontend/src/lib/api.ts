@@ -6,10 +6,16 @@ import type {
   Backup,
   CaptchaChallenge,
   CaptchaResult,
+  Course,
+  CourseBulkResult,
+  CourseDraft,
   FeedbackResponse,
+  GeneratePlansResult,
   HeatmapDay,
   LoginPayload,
   MemoryReport,
+  ParseTimetableResult,
+  PeriodTime,
   Plan,
   PlanPayload,
   RecordEntry,
@@ -18,6 +24,8 @@ import type {
   ResetPasswordPayload,
   SendCodeResult,
   StatsOverview,
+  TimetableSettings,
+  WiseduCaptcha,
 } from './types'
 import { clearAuth, getToken } from './auth'
 
@@ -46,6 +54,14 @@ async function request<T>(path: string, options: RequestInit = {}): Promise<T> {
     try {
       const body = await res.json()
       detail = body.detail ?? detail
+      if (Array.isArray(detail)) {
+        detail = detail
+          .map((d) => (d && typeof d === 'object' ? d.msg ?? d.message ?? (d.loc ?? []).join(' ') : String(d)))
+          .filter(Boolean)
+          .join('；')
+      } else if (detail && typeof detail === 'object') {
+        detail = (detail as { msg?: string; message?: string }).msg ?? (detail as { message?: string }).message ?? '请求参数有误'
+      }
     } catch {
       /* ignore */
     }
@@ -155,5 +171,37 @@ export const api = {
     if (payload.contact) form.append('contact', payload.contact)
     for (const image of payload.images) form.append('images', image)
     return request<FeedbackResponse>('/feedback', { method: 'POST', body: form })
+  },
+
+  parseTimetable(payload: { file?: File; raw_text?: string; term?: string }) {
+    const form = new FormData()
+    if (payload.file) form.append('file', payload.file)
+    if (payload.raw_text) form.append('raw_text', payload.raw_text)
+    if (payload.term) form.append('term', payload.term)
+    return request<ParseTimetableResult>('/timetable/parse', { method: 'POST', body: form })
+  },
+  fetchWiseduCaptcha(payload: { base_url?: string } = {}) {
+    return request<WiseduCaptcha>('/timetable/wisedu/captcha', { method: 'POST', body: JSON.stringify(payload) })
+  },
+  fetchWiseduTimetable(payload: { username: string; password: string; captcha_token: string; captcha_code?: string; term?: string; base_url?: string }) {
+    return request<ParseTimetableResult>('/timetable/wisedu/fetch', { method: 'POST', body: JSON.stringify(payload) })
+  },
+  saveCourses(payload: { term: string; courses: CourseDraft[]; week1_date?: string; period_times?: PeriodTime[] }) {
+    return request<CourseBulkResult>('/timetable/courses', { method: 'POST', body: JSON.stringify(payload) })
+  },
+  fetchCourses(params: { term?: string } = {}) {
+    return request<{ term?: string | null; courses: Course[]; settings: TimetableSettings }>(`/timetable/courses${qs(params)}`)
+  },
+  deleteCourse(id: number) {
+    return request<void>(`/timetable/courses/${id}`, { method: 'DELETE' })
+  },
+  fetchTimetableSettings() {
+    return request<TimetableSettings>('/timetable/settings')
+  },
+  updateTimetableSettings(payload: Partial<TimetableSettings>) {
+    return request<TimetableSettings>('/timetable/settings', { method: 'PATCH', body: JSON.stringify(payload) })
+  },
+  generatePlans(payload: { term: string; week_start: string }) {
+    return request<GeneratePlansResult>('/timetable/generate-plans', { method: 'POST', body: JSON.stringify(payload) })
   },
 }

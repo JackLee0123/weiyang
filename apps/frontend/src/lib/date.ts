@@ -3,6 +3,7 @@ import {
   endOfMonth,
   endOfWeek,
   format,
+  parseISO,
   startOfMonth,
   startOfWeek,
   addMonths,
@@ -22,3 +23,14 @@ export const nextMonth = (d: Date) => addMonths(d, 1)
 export const prevMonth = (d: Date) => subMonths(d, 1)
 export const fmtShort = (d: Date) => format(d, 'M月d日')
 export const fmtWeekday = (d: Date) => format(d, 'E')
+
+export const mondayOf = (iso: string) => toISO(startOfWeek(parseISO(iso), { weekStartsOn: 1 }))
+export const addDaysISO = (iso: string, days: number) => {
+  const d = parseISO(iso)
+  d.setDate(d.getDate() + days)
+  return toISO(d)
+}
+export const weekdayIndex = (iso: string) => {
+  const day = parseISO(iso).getDay()
+  return day === 0 ? 7 : day
+}

@@ -255,3 +255,101 @@ class MemoryReport(BaseModel):
     top_categories: list[str]
     busiest_day: Optional[str] = None
     unfinished: list[PlanOut]
+
+
+class PeriodTime(BaseModel):
+    start: str = Field(..., pattern=TIME_RE)
+    end: str = Field(..., pattern=TIME_RE)
+
+
+class CourseDraft(BaseModel):
+    term: str = Field(..., max_length=20)
+    name: str = Field(..., min_length=1, max_length=200)
+    code: Optional[str] = Field(default=None, max_length=50)
+    teacher: Optional[str] = Field(default=None, max_length=80)
+    location: Optional[str] = Field(default=None, max_length=120)
+    day_of_week: int = Field(..., ge=1, le=7)
+    start_period: int = Field(..., ge=1)
+    end_period: int = Field(..., ge=1)
+    week_mask: Optional[str] = None
+    week_label: Optional[str] = Field(default=None, max_length=80)
+    credit: Optional[float] = Field(default=None, ge=0)
+    course_type: Optional[str] = Field(default=None, max_length=50)
+
+    @field_validator("end_period")
+    @classmethod
+    def _end_after_start(cls, value, info):
+        start = info.data.get("start_period")
+        if start is not None and value < start:
+            raise ValueError("结束节次不能早于开始节次")
+        return value
+
+
+class CourseOut(CourseDraft):
+    model_config = ConfigDict(from_attributes=True)
+    id: int
+    created_at: datetime
+
+
+class TimetableSettingsIn(BaseModel):
+    active_term: str = ""
+    week1_date: Optional[str] = Field(default=None, pattern=DATE_RE)
+    period_times: Optional[list[PeriodTime]] = None
+
+
+class TimetableSettingsOut(BaseModel):
+    active_term: str = ""
+    week1_date: Optional[str] = None
+    period_times: list[PeriodTime] = []
+
+
+class ParseTimetableIn(BaseModel):
+    term: Optional[str] = Field(default=None, max_length=20)
+
+
+class ParseTimetableOut(BaseModel):
+    term: Optional[str] = None
+    courses: list[CourseDraft]
+    warnings: list[str] = []
+
+
+class WiseduCaptchaOut(BaseModel):
+    captcha_token: str
+    image: str
+
+
+class WiseduCaptchaIn(BaseModel):
+    base_url: Optional[str] = Field(default=None, max_length=255)
+
+
+class WiseduFetchIn(BaseModel):
+    username: str = Field(..., min_length=1, max_length=64)
+    password: str = Field(..., min_length=1, max_length=128)
+    captcha_token: str = Field(..., min_length=1)
+    captcha_code: Optional[str] = Field(default=None, max_length=16)
+    term: Optional[str] = Field(default=None, max_length=20)
+    base_url: Optional[str] = Field(default=None, max_length=255)
+
+
+class CourseBulkIn(BaseModel):
+    term: str = Field(..., max_length=20)
+    courses: list[CourseDraft]
+    week1_date: Optional[str] = Field(default=None, pattern=DATE_RE)
+    period_times: Optional[list[PeriodTime]] = None
+    replace: bool = True
+
+
+class CourseBulkOut(BaseModel):
+    term: str
+    saved: int
+
+
+class GeneratePlansIn(BaseModel):
+    term: str = Field(..., max_length=20)
+    week_start: str = Field(..., pattern=DATE_RE)
+
+
+class GeneratePlansOut(BaseModel):
+    created: int
+    skipped_past: int
+    skipped_duplicate: int

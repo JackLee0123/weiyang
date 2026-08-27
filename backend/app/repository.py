@@ -8,6 +8,7 @@ from sqlalchemy.orm import Session
 
 from . import models, schemas
 from .models import now_utc
+from .services.timetable import resolve_weeks
 
 
 def today_iso() -> str:
@@ -138,6 +139,132 @@ def update_plan(db: Session, plan: models.Plan, data: schemas.PlanUpdate) -> mod
 def delete_plan(db: Session, plan: models.Plan) -> None:
     db.delete(plan)
     db.commit()
+
+
+def list_courses(db: Session, user_id: int, term: Optional[str] = None) -> list[models.Course]:
+    stmt = select(models.Course).where(models.Course.user_id == user_id)
+    if term:
+        stmt = stmt.where(models.Course.term == term)
+    stmt = stmt.order_by(models.Course.day_of_week.asc(), models.Course.start_period.asc(), models.Course.id.asc())
+    return list(db.scalars(stmt).all())
+
+
+def get_course(db: Session, user_id: int, course_id: int) -> Optional[models.Course]:
+    return db.scalar(select(models.Course).where(models.Course.id == course_id, models.Course.user_id == user_id))
+
+
+def replace_courses(db: Session, user_id: int, term: str, courses: list[schemas.CourseDraft]) -> int:
+    db.query(models.Course).filter(models.Course.user_id == user_id, models.Course.term == term).delete()
+    db.flush()
+    for draft in courses:
+        db.add(models.Course(user_id=user_id, **draft.model_dump()))
+    db.commit()
+    return len(courses)
+
+
+def delete_course(db: Session, course: models.Course) -> None:
+    db.delete(course)
+    db.commit()
+
+
+def get_timetable_settings(db: Session, user_id: int) -> Optional[models.TimetableSettings]:
+    return db.scalar(select(models.TimetableSettings).where(models.TimetableSettings.user_id == user_id))
+
+
+def upsert_timetable_settings(
+    db: Session,
+    user_id: int,
+    active_term: str,
+    week1_date: Optional[str],
+    period_times: Optional[list[dict]],
+) -> models.TimetableSettings:
+    settings = get_timetable_settings(db, user_id)
+    if settings is None:
+        settings = models.TimetableSettings(user_id=user_id)
+        db.add(settings)
+    settings.active_term = active_term
+    settings.week1_date = week1_date
+    settings.period_times = period_times
+    db.commit()
+    db.refresh(settings)
+    return settings
+
+
+def generate_timetable_plans(
+    db: Session,
+    user_id: int,
+    term: str,
+    week_start: str,
+) -> dict[str, int]:
+    """把某周的课表生成到计划，按 (date,title,start_time,source) 去重，跳过过去日期。"""
+    from .models import Plan
+
+    today = today_iso()
+    week_start_date = date.fromisoformat(week_start)
+    settings = get_timetable_settings(db, user_id)
+    week1_text = settings.week1_date if settings else None
+    period_times = (settings.period_times if settings else None) or []
+    if not week1_text:
+        raise ValueError("请先设置开学第 1 周周一的日期")
+    week1 = date.fromisoformat(week1_text)
+    week_index = (week_start_date - week1).days // 7 + 1
+    if week_index < 1:
+        raise ValueError("所选周早于第 1 周")
+
+    created = skipped_past = skipped_duplicate = 0
+    courses = list_courses(db, user_id, term)
+    for course in courses:
+        weeks = resolve_weeks(course.week_mask, course.week_label)
+        if weeks and week_index not in weeks:
+            continue
+        plan_date = (week_start_date + timedelta(days=course.day_of_week - 1)).isoformat()
+        if plan_date < today:
+            skipped_past += 1
+            continue
+        start_time = _period_start(period_times, course.start_period)
+        end_time = _period_end(period_times, course.end_period)
+        duplicate = db.scalar(
+            select(Plan.id).where(
+                Plan.user_id == user_id,
+                Plan.date == plan_date,
+                Plan.title == course.name,
+                Plan.start_time == start_time,
+                Plan.source == "timetable",
+            )
+        )
+        if duplicate:
+            skipped_duplicate += 1
+            continue
+        parts = [p for p in (course.teacher, course.location, course.week_label) if p]
+        db.add(
+            Plan(
+                user_id=user_id,
+                date=plan_date,
+                title=course.name,
+                description=" · ".join(parts),
+                start_time=start_time,
+                end_time=end_time,
+                status="pending",
+                priority="medium",
+                category="课程",
+                source="timetable",
+            )
+        )
+        created += 1
+    db.commit()
+    return {"created": created, "skipped_past": skipped_past, "skipped_duplicate": skipped_duplicate}
+
+
+def _period_start(period_times: list[dict], period: int) -> Optional[str]:
+    if 0 < period <= len(period_times):
+        return period_times[period - 1].get("start")
+    return None
+
+
+def _period_end(period_times: list[dict], period: int) -> Optional[str]:
+    if 0 < period <= len(period_times):
+        return period_times[period - 1].get("end")
+    return None
 
 
 def _record_filters(stmt, start: Optional[str], end: Optional[str], category: Optional[str], q: Optional[str]):
