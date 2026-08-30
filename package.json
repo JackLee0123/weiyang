@@ -1,6 +1,6 @@
 {
   "name": "everlong",
-  "version": "0.5.0",
+  "version": "0.5.1",
   "private": true,
   "description": "未央 · Everlong — 本地任务计划客户端 MVP：提前排期 + 每日记录，React + FastAPI + MySQL/MariaDB",
   "scripts": {

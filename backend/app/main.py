@@ -39,7 +39,7 @@ async def lifespan(app: FastAPI):
     yield
 
 
-app = FastAPI(title="未央 · Everlong API", version="0.5.0", lifespan=lifespan)
+app = FastAPI(title="未央 · Everlong API", version="0.5.1", lifespan=lifespan)
 
 app.add_middleware(
     CORSMiddleware,

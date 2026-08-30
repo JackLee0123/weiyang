@@ -12,7 +12,7 @@ export interface ChangelogEntry {
   items: ChangelogItem[]
 }
 
-export const CURRENT_VERSION = 'v0.5.0'
+export const CURRENT_VERSION = 'v0.5.1'
 
 export const CHANGELOG_KIND_META: Record<ChangelogKind, { label: string; className: string }> = {
   feature: { label: '新增', className: 'bg-teal-50 text-teal-700 dark:bg-teal-500/15 dark:text-teal-300' },
@@ -22,6 +22,15 @@ export const CHANGELOG_KIND_META: Record<ChangelogKind, { label: string; classNa
 }
 
 export const CHANGELOG: ChangelogEntry[] = [
+  {
+    version: 'v0.5.1',
+    date: '2026-08-31',
+    title: '课表导入与设置合一',
+    items: [
+      { kind: 'improvement', text: '「设置」与「导入课表」合并为单一入口，导入过程中即可完成学期、开学日期与节次设置' },
+      { kind: 'improvement', text: '页面顶部「导入课表」与教务系统的「抓取课表」按钮更醒目，一眼可辨' },
+    ],
+  },
   {
     version: 'v0.5.0',
     date: '2026-08-27',
