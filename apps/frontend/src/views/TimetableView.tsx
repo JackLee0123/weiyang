@@ -1,108 +1,13 @@
 import { useMemo, useState } from 'react'
 import { format } from 'date-fns'
-import { AlertTriangle, CalendarPlus, ChevronLeft, ChevronRight, Plus, Settings, Trash2, Upload } from 'lucide-react'
+import { AlertTriangle, CalendarPlus, ChevronLeft, ChevronRight, Trash2, Upload } from 'lucide-react'
 import { Modal } from '../components/Modal'
 import { TimetableImport } from '../components/TimetableImport'
 import { useCourses, useTimetableMutations, useTimetableSettings } from '../lib/queries'
 import { addDaysISO, mondayOf, todayISO } from '../lib/date'
 import { courseActiveOn, weekIndexFor } from '../lib/timetable'
-import { CUSTOM_SCHOOL_ID, SCHOOL_PRESETS, detectPreset } from '../lib/schoolPresets'
-import type { PeriodTime, TimetableSettings } from '../lib/types'
 
 const DAY_LABELS = ['一', '二', '三', '四', '五', '六', '日']
-
-function SettingsForm({ initial, onClose }: { initial: TimetableSettings; onClose: () => void }) {
-  const { updateSettings } = useTimetableMutations()
-  const [term, setTerm] = useState(initial.active_term)
-  const [week1, setWeek1] = useState(initial.week1_date ?? '')
-  const [periods, setPeriods] = useState<PeriodTime[]>(initial.period_times.length ? initial.period_times : [])
-  const [school, setSchool] = useState(() => detectPreset(initial.period_times))
-  const [error, setError] = useState('')
-  const [busy, setBusy] = useState(false)
-
-  const setPeriod = (idx: number, key: 'start' | 'end', value: string) =>
-    setPeriods((list) => list.map((p, i) => (i === idx ? { ...p, [key]: value } : p)))
-
-  const applySchool = (id: string) => {
-    setSchool(id)
-    const preset = SCHOOL_PRESETS.find((p) => p.id === id)
-    if (preset) setPeriods(preset.periodTimes.map((t) => ({ ...t })))
-  }
-
-  const submit = async () => {
-    setError('')
-    setBusy(true)
-    try {
-      await updateSettings.mutateAsync({ active_term: term, week1_date: week1 || undefined, period_times: periods })
-      onClose()
-    } catch (e) {
-      setError(e instanceof Error ? e.message : String(e))
-    } finally {
-      setBusy(false)
-    }
-  }
-
-  return (
-    <div className="space-y-4">
-      <div>
-        <label className="label">学校</label>
-        <select className="field" value={school} onChange={(e) => applySchool(e.target.value)}>
-          {SCHOOL_PRESETS.map((p) => (
-            <option key={p.id} value={p.id}>
-              {p.name}
-            </option>
-          ))}
-          <option value={CUSTOM_SCHOOL_ID}>自定义（手动设置）</option>
-        </select>
-        {school === CUSTOM_SCHOOL_ID && (
-          <p className="mt-1 text-xs text-ink-muted dark:text-slate-400">其他学校请手动填写下方各节次时间。</p>
-        )}
-      </div>
-      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-        <div>
-          <label className="label">当前学年学期</label>
-          <input className="field" placeholder="例如 2025-2026-1" value={term} onChange={(e) => setTerm(e.target.value)} />
-        </div>
-        <div>
-          <label className="label">开学第 1 周周一</label>
-          <input type="date" className="field" value={week1} onChange={(e) => setWeek1(e.target.value)} />
-        </div>
-      </div>
-
-      <div>
-        <div className="mb-1.5 flex items-center justify-between">
-          <label className="label mb-0">各节次时间</label>
-          <button className="btn-ghost px-2 py-1 text-xs" onClick={() => setPeriods((list) => [...list, { start: '08:00', end: '08:45' }])}>
-            <Plus size={13} /> 添加节次
-          </button>
-        </div>
-        <div className="space-y-1.5">
-          {periods.map((p, i) => (
-            <div key={i} className="flex items-center gap-2">
-              <span className="w-14 shrink-0 text-xs text-ink-muted dark:text-slate-400">第{i + 1}节</span>
-              <input type="time" className="field" value={p.start} onChange={(e) => setPeriod(i, 'start', e.target.value)} />
-              <span className="text-xs text-ink-faint dark:text-slate-500">-</span>
-              <input type="time" className="field" value={p.end} onChange={(e) => setPeriod(i, 'end', e.target.value)} />
-              <button className="btn-ghost p-1.5" onClick={() => setPeriods((list) => list.filter((_, idx) => idx !== i))} aria-label="删除该节次" title="删除该节次">
-                <Trash2 size={14} />
-              </button>
-            </div>
-          ))}
-        </div>
-      </div>
-
-      {error && <p className="text-xs text-rose-600 dark:text-rose-300">{error}</p>}
-      <div className="flex justify-end gap-2 border-t border-line-soft pt-3 dark:border-slate-700/60">
-        <button className="btn-ghost" onClick={onClose}>
-          取消
-        </button>
-        <button className="btn-primary" onClick={submit} disabled={busy}>
-          保存
-        </button>
-      </div>
-    </div>
-  )
-}
 
 export function TimetableView() {
   const settingsQ = useTimetableSettings()
@@ -111,7 +16,6 @@ export function TimetableView() {
   const { generate, remove } = useTimetableMutations()
   const [weekStart, setWeekStart] = useState(() => mondayOf(todayISO()))
   const [showImport, setShowImport] = useState(false)
-  const [showSettings, setShowSettings] = useState(false)
   const [msg, setMsg] = useState('')
   const [busy, setBusy] = useState(false)
 
@@ -175,10 +79,10 @@ export function TimetableView() {
               本周
             </button>
           </div>
-          <button className="btn-ghost" onClick={() => setShowSettings(true)}>
-            <Settings size={15} /> 设置
-          </button>
-          <button className="btn-ghost" onClick={() => setShowImport(true)}>
+          <button
+            className="btn bg-brand-soft text-brand-ink hover:bg-brand/20 dark:bg-brand/15 dark:text-teal-100 dark:hover:bg-brand/25"
+            onClick={() => setShowImport(true)}
+          >
             <Upload size={15} /> 导入课表
           </button>
           <button className="btn-primary" onClick={doGenerate} disabled={busy || !activeTerm || !hasWeek1 || !weekCourses.length}>
@@ -191,7 +95,7 @@ export function TimetableView() {
         <div className="flex items-start gap-2 rounded-md border border-amber-300/70 bg-amber-50 px-3 py-2 text-sm text-amber-800 dark:border-amber-400/30 dark:bg-amber-400/10 dark:text-amber-200">
           <AlertTriangle size={15} className="mt-0.5 shrink-0" />
           <div>
-            尚未设置开学第 1 周周一的日期，无法生成课程计划。请先在「设置」中确认。
+            尚未设置开学第 1 周周一的日期，无法生成课程计划。请先在「导入课表」中确认。
           </div>
         </div>
       )}
@@ -281,13 +185,8 @@ export function TimetableView() {
       )}
 
       {showImport && (
-        <Modal title="导入课表" onClose={() => setShowImport(false)}>
-          <TimetableImport onClose={() => setShowImport(false)} />
-        </Modal>
-      )}
-      {showSettings && settingsQ.data && (
-        <Modal title="课表设置" onClose={() => setShowSettings(false)}>
-          <SettingsForm initial={settingsQ.data} onClose={() => setShowSettings(false)} />
+        <Modal title="导入与设置课表" size="lg" onClose={() => setShowImport(false)}>
+          <TimetableImport initial={settingsQ.data} onClose={() => setShowImport(false)} />
         </Modal>
       )}
     </div>

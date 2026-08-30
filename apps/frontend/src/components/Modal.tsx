@@ -6,10 +6,12 @@ export function Modal({
   title,
   children,
   onClose,
+  size = 'md',
 }: {
   title: string
   children: ReactNode
   onClose: () => void
+  size?: 'md' | 'lg'
 }) {
   useEffect(() => {
     const onKeyDown = (event: KeyboardEvent) => {
@@ -32,7 +34,9 @@ export function Modal({
       onMouseDown={onClose}
     >
       <div
-        className="w-full max-w-lg rounded-lg border border-line bg-surface shadow-soft dark:border-slate-700 dark:bg-slate-800"
+        className={`w-full rounded-lg border border-line bg-surface shadow-soft dark:border-slate-700 dark:bg-slate-800 ${
+          size === 'lg' ? 'max-w-2xl' : 'max-w-lg'
+        }`}
         role="dialog"
         aria-modal="true"
         aria-label={title}
