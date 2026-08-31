@@ -2,6 +2,7 @@ import { useMemo, useState } from 'react'
 import { format } from 'date-fns'
 import { AlertTriangle, CalendarPlus, ChevronLeft, ChevronRight, Trash2, Upload } from 'lucide-react'
 import { Modal } from '../components/Modal'
+import { SchoolMapViewer } from '../components/SchoolMapViewer'
 import { TimetableImport } from '../components/TimetableImport'
 import { useCourses, useTimetableMutations, useTimetableSettings } from '../lib/queries'
 import { addDaysISO, mondayOf, todayISO } from '../lib/date'
@@ -156,30 +157,42 @@ export function TimetableView() {
 
       {activeTerm && allCourses.length > 0 && (
         <section className="panel">
-          <header className="flex items-center justify-between border-b border-line-soft px-4 py-2.5 dark:border-slate-700/60">
-            <h2 className="text-sm font-semibold text-ink dark:text-slate-100">已导入课程</h2>
-            <span className="text-xs text-ink-muted dark:text-slate-400">{allCourses.length} 条</span>
-          </header>
-          <div className="max-h-72 overflow-auto">
-            <ul className="divide-y divide-line-soft dark:divide-slate-700/60">
-              {allCourses.map((c) => (
-                <li key={c.id} className="flex items-center gap-3 px-4 py-2.5">
-                  <div className="min-w-0 flex-1">
-                    <p className="truncate text-sm font-medium text-ink dark:text-slate-100">{c.name}</p>
-                    <p className="truncate text-xs text-ink-muted dark:text-slate-400">
-                      {`周${DAY_LABELS[c.day_of_week - 1]}`} {c.start_period}
-                      {c.end_period !== c.start_period ? `-${c.end_period}` : ''}节
-                      {c.teacher ? ` · ${c.teacher}` : ''}
-                      {c.location ? ` · ${c.location}` : ''}
-                      {c.week_label ? ` · ${c.week_label}` : ''}
-                    </p>
-                  </div>
-                  <button className="btn-ghost p-1.5" onClick={() => deleteCourse(c.id)} aria-label="删除课程" title="删除课程">
-                    <Trash2 size={15} />
-                  </button>
-                </li>
-              ))}
-            </ul>
+          <div className="grid grid-cols-1 md:grid-cols-2">
+            <div className="border-b border-line-soft md:border-b-0 md:border-r dark:border-slate-700/60">
+              <header className="flex items-center justify-between border-b border-line-soft px-4 py-2.5 dark:border-slate-700/60">
+                <h2 className="text-sm font-semibold text-ink dark:text-slate-100">已导入课程</h2>
+                <span className="text-xs text-ink-muted dark:text-slate-400">{allCourses.length} 条</span>
+              </header>
+              <div className="max-h-72 overflow-auto">
+                <ul className="divide-y divide-line-soft dark:divide-slate-700/60">
+                  {allCourses.map((c) => (
+                    <li key={c.id} className="flex items-center gap-3 px-4 py-2.5">
+                      <div className="min-w-0 flex-1">
+                        <p className="truncate text-sm font-medium text-ink dark:text-slate-100">{c.name}</p>
+                        <p className="truncate text-xs text-ink-muted dark:text-slate-400">
+                          {`周${DAY_LABELS[c.day_of_week - 1]}`} {c.start_period}
+                          {c.end_period !== c.start_period ? `-${c.end_period}` : ''}节
+                          {c.teacher ? ` · ${c.teacher}` : ''}
+                          {c.location ? ` · ${c.location}` : ''}
+                          {c.week_label ? ` · ${c.week_label}` : ''}
+                        </p>
+                      </div>
+                      <button className="btn-ghost p-1.5" onClick={() => deleteCourse(c.id)} aria-label="删除课程" title="删除课程">
+                        <Trash2 size={15} />
+                      </button>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            </div>
+            <div>
+              <header className="flex items-center justify-between border-b border-line-soft px-4 py-2.5 dark:border-slate-700/60">
+                <h2 className="text-sm font-semibold text-ink dark:text-slate-100">学校地图</h2>
+              </header>
+              <div className="p-4">
+                <SchoolMapViewer />
+              </div>
+            </div>
           </div>
         </section>
       )}
