@@ -1,6 +1,7 @@
 import { Check, Lock, Pencil } from 'lucide-react'
 import type { Plan } from '../lib/types'
 import { PriorityBadge, StatusBadge } from './badges'
+import { ImageGallery } from './ImageGallery'
 import { usePlanMutations } from '../lib/queries'
 import { isPast } from '../lib/date'
 
@@ -33,6 +34,7 @@ export function PlanItem({ plan, onEdit }: { plan: Plan; onEdit: (plan: Plan) =>
       <div className={`min-w-0 flex-1 ${locked ? '' : 'cursor-pointer'}`} title={plan.title} onClick={() => !locked && onEdit(plan)}>
         <p className={`truncate text-sm font-medium text-ink dark:text-slate-100 ${done ? 'line-through' : ''}`}>{plan.title}</p>
         {time && <p className="mt-0.5 text-xs text-ink-muted dark:text-slate-500">{time}</p>}
+        <ImageGallery images={plan.images ?? []} />
       </div>
       <div className="hidden items-center gap-1.5 sm:flex">
         <span className="rounded-sm bg-surface-soft px-2 py-0.5 text-xs text-ink-muted dark:bg-slate-700/70 dark:text-slate-300">{plan.category}</span>

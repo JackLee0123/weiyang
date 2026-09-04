@@ -1,9 +1,12 @@
 import { useEffect, useState } from 'react'
 import { Lock, Pi, Trash2 } from 'lucide-react'
+import { ImageUpload } from './ImageUpload'
 import { useRecordMutations } from '../lib/queries'
 import type { Plan, RecordEntry, RecordEntryPayload } from '../lib/types'
 import { CATEGORIES } from '../lib/constants'
 import { isPast, todayISO } from '../lib/date'
+
+const EMPTY_PLANS: Plan[] = []
 
 interface Props {
   defaultDate: string
@@ -12,7 +15,7 @@ interface Props {
   onClose: () => void
 }
 
-export function RecordForm({ defaultDate, initial, plans = [], onClose }: Props) {
+export function RecordForm({ defaultDate, initial, plans = EMPTY_PLANS, onClose }: Props) {
   const { create, update, remove } = useRecordMutations()
   const [error, setError] = useState('')
   const [form, setForm] = useState<RecordEntryPayload>({
@@ -23,6 +26,7 @@ export function RecordForm({ defaultDate, initial, plans = [], onClose }: Props)
     is_completed: initial?.is_completed ?? true,
     category: initial?.category ?? CATEGORIES[0],
     linked_plan_id: initial?.linked_plan_id ?? null,
+    images: initial?.images ?? [],
   })
 
   useEffect(() => {
@@ -34,6 +38,7 @@ export function RecordForm({ defaultDate, initial, plans = [], onClose }: Props)
       is_completed: initial?.is_completed ?? true,
       category: initial?.category ?? CATEGORIES[0],
       linked_plan_id: initial?.linked_plan_id ?? null,
+      images: initial?.images ?? [],
     })
   }, [initial, defaultDate, plans])
 
@@ -87,6 +92,8 @@ export function RecordForm({ defaultDate, initial, plans = [], onClose }: Props)
         <label className="label">具体内容</label>
         <textarea className="field resize-none" rows={3} placeholder="记录完成情况、心得、产出……" value={form.content} onChange={(e) => set('content', e.target.value)} />
       </div>
+
+      <ImageUpload images={form.images ?? []} onChange={(images) => set('images', images)} disabled={locked} />
 
       <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
         <div>

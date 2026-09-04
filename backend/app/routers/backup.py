@@ -37,14 +37,14 @@ def import_backup(payload: dict = Body(...), db: Session = Depends(get_db), curr
     db.flush()
 
     for item in plans:
-        plan = models.Plan(**{k: item.get(k) for k in ("date", "title", "description", "start_time", "end_time", "status", "priority", "category")})
+        plan = models.Plan(**{k: item.get(k) for k in ("date", "title", "description", "start_time", "end_time", "status", "priority", "category", "images")})
         plan.user_id = current_user.id
         plan.id = item.get("id")
         db.add(plan)
     db.flush()
 
     for item in records:
-        record = models.Record(**{k: item.get(k) for k in ("date", "title", "content", "duration_minutes", "is_completed", "category")})
+        record = models.Record(**{k: item.get(k) for k in ("date", "title", "content", "duration_minutes", "is_completed", "category", "images")})
         record.user_id = current_user.id
         record.id = item.get("id")
         linked = item.get("linked_plan_id")

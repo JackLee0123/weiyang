@@ -57,6 +57,7 @@ class Plan(Base):
     priority: Mapped[str] = mapped_column(String(10), default="medium", nullable=False)
     category: Mapped[str] = mapped_column(String(50), default="默认", nullable=False)
     source: Mapped[str] = mapped_column(String(20), default="manual", nullable=False)
+    images: Mapped[Optional[list]] = mapped_column(JSON, default=list, nullable=True)
     created_at: Mapped[datetime] = mapped_column(DateTime, default=now_utc, nullable=False)
     updated_at: Mapped[datetime] = mapped_column(DateTime, default=now_utc, onupdate=now_utc, nullable=False)
 
@@ -77,6 +78,7 @@ class Record(Base):
     done_at: Mapped[Optional[datetime]] = mapped_column(DateTime, nullable=True)
     category: Mapped[str] = mapped_column(String(50), default="默认", nullable=False)
     linked_plan_id: Mapped[Optional[int]] = mapped_column(ForeignKey("plans.id", ondelete="SET NULL"), nullable=True)
+    images: Mapped[Optional[list]] = mapped_column(JSON, default=list, nullable=True)
     created_at: Mapped[datetime] = mapped_column(DateTime, default=now_utc, nullable=False)
 
     linked_plan: Mapped[Optional[Plan]] = relationship(back_populates="records")

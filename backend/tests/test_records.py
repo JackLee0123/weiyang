@@ -1,11 +1,20 @@
 from datetime import date, timedelta
+import base64
+import io
 
 from app import repository
+from PIL import Image
 
 
 TODAY = date.today().isoformat()
 PAST = (date.today() - timedelta(days=1)).isoformat()
 FUTURE = (date.today() + timedelta(days=1)).isoformat()
+
+
+def _png_data_uri() -> str:
+    buf = io.BytesIO()
+    Image.new("RGB", (4, 4), (255, 0, 0)).save(buf, format="PNG")
+    return "data:image/png;base64," + base64.b64encode(buf.getvalue()).decode()
 
 
 def test_record_crud_with_plan(client, auth_headers):
@@ -71,3 +80,27 @@ def test_cannot_link_record_to_other_users_plan(client, auth_headers, register_u
     plan = client.post("/api/plans", json={"date": FUTURE, "title": "p"}, headers=other_headers).json()
     response = client.post("/api/records", json={"date": FUTURE, "title": "t", "linked_plan_id": plan["id"]}, headers=auth_headers)
     assert response.status_code == 404
+
+
+def test_create_record_with_images(client, auth_headers):
+    image = _png_data_uri()
+    created = client.post("/api/records", json={"date": FUTURE, "title": "t", "images": [image]}, headers=auth_headers)
+    assert created.status_code == 201
+    data = created.json()
+    assert len(data["images"]) == 1
+    assert data["images"][0].startswith(("data:image/png;base64,", "data:image/jpeg;base64,"))
+
+
+def test_record_images_too_many(client, auth_headers):
+    image = _png_data_uri()
+    response = client.post("/api/records", json={"date": FUTURE, "title": "t", "images": [image] * 4}, headers=auth_headers)
+    assert response.status_code == 422
+
+
+def test_record_update_images_clear(client, auth_headers):
+    image = _png_data_uri()
+    record = client.post("/api/records", json={"date": FUTURE, "title": "t", "images": [image]}, headers=auth_headers).json()
+    assert len(record["images"]) == 1
+
+    cleared = client.patch(f"/api/records/{record['id']}", json={"images": []}, headers=auth_headers).json()
+    assert cleared["images"] == []

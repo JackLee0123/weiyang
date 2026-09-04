@@ -1,5 +1,6 @@
 import { Lock, Pencil, Timer } from 'lucide-react'
 import type { RecordEntry } from '../lib/types'
+import { ImageGallery } from './ImageGallery'
 import { useRecordMutations } from '../lib/queries'
 import { isPast } from '../lib/date'
 
@@ -33,6 +34,7 @@ export function RecordItem({ record, onEdit }: { record: RecordEntry; onEdit: (r
           <span className="rounded-sm bg-surface-soft px-2 py-0.5 text-xs text-ink-muted dark:bg-slate-700/70 dark:text-slate-300">{record.category}</span>
         </div>
         {record.content && <p className="mt-0.5 truncate text-xs text-ink-muted dark:text-slate-400">{record.content}</p>}
+        <ImageGallery images={record.images ?? []} />
       </div>
       {record.duration_minutes != null && (
         <span className="mt-0.5 flex shrink-0 items-center gap-1 text-xs text-ink-muted dark:text-slate-500">

@@ -11,6 +11,7 @@ export interface Plan {
   status: PlanStatus
   priority: Priority
   category: string
+  images?: string[]
   created_at: string
   updated_at: string
 }
@@ -24,6 +25,7 @@ export interface PlanPayload {
   status?: PlanStatus
   priority?: Priority
   category?: string
+  images?: string[]
 }
 
 export interface RecordEntry {
@@ -35,6 +37,7 @@ export interface RecordEntry {
   is_completed: boolean
   category: string
   linked_plan_id?: number | null
+  images?: string[]
   done_at?: string | null
   created_at: string
 }
@@ -47,6 +50,7 @@ export interface RecordEntryPayload {
   is_completed?: boolean
   category?: string
   linked_plan_id?: number | null
+  images?: string[]
 }
 
 export interface StatsDay {

@@ -1,11 +1,20 @@
 from datetime import date, timedelta
+import base64
+import io
 
 from app import repository
+from PIL import Image
 
 
 TODAY = date.today().isoformat()
 PAST = (date.today() - timedelta(days=1)).isoformat()
 FUTURE = (date.today() + timedelta(days=1)).isoformat()
+
+
+def _png_data_uri() -> str:
+    buf = io.BytesIO()
+    Image.new("RGB", (4, 4), (255, 0, 0)).save(buf, format="PNG")
+    return "data:image/png;base64," + base64.b64encode(buf.getvalue()).decode()
 
 
 def test_create_and_list_plan(client, auth_headers):
@@ -102,3 +111,47 @@ def test_list_unfinished_plans(client, monkeypatch, auth_headers):
 
 def test_unfinished_requires_auth(client):
     assert client.get("/api/plans/unfinished").status_code == 401
+
+
+def test_create_and_list_plan_with_images(client, auth_headers):
+    image = _png_data_uri()
+    payload = {"date": FUTURE, "title": "带图", "images": [image]}
+    created = client.post("/api/plans", json=payload, headers=auth_headers)
+    assert created.status_code == 201
+    data = created.json()
+    assert len(data["images"]) == 1
+    assert data["images"][0].startswith(("data:image/png;base64,", "data:image/jpeg;base64,"))
+
+    listed = client.get("/api/plans", headers=auth_headers).json()
+    assert len(listed[0]["images"]) == 1
+
+
+def test_plan_images_too_many(client, auth_headers):
+    image = _png_data_uri()
+    payload = {"date": FUTURE, "title": "x", "images": [image, image, image, image]}
+    response = client.post("/api/plans", json=payload, headers=auth_headers)
+    assert response.status_code == 422
+
+
+def test_plan_images_invalid(client, auth_headers):
+    payload = {"date": FUTURE, "title": "x", "images": ["not-a-data-uri"]}
+    response = client.post("/api/plans", json=payload, headers=auth_headers)
+    assert response.status_code == 422
+
+
+def test_plan_update_images_replace_and_clear(client, auth_headers):
+    image = _png_data_uri()
+    plan = client.post("/api/plans", json={"date": FUTURE, "title": "a", "images": [image]}, headers=auth_headers).json()
+    assert len(plan["images"]) == 1
+
+    # 省略 images 保持不变
+    renamed = client.patch(f"/api/plans/{plan['id']}", json={"title": "b"}, headers=auth_headers).json()
+    assert len(renamed["images"]) == 1
+
+    # 空列表清空
+    cleared = client.patch(f"/api/plans/{plan['id']}", json={"images": []}, headers=auth_headers).json()
+    assert cleared["images"] == []
+
+    # 显式 null 也清空
+    again = client.patch(f"/api/plans/{plan['id']}", json={"images": None}, headers=auth_headers).json()
+    assert again["images"] == []

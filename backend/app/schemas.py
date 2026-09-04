@@ -4,6 +4,8 @@ from typing import Literal, Optional
 
 from pydantic import BaseModel, ConfigDict, Field, field_validator
 
+from .services.images import MAX_IMAGES, normalize_data_uri
+
 
 PlanStatus = Literal["pending", "in_progress", "done", "cancelled"]
 Priority = Literal["high", "medium", "low"]
@@ -145,10 +147,21 @@ class PlanBase(BaseModel):
     status: PlanStatus = "pending"
     priority: Priority = "medium"
     category: str = "默认"
+    images: list[str] = []
+
+    @field_validator("images", mode="before")
+    @classmethod
+    def _images_not_none(cls, value):
+        return [] if value is None else value
 
 
 class PlanCreate(PlanBase):
-    pass
+    @field_validator("images")
+    @classmethod
+    def _images_normalize(cls, value: list[str]) -> list[str]:
+        if len(value) > MAX_IMAGES:
+            raise ValueError(f"最多上传 {MAX_IMAGES} 张图片")
+        return [normalize_data_uri(item) for item in value]
 
 
 class PlanUpdate(BaseModel):
@@ -160,6 +173,16 @@ class PlanUpdate(BaseModel):
     status: Optional[PlanStatus] = None
     priority: Optional[Priority] = None
     category: Optional[str] = None
+    images: Optional[list[str]] = None
+
+    @field_validator("images")
+    @classmethod
+    def _images_normalize(cls, value: Optional[list[str]]) -> Optional[list[str]]:
+        if value is None:
+            return []
+        if len(value) > MAX_IMAGES:
+            raise ValueError(f"最多上传 {MAX_IMAGES} 张图片")
+        return [normalize_data_uri(item) for item in value]
 
 
 class PlanOut(PlanBase):
@@ -177,10 +200,21 @@ class RecordBase(BaseModel):
     is_completed: bool = True
     category: str = "默认"
     linked_plan_id: Optional[int] = None
+    images: list[str] = []
+
+    @field_validator("images", mode="before")
+    @classmethod
+    def _images_not_none(cls, value):
+        return [] if value is None else value
 
 
 class RecordCreate(RecordBase):
-    pass
+    @field_validator("images")
+    @classmethod
+    def _images_normalize(cls, value: list[str]) -> list[str]:
+        if len(value) > MAX_IMAGES:
+            raise ValueError(f"最多上传 {MAX_IMAGES} 张图片")
+        return [normalize_data_uri(item) for item in value]
 
 
 class RecordUpdate(BaseModel):
@@ -191,6 +225,16 @@ class RecordUpdate(BaseModel):
     is_completed: Optional[bool] = None
     category: Optional[str] = None
     linked_plan_id: Optional[int] = None
+    images: Optional[list[str]] = None
+
+    @field_validator("images")
+    @classmethod
+    def _images_normalize(cls, value: Optional[list[str]]) -> Optional[list[str]]:
+        if value is None:
+            return []
+        if len(value) > MAX_IMAGES:
+            raise ValueError(f"最多上传 {MAX_IMAGES} 张图片")
+        return [normalize_data_uri(item) for item in value]
 
 
 class RecordOut(RecordBase):

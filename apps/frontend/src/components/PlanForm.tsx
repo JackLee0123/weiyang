@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import { Calendar, Clock, Flag, Lock, Trash2 } from 'lucide-react'
+import { ImageUpload } from './ImageUpload'
 import { usePlanMutations } from '../lib/queries'
 import type { Plan, PlanPayload, PlanStatus, Priority } from '../lib/types'
 import { CATEGORIES, PRIORITY_OPTIONS, STATUS_OPTIONS } from '../lib/constants'
@@ -23,6 +24,7 @@ export function PlanForm({ defaultDate, initial, onClose }: Props) {
     status: initial?.status ?? 'pending',
     priority: initial?.priority ?? 'medium',
     category: initial?.category ?? CATEGORIES[0],
+    images: initial?.images ?? [],
   })
 
   useEffect(() => {
@@ -35,6 +37,7 @@ export function PlanForm({ defaultDate, initial, onClose }: Props) {
       status: initial?.status ?? 'pending',
       priority: initial?.priority ?? 'medium',
       category: initial?.category ?? CATEGORIES[0],
+      images: initial?.images ?? [],
     })
   }, [initial, defaultDate])
 
@@ -93,6 +96,8 @@ export function PlanForm({ defaultDate, initial, onClose }: Props) {
         <label className="label">备注</label>
         <textarea className="field resize-none" rows={2} placeholder="补充计划细节" value={form.description} onChange={(e) => set('description', e.target.value)} />
       </div>
+
+      <ImageUpload images={form.images ?? []} onChange={(images) => set('images', images)} disabled={locked} />
 
       <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
         <div>
