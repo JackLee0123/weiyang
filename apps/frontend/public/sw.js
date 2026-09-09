@@ -4,6 +4,34 @@ const SHELL = ['/', '/index.html', '/manifest.webmanifest']
 const ASSET = /^\/assets\//
 const ICON = /^\/icons\//
 
+// ---- Web Push：把收到的通知写入 IndexedDB，供前端“通知中心”读取 ----
+function storeNotification(payload) {
+  return new Promise((resolve, reject) => {
+    const req = indexedDB.open('everlong-push', 1)
+    req.onupgradeneeded = () => {
+      const db = req.result
+      if (!db.objectStoreNames.contains('notifications')) {
+        const store = db.createObjectStore('notifications', { keyPath: 'id', autoIncrement: true })
+        store.createIndex('ts', 'ts')
+      }
+    }
+    req.onsuccess = () => {
+      const db = req.result
+      const tx = db.transaction('notifications', 'readwrite')
+      tx.objectStore('notifications').add({
+        title: payload.title || '未央 · Everlong',
+        body: payload.body || '',
+        url: payload.url || '/',
+        icon: payload.icon || '/icons/icon-192.png',
+        ts: Date.now(),
+      })
+      tx.oncomplete = () => resolve()
+      tx.onerror = () => reject(tx.error)
+    }
+    req.onerror = () => reject(req.error)
+  })
+}
+
 self.addEventListener('install', (event) => {
   event.waitUntil(
     caches
@@ -61,5 +89,53 @@ self.addEventListener('fetch', (event) => {
           return res
         }),
     ),
+  )
+})
+
+self.addEventListener('push', (event) => {
+  let payload = {}
+  try {
+    payload = event.data ? event.data.json() : {}
+  } catch {
+    payload = { title: '未央 · Everlong' }
+  }
+
+  const title = payload.title || '未央 · Everlong'
+  const options = {
+    body: payload.body || '',
+    icon: payload.icon || '/icons/icon-192.png',
+    badge: payload.badge || '/icons/icon-192.png',
+    tag: payload.tag || 'everlong',
+    dir: 'auto',
+    vibrate: [100, 50, 100],
+    renotify: false,
+    data: { url: payload.url || '/' },
+    actions: payload.actions || [],
+  }
+
+  event.waitUntil(
+    (async () => {
+      try {
+        await storeNotification(payload)
+      } catch {
+        // 存储失败不影响展示通知
+      }
+      return self.registration.showNotification(title, options)
+    })(),
+  )
+})
+
+self.addEventListener('notificationclick', (event) => {
+  event.notification.close()
+  const url = (event.notification.data && event.notification.data.url) || '/'
+  const target = new URL(url, self.location.origin).href
+  event.waitUntil(
+    self.clients.matchAll({ type: 'window', includeUncontrolled: true }).then((clientList) => {
+      for (const client of clientList) {
+        if ('navigate' in client && client.url !== target) client.navigate(target)
+        if ('focus' in client) return client.focus()
+      }
+      return self.clients.openWindow(target)
+    }),
   )
 })

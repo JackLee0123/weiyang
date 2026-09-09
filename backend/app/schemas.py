@@ -1,8 +1,9 @@
+import base64
 from datetime import datetime
 import re
 from typing import Literal, Optional
 
-from pydantic import BaseModel, ConfigDict, Field, field_validator
+from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
 
 from .services.images import MAX_IMAGES, normalize_data_uri
 
@@ -397,3 +398,155 @@ class GeneratePlansOut(BaseModel):
     created: int
     skipped_past: int
     skipped_duplicate: int
+
+
+def _normalize_b64url(value: str, field: str, expected_bytes: int) -> str:
+    """把 p256dh/auth 规范化为无填充的 urlsafe base64，并校验解码后字节数。"""
+    if not value or len(value) > 1024:
+        raise ValueError(f"{field} 格式不正确")
+    # 允许标准 base64（含 + / =）或 urlsafe base64（含 - _）
+    padded = value.strip().replace("-", "+").replace("_", "/")
+    padded += "=" * (-len(padded) % 4)
+    try:
+        decoded = base64.b64decode(padded, validate=True)
+    except Exception as exc:
+        raise ValueError(f"{field} 不是合法的 Base64") from exc
+    if len(decoded) != expected_bytes:
+        raise ValueError(f"{field} 长度应为 {expected_bytes} 字节")
+    return base64.urlsafe_b64encode(decoded).rstrip(b"=").decode("ascii")
+
+
+class PushKeys(BaseModel):
+    p256dh: str
+    auth: str
+
+    @field_validator("p256dh")
+    @classmethod
+    def _p256dh(cls, value: str) -> str:
+        return _normalize_b64url(value, "p256dh", 65)
+
+    @field_validator("auth")
+    @classmethod
+    def _auth(cls, value: str) -> str:
+        return _normalize_b64url(value, "auth", 16)
+
+
+class PushSubscriptionIn(BaseModel):
+    endpoint: str = Field(..., max_length=800)
+    keys: PushKeys
+    user_agent: Optional[str] = Field(default=None, max_length=255)
+
+    @field_validator("endpoint")
+    @classmethod
+    def _endpoint(cls, value: str) -> str:
+        if not value.startswith(("https://", "http://localhost")):
+            raise ValueError("订阅端点必须使用 HTTPS")
+        return value.strip()
+
+
+class PushSubscriptionOut(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+    id: int
+    endpoint: str
+    created_at: datetime
+
+
+class PushUnsubscribeIn(BaseModel):
+    endpoint: str = Field(..., max_length=800)
+
+
+class PushTestIn(BaseModel):
+    title: str = "测试通知"
+    body: str = "你的 PWA 手机通知已经正常工作！"
+    url: str = "/notifications"
+
+
+class PushSendIn(BaseModel):
+    user_id: int = Field(..., ge=1)
+    title: str = Field(..., min_length=1, max_length=120)
+    body: str = Field(..., min_length=1, max_length=1000)
+    url: str = Field(default="/", max_length=255)
+    icon: Optional[str] = Field(default=None, max_length=500)
+
+
+class PushSendOut(BaseModel):
+    success: int
+    failed: int
+
+
+class PushStatusOut(BaseModel):
+    server_supported: bool
+    subscriptions: int
+    public_key: str
+
+
+class PushScheduleIn(BaseModel):
+    enabled: bool = False
+    recurrence: Literal["daily", "weekly", "monthly", "yearly"] = "daily"
+    times: list[str] = Field(default_factory=list)
+    days_of_week: list[int] = Field(default_factory=list)
+    day_of_month: list[int] = Field(default_factory=list)
+    month: Optional[int] = Field(default=None, ge=1, le=12)
+    day: Optional[int] = Field(default=None, ge=1, le=31)
+    batch_days: int = Field(default=0, ge=0, le=31)
+
+    @field_validator("times", mode="before")
+    @classmethod
+    def _times(cls, value: Optional[list[str]]) -> list[str]:
+        if value is None:
+            value = []
+        cleaned: list[str] = []
+        for item in value:
+            item = item.strip()
+            if not re.fullmatch(TIME_RE, item):
+                raise ValueError("时间点格式应为 HH:MM (00:00-23:59)")
+            if item not in cleaned:
+                cleaned.append(item)
+        if not cleaned:
+            raise ValueError("至少需要设置一个时间点")
+        return sorted(cleaned)
+
+    @field_validator("days_of_week", mode="before")
+    @classmethod
+    def _dow(cls, value: Optional[list[int]]) -> list[int]:
+        if value is None:
+            value = []
+        cleaned = sorted({v for v in value})
+        if any(v < 0 or v > 6 for v in cleaned):
+            raise ValueError("星期取值应为 0-6")
+        return cleaned
+
+    @field_validator("day_of_month", mode="before")
+    @classmethod
+    def _dom(cls, value: Optional[list[int]]) -> list[int]:
+        if value is None:
+            value = []
+        cleaned = sorted({v for v in value})
+        if any(v < 1 or v > 31 for v in cleaned):
+            raise ValueError("每月日期取值应为 1-31")
+        return cleaned
+
+    @model_validator(mode="after")
+    def _recurrence_consistency(self) -> "PushScheduleIn":
+        if self.recurrence == "weekly" and not self.days_of_week:
+            raise ValueError("每周提醒需要选择星期")
+        if self.recurrence == "monthly" and not self.day_of_month:
+            raise ValueError("每月提醒需要选择日期")
+        if self.recurrence == "yearly" and (self.month is None or self.day is None):
+            raise ValueError("每年提醒需要选择月和日")
+        return self
+
+
+class PushScheduleOut(PushScheduleIn):
+    model_config = ConfigDict(from_attributes=True)
+    id: int
+    last_fired_at: Optional[datetime] = None
+    created_at: datetime
+    updated_at: datetime
+
+
+class PushScheduleView(BaseModel):
+    exists: bool
+    schedule: Optional[PushScheduleOut] = None
+    next_fire: Optional[str] = None
+    preview: Optional[str] = None

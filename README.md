@@ -107,6 +107,74 @@ python .build/e2e.py
   `apps/frontend/public/sw.js`（离线缓存外壳；`/api` 请求始终走网络，不写入缓存）。
 - 图标取自品牌图标，构建前端时(`pnpm build:frontend`)会一并打包，无需额外配置。
 
+## 手机通知（Web Push）
+
+支持 Android Chrome / Edge、iPhone Safari 与 iOS/iPadOS PWA：用户把网站安装到主屏幕后，
+即使不打开网页也能收到系统推送通知。
+
+**开启方式**：登录后侧边栏「接收通知」（或首次进入顶部提示条）→ 授权通知权限 →
+后端保存你的订阅。iPhone 须先把网站「添加到主屏幕」后再开启。
+
+**VAPID 配置**：生成密钥对（私钥绝对不要放进前端或提交 Git）：
+
+```powershell
+cd backend
+uv run python -c "import base64; from cryptography.hazmat.primitives.asymmetric import ec; p=ec.generate_private_key(ec.SECP256R1()); print('VAPID_PUBLIC_KEY='+base64.urlsafe_b64encode(b'\x04'+p.public_key().public_numbers().x.to_bytes(32,'big')+p.public_key().public_numbers().y.to_bytes(32,'big')).rstrip(b'=').decode()); print('VAPID_PRIVATE_KEY='+base64.urlsafe_b64encode(p.private_numbers().private_value.to_bytes(32,'big')).rstrip(b'=').decode())"
+```
+
+把结果写入 `backend/.env`（或系统环境变量）：
+
+```text
+VAPID_PUBLIC_KEY=<生成的公钥>
+VAPID_PRIVATE_KEY=<生成的私钥>
+VAPID_SUBJECT=mailto:you@example.com
+```
+
+**数据库**：新增 `push_subscriptions` 表（`user_id / endpoint / p256dh / auth / user_agent / created_at / updated_at`），
+一个用户可对应多台设备。迁移：
+
+```powershell
+cd backend
+uv run alembic upgrade head
+```
+
+**接口**（除 `config` 外均需 `Authorization: Bearer <token>`）：
+
+| 方法 | 路径 | 说明 |
+| --- | --- | --- |
+| GET | `/api/push/config` | 返回 VAPID 公钥与服务端是否已配置（无需登录） |
+| GET | `/api/push/status` | 当前用户的订阅数量与服务端配置 |
+| POST | `/api/push/subscribe` | 保存/更新当前用户的订阅 |
+| POST | `/api/push/unsubscribe` | 删除当前用户的指定订阅 |
+| POST | `/api/push/test` | 给当前用户发送一条测试通知（开发/自助联调） |
+| POST | `/api/push/send` | 管理员向指定 `user_id` 发送通知 |
+| GET | `/api/push/schedule` | 读取当前用户的任务提醒规则与下次提醒时间 |
+| PUT | `/api/push/schedule` | 保存/更新当前用户的任务提醒规则 |
+
+`/api/push/send` 请求体示例：
+
+```json
+{ "user_id": 123, "title": "新消息", "body": "你有一条新的通知", "url": "/notifications" }
+```
+
+**任务提醒（定时推送）**：侧边栏「任务提醒」可设置多个每日时间点、提前“批量天数”、
+以及按周（选星期）/按月（选日期）/按年（选月+日）重复，到点由后端调度器把当天/本周期
+的任务摘要推送给订阅设备。后端启动一个异步调度任务（默认每 30 秒扫描一次），通过
+`PUSH_SCHEDULER_ENABLED` / `PUSH_SCHEDULER_INTERVAL_SECONDS` / `PUSH_SCHEDULER_GRACE_SECONDS` 控制。
+
+**本地 HTTPS 测试**：通知接口需要安全上下文，建议用 `mkcert` 生成本地证书（命令：`mkcert -install`，
+再 `mkcert 127.0.0.1` 生成证书），或用已配置 HTTPS 的暂存域名。`localhost` / `127.0.0.1`
+在 Chrome/Edge 会被当作安全源，可直接在浏览器里开着页面点击「发送测试通知」验证。
+
+**Android 测试**：Chrome/Edge 打开站点 → 侧边栏「安装应用」，装上后从主屏幕打开 →
+「接收通知」开启 → 「发送测试通知」，等待推送到达通知栏。点击通知应跳转 `/notifications`。
+
+**iPhone 测试**：Safari 打开站点 → 分享 →「添加到主屏幕」→ 从主屏幕打开 →
+「接收通知」开启（首次会弹出系统授权）→「发送测试通知」。若没看到开启入口，按页面提示先安装。
+
+**生产注意**：必须 HTTPS；确认 `CORS_ORIGINS` 与 `TRUST_PROXY_HEADERS`；VAPID 私钥只放后端环境变量；
+通知内容不要写入敏感信息；订阅失效（404/410）时后端会自动清理对应记录。
+
 ## API 一览
 
 | 方法 | 路径 | 说明 |

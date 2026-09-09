@@ -18,6 +18,13 @@ import type {
   PeriodTime,
   Plan,
   PlanPayload,
+  PushConfig,
+  PushSchedule,
+  PushSchedulePayload,
+  PushScheduleView,
+  PushSendResult,
+  PushStatus,
+  PushSubscriptionPayload,
   RecordEntry,
   RecordEntryPayload,
   RegisterPayload,
@@ -203,5 +210,33 @@ export const api = {
   },
   generatePlans(payload: { term: string; week_start: string }) {
     return request<GeneratePlansResult>('/timetable/generate-plans', { method: 'POST', body: JSON.stringify(payload) })
+  },
+
+  pushConfig() {
+    return request<PushConfig>('/push/config')
+  },
+  pushStatus() {
+    return request<PushStatus>('/push/status')
+  },
+  subscribePush(payload: PushSubscriptionPayload) {
+    return request<{ id: number; endpoint: string; created_at: string }>('/push/subscribe', {
+      method: 'POST',
+      body: JSON.stringify(payload),
+    })
+  },
+  unsubscribePush(payload: { endpoint: string }) {
+    return request<void>('/push/unsubscribe', { method: 'POST', body: JSON.stringify(payload) })
+  },
+  sendTestPush() {
+    return request<PushSendResult>('/push/test', { method: 'POST' })
+  },
+  sendPush(payload: { user_id: number; title: string; body: string; url?: string; icon?: string }) {
+    return request<PushSendResult>('/push/send', { method: 'POST', body: JSON.stringify(payload) })
+  },
+  fetchPushSchedule() {
+    return request<PushScheduleView>('/push/schedule')
+  },
+  updatePushSchedule(payload: PushSchedulePayload) {
+    return request<PushSchedule>('/push/schedule', { method: 'PUT', body: JSON.stringify(payload) })
   },
 }

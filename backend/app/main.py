@@ -1,3 +1,4 @@
+import asyncio
 from contextlib import asynccontextmanager
 import mimetypes
 import os
@@ -10,7 +11,8 @@ from .config import settings
 from .database import Base, SessionLocal, engine
 from . import repository
 from .services.security import hash_password
-from .routers import admin, auth, backup, captcha, feedback, health, plans, records, reports, stats, timetable
+from .services.push_schedule import push_scheduler_loop
+from .routers import admin, auth, backup, captcha, feedback, health, plans, push, records, reports, stats, timetable
 
 
 def _bootstrap_super_admin() -> None:
@@ -36,10 +38,29 @@ async def lifespan(app: FastAPI):
     if settings.auto_create_tables:
         Base.metadata.create_all(bind=engine)
     _bootstrap_super_admin()
+    scheduler_task = None
+    if settings.push_scheduler_enabled:
+        scheduler_task = asyncio.create_task(push_scheduler_loop())
     yield
+    if scheduler_task:
+        scheduler_task.cancel()
+        try:
+            await scheduler_task
+        except asyncio.CancelledError:
+            pass
 
 
-app = FastAPI(title="未央 · Everlong API", version="0.5.1", lifespan=lifespan)
+app = FastAPI(title="未央 · Everlong API", version="0.5.2", lifespan=lifespan)
+
+
+class SPAStaticFiles(StaticFiles):
+    """前端口径回退：未命中真实文件时返回 index.html，支持 /notifications 等深链接。"""
+
+    async def get_response(self, path: str, scope):
+        response = await super().get_response(path, scope)
+        if response.status_code == 404:
+            response = await super().get_response("index.html", scope)
+        return response
 
 app.add_middleware(
     CORSMiddleware,
@@ -61,6 +82,7 @@ for router in (
     feedback.router,
     admin.router,
     timetable.router,
+    push.router,
 ):
     app.include_router(router)
 
@@ -73,4 +95,4 @@ if not frontend_dist:
 if os.path.isdir(frontend_dist):
     # PWA 清单需要标准 MIME，否则浏览器会拒绝其作为 Web App Manifest。
     mimetypes.add_type("application/manifest+json", ".webmanifest")
-    app.mount("/", StaticFiles(directory=frontend_dist, html=True), name="frontend")
+    app.mount("/", SPAStaticFiles(directory=frontend_dist, html=True), name="frontend")

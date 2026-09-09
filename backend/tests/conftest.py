@@ -13,6 +13,10 @@ os.environ["SMTP_PASSWORD"] = ""
 os.environ["SMTP_FROM"] = ""
 os.environ["FEEDBACK_TO_EMAIL"] = "feedback@example.com"
 os.environ["DEV_MODE"] = "true"
+os.environ["VAPID_PUBLIC_KEY"] = "BNo0jm9JHia8ii_vLfL-ybz9cEFeQRlrMrmx7ZXwUkFFlIKhGNxx5L41fj7Jjxwlj2gfu51fp3MkYxb-1YYEPVE"
+os.environ["VAPID_PRIVATE_KEY"] = "i76U7vAKFSQWSZ4g1xkggP38ptMcsX-KIRULIqdPKyg"
+os.environ["VAPID_SUBJECT"] = "mailto:test@example.com"
+os.environ["PUSH_SCHEDULER_ENABLED"] = "false"
 
 from fastapi.testclient import TestClient  # noqa: E402
 from sqlalchemy import create_engine  # noqa: E402

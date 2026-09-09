@@ -1,4 +1,4 @@
-import { Activity, BookOpen, CalendarCheck, CalendarDays, CalendarRange, History, List, LogOut, MonitorDown, Moon, Plane, Plus, Route, Sun, Users } from 'lucide-react'
+import { Activity, Bell, BookOpen, CalendarCheck, CalendarClock, CalendarDays, CalendarRange, History, List, LogOut, MonitorDown, Moon, Plane, Plus, Route, Sun, Users } from 'lucide-react'
 import { useEffect, useState, type ReactNode } from 'react'
 import type { Theme } from '../lib/theme'
 import type { View } from '../lib/types'
@@ -8,6 +8,7 @@ const NAV: { key: View; label: string; icon: typeof CalendarCheck }[] = [
   { key: 'today', label: '今日', icon: CalendarCheck },
   { key: 'weiyang', label: '未央', icon: Route },
   { key: 'memory', label: '回忆', icon: BookOpen },
+  { key: 'notifications', label: '通知', icon: Bell },
   { key: 'calendar', label: '日历', icon: CalendarDays },
   { key: 'timetable', label: '课表', icon: CalendarRange },
   { key: 'heatmap', label: '活跃度', icon: Activity },
@@ -69,6 +70,8 @@ export function Sidebar({
   onNavigate,
   onAddPlan,
   onOpenFocus,
+  onOpenPush,
+  onOpenSchedule,
   onLogout,
 }: {
   view: View
@@ -79,6 +82,8 @@ export function Sidebar({
   onNavigate: (v: View) => void
   onAddPlan: () => void
   onOpenFocus: () => void
+  onOpenPush: () => void
+  onOpenSchedule: () => void
   onLogout: () => void
 }) {
   const themeLabel = theme === 'dark' ? '切换到浅色模式' : '切换到深色模式'
@@ -127,6 +132,12 @@ export function Sidebar({
         <div className="ml-auto flex items-center gap-1">
           <button className="btn-ghost p-2" onClick={onLogout} aria-label="退出登录" title="退出登录">
             <LogOut size={17} />
+          </button>
+          <button className="btn-ghost p-2" onClick={onOpenPush} aria-label="接收通知" title="接收通知">
+            <Bell size={17} />
+          </button>
+          <button className="btn-ghost p-2" onClick={onOpenSchedule} aria-label="任务提醒" title="任务提醒">
+            <CalendarClock size={17} />
           </button>
           <button className="btn-ghost p-2" onClick={onOpenFocus} aria-label="专注航班" title="专注航班">
             <Plane size={17} />
@@ -181,6 +192,14 @@ export function Sidebar({
               </div>
             </div>
           )}
+          <button className="btn-ghost w-full justify-center" onClick={onOpenPush}>
+            <Bell size={16} />
+            接收通知
+          </button>
+          <button className="btn-ghost w-full justify-center" onClick={onOpenSchedule}>
+            <CalendarClock size={16} />
+            任务提醒
+          </button>
           <button
             className={`btn-ghost w-full justify-center ${
               view === 'changelog' ? 'bg-brand-soft text-brand-ink dark:bg-brand/15 dark:text-teal-200' : ''

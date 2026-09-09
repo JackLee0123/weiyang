@@ -250,4 +250,62 @@ export interface GeneratePlansResult {
   skipped_duplicate: number
 }
 
-export type View = 'today' | 'weiyang' | 'calendar' | 'list' | 'heatmap' | 'memory' | 'timetable' | 'changelog' | 'admin'
+export interface PushConfig {
+  server_supported: boolean
+  public_key: string
+}
+
+export interface PushStatus {
+  server_supported: boolean
+  subscriptions: number
+  public_key: string
+}
+
+export interface PushSubscriptionPayload {
+  endpoint: string
+  keys: { p256dh: string; auth: string }
+  user_agent?: string
+}
+
+export interface PushSendResult {
+  success: number
+  failed: number
+}
+
+export type PushScheduleRecurrence = 'daily' | 'weekly' | 'monthly' | 'yearly'
+
+export interface PushSchedulePayload {
+  enabled: boolean
+  recurrence: PushScheduleRecurrence
+  times: string[]
+  days_of_week: number[]
+  day_of_month: number[]
+  month?: number | null
+  day?: number | null
+  batch_days: number
+}
+
+export interface PushSchedule extends PushSchedulePayload {
+  id: number
+  last_fired_at?: string | null
+  created_at: string
+  updated_at: string
+}
+
+export interface PushScheduleView {
+  exists: boolean
+  schedule?: PushSchedule | null
+  next_fire?: string | null
+  preview?: string | null
+}
+
+export interface PushNotification {
+  id?: number | string
+  title: string
+  body?: string
+  url?: string
+  icon?: string
+  ts: number
+}
+
+export type View = 'today' | 'weiyang' | 'calendar' | 'list' | 'heatmap' | 'memory' | 'timetable' | 'notifications' | 'changelog' | 'admin'

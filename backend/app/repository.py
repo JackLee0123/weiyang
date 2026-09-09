@@ -499,3 +499,78 @@ def update_user(db: Session, user: models.User, fields: dict) -> models.User:
 def delete_user(db: Session, user: models.User) -> None:
     db.delete(user)
     db.commit()
+
+
+# ---- Web Push subscriptions ----
+
+
+def list_subscriptions(db: Session, user_id: int) -> list[models.PushSubscription]:
+    stmt = select(models.PushSubscription).where(models.PushSubscription.user_id == user_id).order_by(models.PushSubscription.id)
+    return list(db.scalars(stmt).all())
+
+
+def get_subscription_by_endpoint(db: Session, user_id: int, endpoint: str) -> Optional[models.PushSubscription]:
+    return db.scalar(
+        select(models.PushSubscription).where(
+            models.PushSubscription.user_id == user_id,
+            models.PushSubscription.endpoint == endpoint,
+        )
+    )
+
+
+def upsert_subscription(
+    db: Session,
+    user_id: int,
+    endpoint: str,
+    p256dh: str,
+    auth: str,
+    user_agent: Optional[str] = None,
+) -> models.PushSubscription:
+    sub = get_subscription_by_endpoint(db, user_id, endpoint)
+    if sub is None:
+        sub = models.PushSubscription(user_id=user_id, endpoint=endpoint, p256dh=p256dh, auth=auth, user_agent=user_agent)
+        db.add(sub)
+    else:
+        sub.p256dh = p256dh
+        sub.auth = auth
+        if user_agent is not None:
+            sub.user_agent = user_agent
+    db.commit()
+    db.refresh(sub)
+    return sub
+
+
+def delete_subscription_by_endpoint(db: Session, user_id: int, endpoint: str) -> None:
+    sub = get_subscription_by_endpoint(db, user_id, endpoint)
+    if sub:
+        db.delete(sub)
+        db.commit()
+
+
+def delete_subscriptions(db: Session, subs: list[models.PushSubscription]) -> None:
+    for sub in subs:
+        db.delete(sub)
+    db.commit()
+
+
+def get_push_schedule(db: Session, user_id: int) -> Optional[models.PushSchedule]:
+    return db.scalar(select(models.PushSchedule).where(models.PushSchedule.user_id == user_id))
+
+
+def list_enabled_push_schedules(db: Session) -> list[models.PushSchedule]:
+    return list(db.scalars(select(models.PushSchedule).where(models.PushSchedule.enabled.is_(True))).all())
+
+
+def upsert_push_schedule(db: Session, user_id: int, data: schemas.PushScheduleIn) -> models.PushSchedule:
+    schedule = get_push_schedule(db, user_id)
+    if schedule is None:
+        schedule = models.PushSchedule(user_id=user_id, **data.model_dump())
+        db.add(schedule)
+    else:
+        for key, value in data.model_dump().items():
+            setattr(schedule, key, value)
+        # 变更配置后，允许下一个到期时间点立即触发一次。
+        schedule.last_fired_at = None
+    db.commit()
+    db.refresh(schedule)
+    return schedule

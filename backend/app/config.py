@@ -42,6 +42,18 @@ class Settings(BaseSettings):
     super_admin_email: str = ""
     super_admin_password: str = ""
 
+    # Web Push：使用 VAPID 签名向订阅端点发送通知。
+    # 生产环境必须配置这三项；私钥绝不进入前端，仅后端使用。
+    vapid_public_key: str = ""
+    vapid_private_key: str = ""
+    # VAPID 主体，必须是 mailto: 邮箱或 https 网址（用于标识推送服务提供方）。
+    vapid_subject: str = ""
+    # 任务提醒调度器：启用后在后台定期检查哪些提醒到点并推送。
+    push_scheduler_enabled: bool = True
+    push_scheduler_interval_seconds: float = 30.0
+    # 允许多久内的“迟到”通知仍被补发（防止调度错过时过于滞后）。
+    push_scheduler_grace_seconds: float = 300.0
+
     # 品牌信息（邮件、API 标题等处使用）
     app_name: str = "未央 · Everlong"
     app_tagline: str = "提前排期，每日记录"
@@ -49,6 +61,10 @@ class Settings(BaseSettings):
     @property
     def cors_origin_list(self) -> list[str]:
         return [origin.strip() for origin in self.cors_origins.split(",") if origin.strip()]
+
+    @property
+    def vapid_configured(self) -> bool:
+        return bool(self.vapid_public_key and self.vapid_private_key and self.vapid_subject)
 
 
 settings = Settings()

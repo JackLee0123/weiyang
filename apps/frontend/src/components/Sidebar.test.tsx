@@ -11,6 +11,8 @@ const baseProps = {
   onNavigate: vi.fn(),
   onAddPlan: vi.fn(),
   onOpenFocus: vi.fn(),
+  onOpenPush: vi.fn(),
+  onOpenSchedule: vi.fn(),
   onLogout: vi.fn(),
 }
 

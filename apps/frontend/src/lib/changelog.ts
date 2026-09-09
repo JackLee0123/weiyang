@@ -12,7 +12,7 @@ export interface ChangelogEntry {
   items: ChangelogItem[]
 }
 
-export const CURRENT_VERSION = 'v0.5.1'
+export const CURRENT_VERSION = 'v0.5.2'
 
 export const CHANGELOG_KIND_META: Record<ChangelogKind, { label: string; className: string }> = {
   feature: { label: '新增', className: 'bg-teal-50 text-teal-700 dark:bg-teal-500/15 dark:text-teal-300' },
@@ -22,6 +22,18 @@ export const CHANGELOG_KIND_META: Record<ChangelogKind, { label: string; classNa
 }
 
 export const CHANGELOG: ChangelogEntry[] = [
+  {
+    version: 'v0.5.2',
+    date: '2026-09-09',
+    title: '手机通知与自定义任务提醒',
+    items: [
+      { kind: 'feature', text: '新增手机通知（Web Push）：安装到主屏幕后，即使不打开网页也能收到系统推送' },
+      { kind: 'feature', text: '支持多个时间点提醒每天任务，可自定义批量天数，提前查看未来几天任务' },
+      { kind: 'feature', text: '提醒可切换每天、每周、每月、每年重复，到点自动推送当天/本周期任务摘要' },
+      { kind: 'improvement', text: '新增通知中心，收到的系统推送可回看，点击通知可直达对应页面' },
+      { kind: 'notice', text: 'iPhone 需先将本网站添加到主屏幕，安装后才能开启通知' },
+    ],
+  },
   {
     version: 'v0.5.1',
     date: '2026-08-31',
