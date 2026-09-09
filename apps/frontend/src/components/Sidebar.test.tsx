@@ -17,6 +17,12 @@ const baseProps = {
 }
 
 describe('Sidebar install entry', () => {
+  it('labels the changelog and feedback entry clearly', () => {
+    render(<Sidebar {...baseProps} />)
+    expect(screen.getAllByText('更新与意见').length).toBeGreaterThan(0)
+    expect(screen.queryByText('更新日志')).not.toBeInTheDocument()
+  })
+
   it('does not offer the desktop download in web runtime', () => {
     render(<Sidebar {...baseProps} />)
     expect(screen.queryAllByText('下载桌面版')).toHaveLength(0)

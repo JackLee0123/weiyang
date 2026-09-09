@@ -50,7 +50,7 @@ async def lifespan(app: FastAPI):
             pass
 
 
-app = FastAPI(title="未央 · Everlong API", version="0.5.2", lifespan=lifespan)
+app = FastAPI(title="未央 · Everlong API", version="0.5.3", lifespan=lifespan)
 
 
 class SPAStaticFiles(StaticFiles):

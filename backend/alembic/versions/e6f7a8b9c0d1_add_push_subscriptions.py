@@ -16,6 +16,10 @@ depends_on = None
 
 
 def upgrade() -> None:
+    bind = op.get_bind()
+    inspector = sa.inspect(bind)
+    if "push_subscriptions" in inspector.get_table_names():
+        return
     op.create_table(
         "push_subscriptions",
         sa.Column("id", sa.Integer(), primary_key=True, autoincrement=True),
@@ -32,5 +36,11 @@ def upgrade() -> None:
 
 
 def downgrade() -> None:
-    op.drop_index(op.f("ix_push_subscriptions_user_id"), table_name="push_subscriptions")
+    bind = op.get_bind()
+    inspector = sa.inspect(bind)
+    if "push_subscriptions" not in inspector.get_table_names():
+        return
+    indexes = {index["name"] for index in inspector.get_indexes("push_subscriptions")}
+    if op.f("ix_push_subscriptions_user_id") in indexes:
+        op.drop_index(op.f("ix_push_subscriptions_user_id"), table_name="push_subscriptions")
     op.drop_table("push_subscriptions")

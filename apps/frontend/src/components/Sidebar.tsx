@@ -15,7 +15,7 @@ const NAV: { key: View; label: string; icon: typeof CalendarCheck }[] = [
   { key: 'list', label: '全部', icon: List },
 ]
 
-const CHANGELOG_NAV = { key: 'changelog', label: '更新日志', icon: History } as const
+const CHANGELOG_NAV = { key: 'changelog', label: '更新与意见', icon: History } as const
 const ADMIN_NAV = { key: 'admin', label: '用户管理', icon: Users } as const
 
 function InstallAppButton({ className, compact = false }: { className?: string; compact?: boolean }) {
@@ -207,7 +207,7 @@ export function Sidebar({
             onClick={() => onNavigate('changelog')}
           >
             <History size={16} />
-            更新日志
+            更新与意见
           </button>
           <button className="btn-ghost w-full justify-center" onClick={onLogout}>
             <LogOut size={16} />

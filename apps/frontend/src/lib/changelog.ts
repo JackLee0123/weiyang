@@ -12,7 +12,7 @@ export interface ChangelogEntry {
   items: ChangelogItem[]
 }
 
-export const CURRENT_VERSION = 'v0.5.2'
+export const CURRENT_VERSION = 'v0.5.3'
 
 export const CHANGELOG_KIND_META: Record<ChangelogKind, { label: string; className: string }> = {
   feature: { label: '新增', className: 'bg-teal-50 text-teal-700 dark:bg-teal-500/15 dark:text-teal-300' },
@@ -22,6 +22,17 @@ export const CHANGELOG_KIND_META: Record<ChangelogKind, { label: string; classNa
 }
 
 export const CHANGELOG: ChangelogEntry[] = [
+  {
+    version: 'v0.5.3',
+    date: '2026-09-10',
+    title: '图片交互与数据迁移修复',
+    items: [
+      { kind: 'fix', text: '修复点击计划或记录图片时误打开编辑弹窗的问题，预览遮罩关闭也不会再触发编辑' },
+      { kind: 'fix', text: '修复带图片创建计划或记录时，因数据库缺少迁移而出现 Internal Server Error 的问题' },
+      { kind: 'improvement', text: '后端启动前自动执行数据库迁移，并让通知相关迁移可安全重复执行' },
+      { kind: 'improvement', text: '「更新与意见」入口更清晰，历史版本支持分页浏览' },
+    ],
+  },
   {
     version: 'v0.5.2',
     date: '2026-09-09',

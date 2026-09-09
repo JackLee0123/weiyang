@@ -24,7 +24,10 @@ export function ImageGallery({ images }: { images: string[] }) {
             key={`${uri.slice(0, 64)}-${index}`}
             type="button"
             className="h-12 w-12 overflow-hidden rounded-md border border-line transition hover:border-brand dark:border-slate-600 dark:hover:border-teal-400"
-            onClick={() => setOpenIndex(index)}
+            onClick={(event) => {
+              event.stopPropagation()
+              setOpenIndex(index)
+            }}
             aria-label={`查看图片 ${index + 1}`}
             title={`查看图片 ${index + 1}`}
           >
@@ -36,7 +39,10 @@ export function ImageGallery({ images }: { images: string[] }) {
         <div
           className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/80 p-4 backdrop-blur-sm"
           role="presentation"
-          onClick={() => setOpenIndex(null)}
+          onClick={(event) => {
+            event.stopPropagation()
+            setOpenIndex(null)
+          }}
           onMouseDown={(e) => e.stopPropagation()}
         >
           <div className="relative max-h-full max-w-full" onClick={(e) => e.stopPropagation()}>
