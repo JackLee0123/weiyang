@@ -72,7 +72,8 @@ def test_records_are_isolated_per_user(client, auth_headers, register_user):
     client.post("/api/records", json={"date": TODAY, "title": "other"}, headers=other_headers)
 
     assert [r["id"] for r in client.get("/api/records", headers=auth_headers).json()] == [owner_record["id"]]
-    assert client.get(f"/api/records/{owner_record['id']}", headers=other_headers).status_code == 404
+    assert client.patch(f"/api/records/{owner_record['id']}", json={"title": "x"}, headers=other_headers).status_code == 404
+    assert client.delete(f"/api/records/{owner_record['id']}", headers=other_headers).status_code == 404
 
 
 def test_cannot_link_record_to_other_users_plan(client, auth_headers, register_user):

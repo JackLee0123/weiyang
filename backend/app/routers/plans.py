@@ -37,14 +37,6 @@ def list_unfinished_plans(db: Session = Depends(get_db), current_user: User = De
     return repository.list_unfinished_plans(db, current_user.id)
 
 
-@router.get("/{plan_id}", response_model=schemas.PlanOut)
-def get_plan(plan_id: int, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
-    plan = repository.get_plan(db, current_user.id, plan_id)
-    if not plan:
-        raise HTTPException(status_code=404, detail="计划不存在")
-    return plan
-
-
 @router.patch("/{plan_id}", response_model=schemas.PlanOut)
 def update_plan(plan_id: int, data: schemas.PlanUpdate, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
     plan = repository.get_plan(db, current_user.id, plan_id)

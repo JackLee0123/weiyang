@@ -336,10 +336,20 @@ def _minutes_from_times(start: Optional[str], end: Optional[str]) -> int:
     return (end_min - start_min) % (24 * 60)
 
 
-def stats_overview(db: Session, user_id: int, start: str, end: str) -> schemas.StatsOverview:
-    plans = list_plans(db, user_id, start=start, end=end)
-    records = list_records(db, user_id, start=start, end=end)
+def _streak(days: set[str], anchor: date) -> int:
+    """从锚点日往前数连续有记录的天数（锚点当天没有记录时从昨天起算）。"""
+    cursor = anchor
+    if cursor.isoformat() not in days:
+        cursor -= timedelta(days=1)
+    streak = 0
+    while cursor.isoformat() in days:
+        streak += 1
+        cursor -= timedelta(days=1)
+    return streak
 
+
+def _range_stats(plans: list[models.Plan], records: list[models.Record], start: str, end: str) -> schemas.StatsOverview:
+    """把一期数据聚合为统计总览；统计总览与回忆报告共用这一份实现，避免重复计算。"""
     total_plans = len(plans)
     done_plans = sum(1 for p in plans if p.status == "done")
     completion_rate = round(done_plans / total_plans, 4) if total_plans else 0.0
@@ -375,16 +385,6 @@ def stats_overview(db: Session, user_id: int, start: str, end: str) -> schemas.S
         for d, v in sorted(day_map.items())
     ]
 
-    # 连续记录天数：从今天（若无则昨天）向前连续有记录的日子
-    record_dates = {r.date for r in records}
-    cursor: date = date.today()
-    if cursor.isoformat() not in record_dates:
-        cursor -= timedelta(days=1)
-    streak = 0
-    while cursor.isoformat() in record_dates:
-        streak += 1
-        cursor -= timedelta(days=1)
-
     return schemas.StatsOverview(
         start=start,
         end=end,
@@ -395,28 +395,14 @@ def stats_overview(db: Session, user_id: int, start: str, end: str) -> schemas.S
         recorded_minutes=recorded_minutes,
         by_category=by_category,
         days=days,
-        consecutive_recording_days=streak,
+        consecutive_recording_days=_streak({r.date for r in records}, date.today()),
     )
 
 
-def heatmap_points(db: Session, user_id: int, start: str, end: str) -> list[schemas.HeatmapDay]:
-    """返回日期范围内按天聚合的活跃数据（仅包含有活动的天）。"""
+def stats_overview(db: Session, user_id: int, start: str, end: str) -> schemas.StatsOverview:
     plans = list_plans(db, user_id, start=start, end=end)
     records = list_records(db, user_id, start=start, end=end)
-
-    day_map: dict[str, dict[str, int]] = {}
-    for p in plans:
-        if p.status == "done":
-            entry = day_map.setdefault(p.date, {"completed_plans": 0, "records_count": 0})
-            entry["completed_plans"] += 1
-    for r in records:
-        entry = day_map.setdefault(r.date, {"completed_plans": 0, "records_count": 0})
-        entry["records_count"] += 1
-
-    return [
-        schemas.HeatmapDay(date=d, completed_plans=v["completed_plans"], records_count=v["records_count"])
-        for d, v in sorted(day_map.items())
-    ]
+    return _range_stats(plans, records, start, end)
 
 
 def memory_report(db: Session, user_id: int, start: str, end: str) -> schemas.MemoryReport:
@@ -424,55 +410,33 @@ def memory_report(db: Session, user_id: int, start: str, end: str) -> schemas.Me
     plans = list_plans(db, user_id, start=start, end=end)
     records = list_records(db, user_id, start=start, end=end)
 
-    total_plans = len(plans)
-    done_plans = sum(1 for p in plans if p.status == "done")
+    # 概览数字复用统计总览的聚合，只有「回忆」特有的字段在这里单独算
+    stats = _range_stats(plans, records, start, end)
+
     unfinished_plans = sum(1 for p in plans if p.status in ("pending", "in_progress"))
     cancelled_plans = sum(1 for p in plans if p.status == "cancelled")
-    completion_rate = round(done_plans / total_plans, 4) if total_plans else 0.0
-
-    records_count = len(records)
-    recorded_minutes = sum(r.duration_minutes or 0 for r in records)
-
-    by_category: dict[str, int] = {}
-    for r in records:
-        by_category[r.category] = by_category.get(r.category, 0) + 1
-    top_categories = [name for name, _ in sorted(by_category.items(), key=lambda kv: kv[1], reverse=True)[:3]]
-
+    top_categories = [name for name, _ in sorted(stats.by_category.items(), key=lambda kv: kv[1], reverse=True)[:3]]
     active_days = len({r.date for r in records})
-
-    day_counts: dict[str, int] = {}
-    for r in records:
-        day_counts[r.date] = day_counts.get(r.date, 0) + 1
-    busiest_day = max(day_counts.items(), key=lambda kv: kv[1])[0] if day_counts else None
-
-    # 连续记录天数：以周期末尾为锚，向前数连续有记录的日子
-    record_dates = {r.date for r in records}
-    cursor = date.fromisoformat(end)
-    if cursor.isoformat() not in record_dates:
-        cursor -= timedelta(days=1)
-    streak = 0
-    while cursor.isoformat() in record_dates:
-        streak += 1
-        cursor -= timedelta(days=1)
-
+    busiest = [day for day in stats.days if day.records_count]
+    busiest_day = max(busiest, key=lambda day: day.records_count).date if busiest else None
     period_days = (date.fromisoformat(end) - date.fromisoformat(start)).days + 1
-
     unfinished = [schemas.PlanOut.model_validate(p) for p in plans if p.status in ("pending", "in_progress")]
 
     return schemas.MemoryReport(
         start=start,
         end=end,
         period_days=period_days,
-        records_count=records_count,
-        recorded_minutes=recorded_minutes,
+        records_count=len(records),
+        recorded_minutes=stats.recorded_minutes,
         active_days=active_days,
-        consecutive_recording_days=streak,
-        total_plans=total_plans,
-        done_plans=done_plans,
+        # 回忆里的连续天数以这段时光的末尾为锚，与「今天」口径不同
+        consecutive_recording_days=_streak({r.date for r in records}, date.fromisoformat(end)),
+        total_plans=stats.total_plans,
+        done_plans=stats.done_plans,
         unfinished_plans=unfinished_plans,
         cancelled_plans=cancelled_plans,
-        completion_rate=completion_rate,
-        by_category=by_category,
+        completion_rate=stats.completion_rate,
+        by_category=stats.by_category,
         top_categories=top_categories,
         busiest_day=busiest_day,
         unfinished=unfinished,

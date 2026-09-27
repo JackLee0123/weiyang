@@ -6,9 +6,8 @@ from sqlalchemy.orm import Session
 from .. import repository, schemas
 from ..config import settings
 from ..database import get_db
-from ..deps import get_current_user, require_admin
+from ..deps import get_current_user
 from ..models import User
-from ..services.net import client_ip
 from ..services.ratelimit import rate_limiter
 from ..services import push as push_service
 from ..services import push_schedule as schedule_service
@@ -85,29 +84,6 @@ def send_test(request: Request, db: Session = Depends(get_db), current_user: Use
     if result.success == 0:
         raise HTTPException(status_code=400, detail="当前设备尚未开启通知，请先在设置中开启")
     return result
-
-
-@router.post("/send", response_model=schemas.PushSendOut)
-def send(
-    data: schemas.PushSendIn,
-    request: Request,
-    db: Session = Depends(get_db),
-    admin: User = Depends(require_admin),
-):
-    """发给指定用户（仅管理员）。支持标题、正文、图标与跳转 URL。"""
-    _enforce(request, "send", f"admin:{admin.id}:ip:{client_ip(request)}", limit=30, window=60)
-    if not push_service.server_supported():
-        raise HTTPException(status_code=503, detail="推送服务未配置，请在后端设置 VAPID 密钥")
-    if not repository.get_user(db, data.user_id):
-        raise HTTPException(status_code=404, detail="用户不存在")
-    return push_service.send_to_user(
-        db,
-        data.user_id,
-        title=data.title,
-        body=data.body,
-        url=data.url,
-        icon=data.icon,
-    )
 
 
 @router.get("/schedule", response_model=schemas.PushScheduleView)

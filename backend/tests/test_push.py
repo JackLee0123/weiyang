@@ -67,18 +67,3 @@ def test_test_push_with_subscription_succeeds(client, auth_headers, monkeypatch)
     res = client.post("/api/push/test", headers=auth_headers)
     assert res.status_code == 200
     assert res.json()["success"] == 1
-
-
-def test_send_requires_admin(client, auth_headers, monkeypatch):
-    client.post("/api/push/subscribe", json=_subscribe_payload(), headers=auth_headers)
-
-    def fake_send_one(db, sub, payload):
-        return True
-
-    monkeypatch.setattr(push_service, "_send_one", fake_send_one)
-    res = client.post(
-        "/api/push/send",
-        json={"user_id": 1, "title": "新消息", "body": "你有一条新的通知", "url": "/notifications"},
-        headers=auth_headers,
-    )
-    assert res.status_code == 403

@@ -201,42 +201,6 @@ def _draft(**kwargs) -> dict:
     }
 
 
-def parse_wisedu_rows(rows: list[dict], term: Optional[str] = None, warnings: Optional[list[str]] = None) -> list[dict]:
-    """把金智教务接口返回的 rows 归一化为 CourseDraft 字典。"""
-    warnings = warnings if warnings is not None else []
-    courses: list[dict] = []
-    for row in rows or []:
-        name = _clean(row.get("KCM"))
-        if not name:
-            warnings.append("跳过一条缺少课程名称的记录")
-            continue
-        day = int(row.get("SKXQ") or 0)
-        if day < 1 or day > 7:
-            warnings.append(f"跳过“{name}”：星期字段无效")
-            continue
-        raw_term = _clean(row.get("XNXQDM")) or term or infer_term()
-        week_mask = _clean(row.get("SKZC"))
-        if week_mask and not re.fullmatch(r"[01]{8,32}", week_mask):
-            week_mask = None
-        courses.append(
-            _draft(
-                term=raw_term,
-                name=name,
-                code=_clean(row.get("KCH")),
-                teacher=_clean(row.get("SKJS")),
-                location=_clean(row.get("JASMC")),
-                day_of_week=day,
-                start_period=int(row.get("KSJC") or 1),
-                end_period=int(row.get("JSJC") or row.get("KSJC") or 1),
-                week_mask=week_mask,
-                week_label=_clean(row.get("ZCMC")),
-                credit=_to_float(row.get("XF")),
-                course_type=_clean(row.get("KCXZDM_DISPLAY") or row.get("KCLBDM_DISPLAY")),
-            )
-        )
-    return courses
-
-
 def _parse_teacher_week(text: Optional[str]) -> tuple[Optional[str], Optional[str]]:
     """从 like '9-16周[实践]/张德慧[主讲]' 解析出教师和周次。"""
     teacher: Optional[str] = None

@@ -30,4 +30,7 @@ def test_stats_overview(client, auth_headers):
     assert data["planned_minutes"] == 90
     assert data["recorded_minutes"] == 20
     assert data["by_category"] == {"学习": 1}
+    # 热力图直接用 days 里的逐日聚合，这里锁定字段口径
     assert data["days"][0]["records_count"] == 1
+    assert data["days"][0]["done_plans"] == 1
+    assert data["consecutive_recording_days"] == 1

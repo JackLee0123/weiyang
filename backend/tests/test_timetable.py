@@ -12,35 +12,6 @@ def _today_monday():
     return today - timedelta(days=today.isoweekday() - 1)
 
 
-ANY_ROW = {
-    "KCM": "Android技术开发基础",
-    "SKJS": "金旭亮",
-    "JASMC": "综教A504",
-    "SKXQ": 4,
-    "SKZC": "1111111100000000",
-    "ZCMC": "1-8周",
-    "KSJC": 1,
-    "JSJC": 2,
-    "XNXQDM": "2025-2026-1",
-    "KCH": "100074105",
-    "XF": 2,
-    "KCXZDM_DISPLAY": "选修",
-}
-
-
-READ_ONLY_ROW = {
-    "KCM": "高等数学",
-    "SKJS": "张三",
-    "JASMC": "A101",
-    "SKXQ": 1,
-    "SKZC": "111111111111111100000000",
-    "ZCMC": "1-16周",
-    "KSJC": 3,
-    "JSJC": 4,
-    "XNXQDM": "2025-2026-1",
-}
-
-
 def test_week_helpers():
     assert tt.mask_to_weeks("1111111100000000") == [1, 2, 3, 4, 5, 6, 7, 8]
     assert tt.weeks_to_mask([1, 3, 5], length=8) == "10101000"
@@ -51,18 +22,6 @@ def test_week_helpers():
     assert tt.resolve_weeks("1111111100000000", None) == [1, 2, 3, 4, 5, 6, 7, 8]
     assert tt.infer_term(date(2025, 10, 1)) == "2025-2026-1"
     assert tt.infer_term(date(2026, 3, 1)) == "2025-2026-2"
-
-
-def test_parse_wisedu_rows():
-    courses = tt.parse_wisedu_rows([ANY_ROW, READ_ONLY_ROW])
-    assert len(courses) == 2
-    first = courses[0]
-    assert first["name"] == "Android技术开发基础"
-    assert first["day_of_week"] == 4
-    assert first["start_period"] == 1
-    assert first["end_period"] == 2
-    assert first["week_mask"] == "1111111100000000"
-    assert first["term"] == "2025-2026-1"
 
 
 def test_parse_arranged_list():

@@ -455,20 +455,6 @@ class PushUnsubscribeIn(BaseModel):
     endpoint: str = Field(..., max_length=800)
 
 
-class PushTestIn(BaseModel):
-    title: str = "测试通知"
-    body: str = "你的 PWA 手机通知已经正常工作！"
-    url: str = "/notifications"
-
-
-class PushSendIn(BaseModel):
-    user_id: int = Field(..., ge=1)
-    title: str = Field(..., min_length=1, max_length=120)
-    body: str = Field(..., min_length=1, max_length=1000)
-    url: str = Field(default="/", max_length=255)
-    icon: Optional[str] = Field(default=None, max_length=500)
-
-
 class PushSendOut(BaseModel):
     success: int
     failed: int

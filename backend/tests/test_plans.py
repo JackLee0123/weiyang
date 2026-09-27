@@ -77,7 +77,6 @@ def test_plans_are_isolated_per_user(client, auth_headers, register_user):
     client.post("/api/plans", json={"date": FUTURE, "title": "other"}, headers=other_headers)
 
     assert [p["id"] for p in client.get("/api/plans", headers=auth_headers).json()] == [owner_plan["id"]]
-    assert client.get(f"/api/plans/{owner_plan['id']}", headers=other_headers).status_code == 404
     assert client.patch(f"/api/plans/{owner_plan['id']}", json={"title": "x"}, headers=other_headers).status_code == 404
     assert client.delete(f"/api/plans/{owner_plan['id']}", headers=other_headers).status_code == 404
 

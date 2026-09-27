@@ -32,14 +32,6 @@ def create_record(data: schemas.RecordCreate, db: Session = Depends(get_db), cur
     return repository.create_record(db, current_user.id, data)
 
 
-@router.get("/{record_id}", response_model=schemas.RecordOut)
-def get_record(record_id: int, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
-    record = repository.get_record(db, current_user.id, record_id)
-    if not record:
-        raise HTTPException(status_code=404, detail="记录不存在")
-    return record
-
-
 @router.patch("/{record_id}", response_model=schemas.RecordOut)
 def update_record(record_id: int, data: schemas.RecordUpdate, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
     record = repository.get_record(db, current_user.id, record_id)
