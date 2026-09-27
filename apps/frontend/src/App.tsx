@@ -2,8 +2,8 @@ import { useCallback, useEffect, useState } from 'react'
 import { LoginPage } from './components/LoginPage'
 import { Sidebar } from './components/Sidebar'
 import { Modal } from './components/Modal'
-import { NotificationSettings } from './components/NotificationSettings'
-import { ScheduleSettings } from './components/ScheduleSettings'
+import { NotificationsPanel } from './components/NotificationsPanel'
+import { BackupPanel } from './components/BackupPanel'
 import { PushPrompt } from './components/PushPrompt'
 import { PlanForm } from './components/PlanForm'
 import { FocusFlightOverlay } from './components/FocusFlightOverlay'
@@ -35,8 +35,8 @@ export default function App() {
   const [date, setDate] = useState(todayISO())
   const [showAddPlan, setShowAddPlan] = useState(false)
   const [showFocus, setShowFocus] = useState(false)
-  const [showPushSettings, setShowPushSettings] = useState(false)
-  const [showScheduleSettings, setShowScheduleSettings] = useState(false)
+  const [showNotifications, setShowNotifications] = useState(false)
+  const [showBackup, setShowBackup] = useState(false)
   const [isAuthed, setIsAuthed] = useState(() => typeof window !== 'undefined' && !!getToken())
   const { theme, toggleTheme } = useTheme()
   const [user, setUser] = useState<StoredUser | null>(() => getStoredUser())
@@ -109,13 +109,13 @@ export default function App() {
         onNavigate={navigate}
         onAddPlan={() => setShowAddPlan(true)}
         onOpenFocus={openFocus}
-        onOpenPush={() => setShowPushSettings(true)}
-        onOpenSchedule={() => setShowScheduleSettings(true)}
+        onOpenNotifications={() => setShowNotifications(true)}
+        onOpenBackup={() => setShowBackup(true)}
         onLogout={logout}
       />
       <main className="flex-1 overflow-y-auto">
         <div className="mx-auto w-full max-w-6xl px-4 py-4 sm:px-6 lg:px-8 lg:py-6">
-          <PushPrompt onOpenSettings={() => setShowPushSettings(true)} />
+          <PushPrompt onOpenSettings={() => setShowNotifications(true)} />
           {view === 'today' && <TodayView date={date} onChangeDate={setDate} />}
           {view === 'weiyang' && <WeiyangView />}
           {view === 'memory' && <MemoryView />}
@@ -149,14 +149,14 @@ export default function App() {
         </Modal>
       )}
       {showFocus && <FocusFlightOverlay onClose={closeFocus} />}
-      {showPushSettings && (
-        <Modal title="接收通知" onClose={() => setShowPushSettings(false)}>
-          <NotificationSettings onClose={() => setShowPushSettings(false)} />
+      {showNotifications && (
+        <Modal title="通知设置" onClose={() => setShowNotifications(false)}>
+          <NotificationsPanel onClose={() => setShowNotifications(false)} />
         </Modal>
       )}
-      {showScheduleSettings && (
-        <Modal title="任务提醒" onClose={() => setShowScheduleSettings(false)}>
-          <ScheduleSettings onClose={() => setShowScheduleSettings(false)} />
+      {showBackup && (
+        <Modal title="数据备份" onClose={() => setShowBackup(false)}>
+          <BackupPanel onClose={() => setShowBackup(false)} />
         </Modal>
       )}
     </div>

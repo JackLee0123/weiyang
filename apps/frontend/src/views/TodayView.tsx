@@ -1,8 +1,9 @@
-import { useState } from 'react'
+import { useMemo, useState } from 'react'
 import { parseISO, format } from 'date-fns'
 import { CheckSquare, ChevronLeft, ChevronRight, ClipboardList, Lock, Plus } from 'lucide-react'
 import { PlanItem } from '../components/PlanItem'
 import { RecordItem } from '../components/RecordItem'
+import { FocusPanel } from '../components/FocusPanel'
 import { PlanForm } from '../components/PlanForm'
 import { RecordForm } from '../components/RecordForm'
 import { EmptyState } from '../components/EmptyState'
@@ -26,6 +27,7 @@ export function TodayView({ date, onChangeDate }: { date: string; onChangeDate: 
 
   const plans = plansQ.data ?? []
   const records = recordsQ.data ?? []
+  const planTitles = useMemo(() => new Map(plans.map((plan) => [plan.id, plan.title])), [plans])
 
   const shiftDay = (n: number) => {
     const next = new Date(parsed)
@@ -54,8 +56,7 @@ export function TodayView({ date, onChangeDate }: { date: string; onChangeDate: 
               {isToday && <span className="rounded-sm bg-brand-soft px-2 py-0.5 text-xs font-medium text-brand-ink dark:bg-brand/15 dark:text-teal-200">今天</span>}
             </h1>
             <p className="text-sm text-ink-muted dark:text-slate-400">
-              已连续飞行 {statsQ.data?.consecutive_recording_days ?? 0} 天 · 今天记录{' '}
-              {records.filter((r) => r.is_completed).length} 段航程
+              今天记录 {records.filter((r) => r.is_completed).length} 段航程
             </p>
           </div>
         </div>
@@ -65,7 +66,7 @@ export function TodayView({ date, onChangeDate }: { date: string; onChangeDate: 
           </span>
         ) : (
           <div className="flex gap-2">
-            <button className="btn-ghost" onClick={() => setModal({ type: 'record' })}>
+            <button className="btn-record" onClick={() => setModal({ type: 'record' })}>
               <Plus size={15} />
               记一笔
             </button>
@@ -114,6 +115,8 @@ export function TodayView({ date, onChangeDate }: { date: string; onChangeDate: 
           </div>
         </section>
       </div>
+
+      <FocusPanel date={date} records={records} planTitles={planTitles} />
 
       {modal?.type === 'plan' && (
         <Modal title={modal.initial ? '编辑计划' : '新建计划'} onClose={() => setModal(null)}>

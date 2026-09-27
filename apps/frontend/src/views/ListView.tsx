@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react'
-import { Search } from 'lucide-react'
+import { Plus, Search } from 'lucide-react'
 import { PlanItem } from '../components/PlanItem'
 import { RecordItem } from '../components/RecordItem'
 import { PlanForm } from '../components/PlanForm'
@@ -70,7 +70,8 @@ export function ListView() {
           <p className="mt-1 text-sm text-ink-muted dark:text-slate-400">搜索、筛选并回顾计划与实际记录</p>
         </div>
         <div className="flex gap-2">
-          <button className="btn-ghost" onClick={() => setModal({ type: 'record' })}>
+          <button className="btn-record" onClick={() => setModal({ type: 'record' })}>
+            <Plus size={15} />
             新增记录
           </button>
           <button className="btn-primary" onClick={() => setModal({ type: 'plan' })}>

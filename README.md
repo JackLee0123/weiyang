@@ -193,7 +193,6 @@ uv run alembic upgrade head
 | GET/POST | `/api/records` | 查询 / 新建记录 |
 | PATCH/DELETE | `/api/records/:id` | 更新 / 删除记录 |
 | GET | `/api/stats/overview?start=&end=` | 完成率、类别分布、连续记录天数 |
-| GET | `/api/stats/heatmap?start=&end=` | 按天聚合的活跃度（完成计划数 + 记录数） |
 | POST | `/api/backup/export` / `/api/backup/import` | 导出 / 导入备份 |
 | POST | `/api/timetable/parse` | 解析上传的 Excel / HTML / ICS 或粘贴文本，返回课表预览（不保存） |
 | POST | `/api/timetable/wisedu/captcha` | 获取金智教务登录验证码（一次性会话） |

@@ -3,15 +3,10 @@ import { addDays, addMonths, format, parseISO, subDays, subMonths } from 'date-f
 import { BookOpen, ChevronLeft, ChevronRight, Flame, MapPin } from 'lucide-react'
 import { useMemoryReport } from '../lib/queries'
 import { monthRange, weekRange } from '../lib/date'
+import { formatMinutes } from '../lib/format'
 import { EmptyState } from '../components/EmptyState'
 
 type Period = 'week' | 'month'
-
-function fmtMinutes(min: number) {
-  if (min < 60) return `${min} 分钟`
-  const h = Math.floor(min / 60)
-  return `${h} 小时${min % 60 ? ` ${min % 60} 分钟` : ''}`
-}
 
 function fmtDay(date: string) {
   return format(parseISO(date), 'M月d日')
@@ -99,7 +94,7 @@ export function MemoryView() {
         <>
           <p className="text-sm leading-6 text-ink-soft dark:text-slate-300">
             这段时光里，你记录了 <span className="font-semibold text-ink dark:text-slate-100">{report.records_count}</span> 段航程，飞了{' '}
-            <span className="font-semibold text-ink dark:text-slate-100">{fmtMinutes(report.recorded_minutes)}</span>。
+            <span className="font-semibold text-ink dark:text-slate-100">{formatMinutes(report.recorded_minutes)}</span>。
             {report.top_categories.length > 0 && (
               <>
                 {' '}主要飞的是：<span className="font-medium text-brand dark:text-teal-300">{report.top_categories.join('、')}</span>
@@ -112,7 +107,7 @@ export function MemoryView() {
           <div className="grid grid-cols-2 gap-3 xl:grid-cols-4">
             {[
               { label: '记录航段', value: `${report.records_count} 段` },
-              { label: '飞行时长', value: fmtMinutes(report.recorded_minutes) },
+              { label: '飞行时长', value: formatMinutes(report.recorded_minutes) },
               { label: '在线天数', value: `${report.active_days} 天` },
               { label: '连续记录', value: `${report.consecutive_recording_days} 天` },
             ].map((item) => (

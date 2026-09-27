@@ -1,11 +1,6 @@
 import { BarChart3, CheckCircle2, Clock3, Flame, TrendingUp } from 'lucide-react'
 import type { StatsOverview } from '../lib/types'
-
-function fmtMinutes(min: number) {
-  if (min < 60) return `${min} 分钟`
-  const h = Math.floor(min / 60)
-  return `${h} 小时 ${min % 60 ? (min % 60) + ' 分钟' : ''}`
-}
+import { formatMinutes } from '../lib/format'
 
 export function StatsPanel({ stats }: { stats: StatsOverview }) {
   const items = [
@@ -18,14 +13,14 @@ export function StatsPanel({ stats }: { stats: StatsOverview }) {
     },
     {
       label: '记录用时',
-      value: fmtMinutes(stats.recorded_minutes),
+      value: formatMinutes(stats.recorded_minutes),
       icon: TrendingUp,
       tone: 'text-brand dark:text-teal-300',
       bg: 'bg-brand-soft dark:bg-brand/10',
     },
     {
       label: '计划用时',
-      value: fmtMinutes(stats.planned_minutes),
+      value: formatMinutes(stats.planned_minutes),
       icon: Clock3,
       tone: 'text-blue-600 dark:text-blue-400',
       bg: 'bg-blue-50 dark:bg-blue-500/10',

@@ -1,6 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { api } from './api'
-import type { AdminUserUpdate, CourseDraft, PeriodTime, PlanPayload, RecordEntryPayload } from './types'
+import type { AdminUserUpdate, CourseDraft, HeatmapDay, PeriodTime, PlanPayload, RecordEntryPayload } from './types'
 
 export function usePlans(params: { start?: string; end?: string; status?: string; category?: string; q?: string } = {}) {
   return useQuery({ queryKey: ['plans', params], queryFn: () => api.fetchPlans(params) })
@@ -18,8 +18,19 @@ export function useStats(start: string, end: string) {
   return useQuery({ queryKey: ['stats', start, end], queryFn: () => api.fetchStats(start, end) })
 }
 
+/** 活跃度热力图复用统计总览的逐日聚合，后端不再单独提供接口。 */
 export function useHeatmap(start: string, end: string) {
-  return useQuery({ queryKey: ['heatmap', start, end], queryFn: () => api.fetchHeatmap(start, end) })
+  return useQuery({
+    queryKey: ['heatmap', start, end],
+    queryFn: async (): Promise<HeatmapDay[]> => {
+      const stats = await api.fetchStats(start, end)
+      return stats.days.map((day) => ({
+        date: day.date,
+        completed_plans: day.done_plans,
+        records_count: day.records_count,
+      }))
+    },
+  })
 }
 
 export function useMemoryReport(start: string, end: string) {

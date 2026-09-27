@@ -1,4 +1,4 @@
-import { Activity, Bell, BookOpen, CalendarCheck, CalendarClock, CalendarDays, CalendarRange, History, List, LogOut, MonitorDown, Moon, Plane, Plus, Route, Sun, Users } from 'lucide-react'
+import { Activity, Bell, BookOpen, CalendarCheck, CalendarDays, CalendarRange, Database, History, List, LogOut, MonitorDown, Moon, Plane, Plus, Route, Sun, Users } from 'lucide-react'
 import { useEffect, useState, type ReactNode } from 'react'
 import type { Theme } from '../lib/theme'
 import type { View } from '../lib/types'
@@ -70,8 +70,8 @@ export function Sidebar({
   onNavigate,
   onAddPlan,
   onOpenFocus,
-  onOpenPush,
-  onOpenSchedule,
+  onOpenNotifications,
+  onOpenBackup,
   onLogout,
 }: {
   view: View
@@ -82,8 +82,8 @@ export function Sidebar({
   onNavigate: (v: View) => void
   onAddPlan: () => void
   onOpenFocus: () => void
-  onOpenPush: () => void
-  onOpenSchedule: () => void
+  onOpenNotifications: () => void
+  onOpenBackup: () => void
   onLogout: () => void
 }) {
   const themeLabel = theme === 'dark' ? '切换到浅色模式' : '切换到深色模式'
@@ -133,11 +133,8 @@ export function Sidebar({
           <button className="btn-ghost p-2" onClick={onLogout} aria-label="退出登录" title="退出登录">
             <LogOut size={17} />
           </button>
-          <button className="btn-ghost p-2" onClick={onOpenPush} aria-label="接收通知" title="接收通知">
+          <button className="btn-ghost p-2" onClick={onOpenNotifications} aria-label="通知设置" title="通知设置">
             <Bell size={17} />
-          </button>
-          <button className="btn-ghost p-2" onClick={onOpenSchedule} aria-label="任务提醒" title="任务提醒">
-            <CalendarClock size={17} />
           </button>
           <button className="btn-ghost p-2" onClick={onOpenFocus} aria-label="专注航班" title="专注航班">
             <Plane size={17} />
@@ -192,13 +189,13 @@ export function Sidebar({
               </div>
             </div>
           )}
-          <button className="btn-ghost w-full justify-center" onClick={onOpenPush}>
+          <button className="btn-ghost w-full justify-center" onClick={onOpenNotifications}>
             <Bell size={16} />
-            接收通知
+            通知设置
           </button>
-          <button className="btn-ghost w-full justify-center" onClick={onOpenSchedule}>
-            <CalendarClock size={16} />
-            任务提醒
+          <button className="btn-ghost w-full justify-center" onClick={onOpenBackup}>
+            <Database size={16} />
+            数据备份
           </button>
           <button
             className={`btn-ghost w-full justify-center ${

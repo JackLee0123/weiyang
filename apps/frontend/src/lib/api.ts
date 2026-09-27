@@ -11,7 +11,6 @@ import type {
   CourseDraft,
   FeedbackResponse,
   GeneratePlansResult,
-  HeatmapDay,
   LoginPayload,
   MemoryReport,
   ParseTimetableResult,
@@ -146,9 +145,6 @@ export const api = {
   fetchStats(start: string, end: string) {
     return request<StatsOverview>(`/stats/overview${qs({ start, end })}`)
   },
-  fetchHeatmap(start: string, end: string) {
-    return request<HeatmapDay[]>(`/stats/heatmap${qs({ start, end })}`)
-  },
   fetchMemoryReport(start: string, end: string) {
     return request<MemoryReport>(`/reports/memory${qs({ start, end })}`)
   },
@@ -229,9 +225,6 @@ export const api = {
   },
   sendTestPush() {
     return request<PushSendResult>('/push/test', { method: 'POST' })
-  },
-  sendPush(payload: { user_id: number; title: string; body: string; url?: string; icon?: string }) {
-    return request<PushSendResult>('/push/send', { method: 'POST', body: JSON.stringify(payload) })
   },
   fetchPushSchedule() {
     return request<PushScheduleView>('/push/schedule')
