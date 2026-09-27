@@ -8,6 +8,7 @@
   WISEDU_CAPTCHA_PATH    验证码地址（默认 /authserver/getCaptcha.htl）
   WISEDU_LOGIN_PATH      登录地址（默认 /authserver/login）
   WISEDU_TIMETABLE_PATH  课表接口（默认 /jwapp/sys/homeapp/api/home/student/getMyScheduleDetail.do）
+  WISEDU_PROXY           显式代理（默认空：直连；教务系统只在校园网内可达）
 """
 
 from __future__ import annotations
@@ -42,6 +43,43 @@ def _normalize_origin(url: str) -> str:
     if parsed.scheme and parsed.netloc:
         return f"{parsed.scheme}://{parsed.netloc}"
     return url.rstrip("/")
+
+
+def _connect_error_message(exc: httpx.HTTPError, host: str, action: str) -> str:
+    """把底层网络异常翻译成用户能据以排查的提示。"""
+    if isinstance(exc, httpx.TimeoutException):
+        return f"{action}超时（{host}），请确认已连接校园网"
+    reason = " ".join(str(exc).split())[:140]
+    lowered = reason.lower()
+    if isinstance(exc, httpx.ConnectError) and any(
+        kw in lowered for kw in ("getaddrinfo", "name or service not known", "nodename nor servname", "no address associated")
+    ):
+        return f"无法解析学校服务器地址（{host}），请检查网址是否正确、是否已连上校园网"
+    if "ssl" in lowered or "certificate" in lowered or "tls" in lowered:
+        return f"与学校服务器（{host}）的安全连接失败，请稍后重试或改用「文件导入」"
+    return f"{action}失败（{host}）：{reason}"
+
+
+def _build_client() -> httpx.Client:
+    """构造访问教务/认证系统的 HTTP 客户端。
+
+    这些站点通常只在校园网内可达，必须直连。httpx 默认（trust_env=True）会读取系统代理：
+    在 Windows 上 urllib 会回退到注册表里的 IE 代理，于是本机一旦开着 Clash / 加速器 /
+    VPN 之类的全局代理，请求就会被转发到代理服务器上，从而报
+    「SSL: UNEXPECTED_EOF_WHILE_READING」这类连接错误。
+    因此这里固定直连，只有显式配置 WISEDU_PROXY 时才走代理。
+    """
+    proxy = _env("WISEDU_PROXY", "")
+    kwargs: dict = {
+        "timeout": 20,
+        "follow_redirects": True,
+        # 学校自签证书较常见，这里不校验证书链，避免直接连不上。
+        "verify": False,
+        "trust_env": False,
+    }
+    if proxy:
+        kwargs["proxy"] = proxy
+    return httpx.Client(**kwargs)
 
 
 # 与教务前端一致：登录密码先用 64 位随机前缀拼接，再以 pwdEncryptSalt 作 AES 密钥 CBC 加密。
@@ -111,7 +149,7 @@ class WiseduAdapter:
         self.init_path = _env("WISEDU_INIT_PATH", "/jwapp/sys/homeapp/api/home/config/global.do")
         self.xnxq_path = _env("WISEDU_XNXQ_PATH", "/jwapp/sys/homeapp/api/home/kb/xnxq.do")
         self.service = self.base_url + "/jwapp/sys/homeapp/home/index.html"
-        self._client = httpx.Client(timeout=20, follow_redirects=True, verify=False)
+        self._client = _build_client()
         self._execution = ""
         self._lt = ""
         self._pwd_salt = ""
@@ -122,9 +160,9 @@ class WiseduAdapter:
             url = self.auth_url + self.login_path + "?service=" + quote_plus(self.service)
             resp = self._client.get(url)
         except httpx.HTTPError as exc:
-            raise WiseduError("无法连接学校认证服务器，请检查网址与网络") from exc
+            raise WiseduError(_connect_error_message(exc, urlparse(self.auth_url).netloc, "连接学校认证服务器")) from exc
         if resp.status_code != 200:
-            raise WiseduError("学校认证服务器返回异常，请稍后重试")
+            raise WiseduError(f"学校认证服务器返回异常（HTTP {resp.status_code}），请稍后重试")
         self._execution = _extract_hidden(resp.text, "execution") or "e1s1"
         self._lt = _extract_hidden(resp.text, "lt")
         self._pwd_salt = _extract_hidden(resp.text, "pwdEncryptSalt")
@@ -133,15 +171,18 @@ class WiseduAdapter:
         self.open_session()
         token = uuid.uuid4().hex
         image_bytes = b""
+        reason = ""
         try:
             ts = int(time.time() * 1000)
             resp = self._client.get(self.auth_url + self.captcha_path + "?" + str(ts))
             if resp.status_code == 200 and resp.headers.get("content-type", "").startswith("image"):
                 image_bytes = resp.content
-        except httpx.HTTPError:
-            pass
+            else:
+                reason = f"验证码接口返回 HTTP {resp.status_code}"
+        except httpx.HTTPError as exc:
+            reason = _connect_error_message(exc, urlparse(self.auth_url).netloc, "获取登录验证码")
         if not image_bytes:
-            raise WiseduError("无法获取登录验证码，请稍后重试或改用「文件导入」")
+            raise WiseduError(f"{reason or '无法获取登录验证码'}，可稍后重试或改用「文件导入」")
         _CAPTCHA_SESSIONS[token] = {
             "cookies": dict(self._client.cookies),
             "expires": time.time() + 600,
@@ -174,7 +215,7 @@ class WiseduAdapter:
             url = self.auth_url + self.login_path + "?service=" + quote_plus(self.service)
             resp = self._client.post(url, data=form)
         except httpx.HTTPError as exc:
-            raise WiseduError("登录请求失败，请稍后重试") from exc
+            raise WiseduError(_connect_error_message(exc, urlparse(self.auth_url).netloc, "提交登录请求")) from exc
         final_host = urlparse(str(resp.url)).netloc
         auth_host = urlparse(self.auth_url).netloc
         if final_host == auth_host:
@@ -217,7 +258,7 @@ class WiseduAdapter:
         try:
             resp = self._client.post(self.base_url + self.timetable_path, data={"termCode": term})
         except httpx.HTTPError as exc:
-            raise WiseduError(f"拉取课表失败：{exc}") from exc
+            raise WiseduError(_connect_error_message(exc, urlparse(self.base_url).netloc, "拉取课表")) from exc
         try:
             payload = resp.json()
         except ValueError as exc:
