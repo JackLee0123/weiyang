@@ -12,7 +12,7 @@ export interface ChangelogEntry {
   items: ChangelogItem[]
 }
 
-export const CURRENT_VERSION = 'v0.5.3'
+export const CURRENT_VERSION = 'v0.6.0'
 
 export const CHANGELOG_KIND_META: Record<ChangelogKind, { label: string; className: string }> = {
   feature: { label: '新增', className: 'bg-teal-50 text-teal-700 dark:bg-teal-500/15 dark:text-teal-300' },
@@ -22,6 +22,21 @@ export const CHANGELOG_KIND_META: Record<ChangelogKind, { label: string; classNa
 }
 
 export const CHANGELOG: ChangelogEntry[] = [
+  {
+    version: 'v0.6.0',
+    date: '2026-09-27',
+    title: '专注统计与界面整理',
+    items: [
+      { kind: 'feature', text: '今日页新增「当日专注」：当天专注次数与总时长，一眼看清投入了多少' },
+      { kind: 'feature', text: '新增「专注时长分布」饼图：按关联计划（没有关联的按标题）拆分，给出各项目时长与占比' },
+      { kind: 'feature', text: '新增「数据备份」：一键导出全部计划与记录，也可从备份文件恢复（覆盖前会二次确认）' },
+      { kind: 'improvement', text: '「记一笔」与「新增记录」改为醒目的实心按钮，和「新建计划」同级、蓝青两色区分' },
+      { kind: 'improvement', text: '通知入口合并为「通知设置」一个弹窗，内含「接收通知」与「任务提醒」两个标签页' },
+      { kind: 'improvement', text: '统一各处时长文案，去掉今日页与本周概览重复展示的「连续记录」' },
+      { kind: 'fix', text: '修复开着系统代理（Clash/加速器）时教务系统抓取报「无法连接学校认证服务器」的问题' },
+      { kind: 'notice', text: '高德地图 key 改为只在构建环境变量中配置，不再写在源码里' },
+    ],
+  },
   {
     version: 'v0.5.3',
     date: '2026-09-10',

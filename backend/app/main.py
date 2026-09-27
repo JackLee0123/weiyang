@@ -7,7 +7,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 
-from .config import settings
+from .config import APP_VERSION, settings
 from .database import Base, SessionLocal, engine
 from . import repository
 from .services.security import hash_password
@@ -50,7 +50,7 @@ async def lifespan(app: FastAPI):
             pass
 
 
-app = FastAPI(title="未央 · Everlong API", version="0.5.3", lifespan=lifespan)
+app = FastAPI(title="未央 · Everlong API", version=APP_VERSION, lifespan=lifespan)
 
 
 class SPAStaticFiles(StaticFiles):
