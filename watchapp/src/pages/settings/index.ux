@@ -9,10 +9,15 @@
 
     <div class="form">
       <text class="label">服务器地址</text>
-      <input class="input" type="text" placeholder="http://192.168.1.10:8000" value="{{baseUrl}}" onchange="onBaseUrl" />
+      <input class="input" type="text" placeholder="https://everlong.net.cn" value="{{baseUrl}}" onchange="onBaseUrl" />
 
-      <div class="btn btn-primary" onclick="openPair">
-        <text class="btn-text">连接账户（输入配对码）</text>
+      <div class="btn btn-primary" onclick="goConnect">
+        <text class="btn-text">连接账户（手环显示二维码）</text>
+      </div>
+
+      <div class="account">
+        <text class="account-label">当前账号</text>
+        <text class="account-value {{connected ? 'account-on' : ''}}">{{accountLabel}}</text>
       </div>
 
       <div class="btn btn-ghost" onclick="testConnection">
@@ -31,31 +36,10 @@
 
     <div class="help">
       <text class="help-title">如何连接</text>
-      <text class="help-line">1. 电脑登录未央网页端 → 侧栏「设备连接」</text>
-      <text class="help-line">2. 生成 6 位配对码（5 分钟内有效）</text>
-      <text class="help-line">3. 点上方「连接账户」输入配对码即可</text>
-      <text class="help-line">电脑与手环须能访问同一服务器地址</text>
-    </div>
-
-    <div if="{{pairing}}" class="pair-mask">
-      <div class="pair-panel">
-        <text class="pair-title">输入配对码</text>
-        <div class="pair-dots">
-          <div class="pair-dot {{pairCode.length > 0 ? 'pair-dot-on' : ''}}"></div>
-          <div class="pair-dot {{pairCode.length > 1 ? 'pair-dot-on' : ''}}"></div>
-          <div class="pair-dot {{pairCode.length > 2 ? 'pair-dot-on' : ''}}"></div>
-          <div class="pair-dot {{pairCode.length > 3 ? 'pair-dot-on' : ''}}"></div>
-          <div class="pair-dot {{pairCode.length > 4 ? 'pair-dot-on' : ''}}"></div>
-          <div class="pair-dot {{pairCode.length > 5 ? 'pair-dot-on' : ''}}"></div>
-        </div>
-        <text if="{{pairMsg}}" class="pair-msg">{{pairMsg}}</text>
-        <div class="pair-keys">
-          <div for="{{keys}}" class="pair-key {{$item === 'ok' || $item === 'back' ? 'pair-key-mute' : ''}}" onclick="pressKey($item)">
-            <text class="pair-key-text {{$item === 'ok' ? 'pair-key-ok' : ''}}">{{$item === 'back' ? '⌫' : ($item === 'ok' ? '确定' : $item)}}</text>
-          </div>
-        </div>
-        <text class="pair-cancel" onclick="closePair">取消</text>
-      </div>
+      <text class="help-line">1. 点上方「连接账户」，手环显示二维码</text>
+      <text class="help-line">2. 手机打开未央 → 侧栏「设备连接」→ 扫码</text>
+      <text class="help-line">3. 手机上点「连接」，手环会自动完成连接</text>
+      <text class="help-line">手环经手机网络访问服务器，需保持蓝牙连接</text>
     </div>
   </div>
 </template>
@@ -132,6 +116,24 @@
   .btn-text-accent {
     color: #5eead4;
   }
+  .account {
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 22px;
+    padding: 0 4px;
+  }
+  .account-label {
+    font-size: 22px;
+    color: #94a3b8;
+  }
+  .account-value {
+    font-size: 22px;
+    color: #64748b;
+  }
+  .account-on {
+    color: #5eead4;
+  }
   .demo-row {
     flex-direction: row;
     justify-content: space-between;
@@ -185,93 +187,20 @@
     color: #94a3b8;
     margin-top: 6px;
   }
-  .pair-mask {
-    position: fixed;
-    left: 0;
-    top: 0;
-    width: 100%;
-    height: 100%;
-    background-color: rgba(2, 6, 12, 0.92);
-    justify-content: center;
-    align-items: center;
-  }
-  .pair-panel {
-    flex-direction: column;
-    align-items: center;
-    width: 100%;
-    padding: 0 32px;
-  }
-  .pair-title {
-    font-size: 30px;
-    font-weight: bold;
-    color: #f1f5f9;
-    margin-bottom: 24px;
-  }
-  .pair-dots {
-    flex-direction: row;
-    justify-content: center;
-    margin-bottom: 16px;
-  }
-  .pair-dot {
-    width: 22px;
-    height: 22px;
-    border-radius: 11px;
-    border: 2px solid #334155;
-    margin: 0 10px;
-  }
-  .pair-dot-on {
-    background-color: #5eead4;
-    border-color: #5eead4;
-  }
-  .pair-msg {
-    font-size: 20px;
-    color: #fbbf24;
-    margin-bottom: 10px;
-  }
-  .pair-keys {
-    flex-direction: row;
-    flex-wrap: wrap;
-    justify-content: center;
-    width: 100%;
-  }
-  .pair-key {
-    width: 30%;
-    height: 84px;
-    margin: 8px 1.5%;
-    border-radius: 20px;
-    background-color: #131a23;
-    border: 2px solid #1e293b;
-    justify-content: center;
-    align-items: center;
-  }
-  .pair-key-mute {
-    background-color: transparent;
-    border-color: transparent;
-  }
-  .pair-key-text {
-    font-size: 32px;
-    color: #e2e8f0;
-  }
-  .pair-key-ok {
-    font-size: 26px;
-    color: #5eead4;
-  }
 </style>
 
 <script>
 import router from '@system.router'
 import { ready, getConfig, save } from '../../common/scripts/store.js'
-import { fetchMe, pairDevice } from '../../common/scripts/api.js'
+import { fetchMe } from '../../common/scripts/api.js'
 
 export default {
   private: {
     baseUrl: '',
     demo: false,
+    connected: false,
+    accountLabel: '未连接',
     msg: '',
-    pairing: false,
-    pairCode: '',
-    pairMsg: '',
-    keys: [1, 2, 3, 4, 5, 6, 7, 8, 9, 'back', 0, 'ok']
   },
 
   onShow() {
@@ -280,6 +209,8 @@ export default {
       var cfg = getConfig()
       self.baseUrl = cfg.baseUrl
       self.demo = cfg.demo
+      self.connected = !!cfg.token
+      self.accountLabel = cfg.token ? (cfg.accountName || '已连接') : '未连接'
     })
   },
 
@@ -308,10 +239,12 @@ export default {
         return null
       }
       if (!getConfig().token) {
-        self.msg = '尚未连接账户，请先输入配对码'
+        self.msg = '尚未连接账户，请先点「连接账户」扫码'
         return null
       }
       return fetchMe().then(function (user) {
+        self.connected = true
+        self.accountLabel = user.name || user.email || '已连接'
         self.msg = '连接成功：' + (user.name || user.email)
       }).catch(function (e) {
         self.msg = '连接失败：' + (e.message || e)
@@ -323,56 +256,13 @@ export default {
     router.back()
   },
 
-  openPair() {
+  goConnect() {
     if (!this.baseUrl) {
       this.msg = '请先填写服务器地址，再连接账户'
       return
     }
-    this.pairing = true
-    this.pairCode = ''
-    this.pairMsg = '在网页端「设备连接」获取配对码'
-  },
-
-  closePair() {
-    this.pairing = false
-  },
-
-  pressKey(key) {
-    if (key === 'back') {
-      this.pairCode = this.pairCode.slice(0, -1)
-      this.pairMsg = ''
-      return
-    }
-    if (key === 'ok') {
-      this.confirmPair()
-      return
-    }
-    if (this.pairCode.length >= 6) return
-    this.pairCode = this.pairCode + String(key)
-    this.pairMsg = ''
-    if (this.pairCode.length === 6) {
-      this.confirmPair()
-    }
-  },
-
-  confirmPair() {
-    var self = this
-    if (this.pairCode.length !== 6) {
-      this.pairMsg = '请输入 6 位配对码'
-      return
-    }
-    this.pairMsg = '连接中…'
     save({ baseUrl: this.baseUrl }).then(function () {
-      pairDevice(self.pairCode).then(function (data) {
-        return save({ token: data.token }).then(function () {
-          self.pairing = false
-          self.msg = '已连接账户：' + (data.name || '')
-        })
-      }).catch(function (e) {
-        var m = e.message || String(e)
-        self.pairMsg = m.indexOf('400') >= 0 ? '配对码错误或已过期' : '连接失败：' + m
-        self.pairCode = ''
-      })
+      router.push({ uri: '/pages/connect' })
     })
   }
 }

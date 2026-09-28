@@ -6,6 +6,8 @@
  *   GET  /api/timetable/courses       课表 + 学期设置
  *   GET  /api/plans?start=&end=       取计划标题用于专注分布标签
  *   GET  /api/auth/me                 校验令牌
+ *   POST /api/devices/handshake       连接账户：生成一次性短码（未登录可用）
+ *   POST /api/devices/handshake/:code/poll  连接账户：轮询领取访问令牌
  */
 import fetch from '@system.fetch'
 import { getConfig } from './store.js'
@@ -13,19 +15,25 @@ import { getConfig } from './store.js'
 function request(path, options) {
   options = options || {}
   var cfg = getConfig()
+  var header = { 'Content-Type': 'application/json' }
+  // 连接账户时手环还没有令牌，这两个接口也不需要鉴权。
+  if (cfg.token) {
+    header.Authorization = 'Bearer ' + cfg.token
+  }
   var params = {
     url: cfg.baseUrl + '/api' + path,
     method: options.method || 'GET',
-    header: {
-      'Content-Type': 'application/json',
-      'Authorization': 'Bearer ' + cfg.token
-    },
+    header: header,
     responseType: 'json',
     success: function (resp) {
       if (resp.code >= 200 && resp.code < 300) {
         resolveRef(resp.data)
       } else {
-        rejectRef(new Error('请求失败 (HTTP ' + resp.code + ')'))
+        var detail = ''
+        if (resp.data && resp.data.detail) {
+          detail = resp.data.detail
+        }
+        rejectRef(new Error(detail || '请求失败 (HTTP ' + resp.code + ')'))
       }
     },
     fail: function (data, code) {
@@ -66,9 +74,20 @@ export function fetchMe() {
 }
 
 /**
- * 凭 6 位配对码换取访问令牌（网页端「设备连接」生成）。
- * 配对码一次性、5 分钟有效；成功后后端签发新的访问令牌。
+ * 连接账户第 1 步：手环端发起握手，拿到一次性短码与轮询凭据。
+ * 短码显示成二维码给手机扫，poll_token 只留在手环本地。
  */
-export function pairDevice(code) {
-  return request('/devices/pair', { method: 'POST', body: { code: code } })
+export function startHandshake(deviceLabel) {
+  return request('/devices/handshake', { method: 'POST', body: { device_label: deviceLabel || '' } })
+}
+
+/**
+ * 连接账户第 2 步：轮询握手结果。手机端确认后，这里会一次性拿到访问令牌。
+ * 返回 status：pending / approved / claimed / expired / invalid。
+ */
+export function pollHandshake(code, pollToken) {
+  return request('/devices/handshake/' + code + '/poll', {
+    method: 'POST',
+    body: { poll_token: pollToken }
+  })
 }

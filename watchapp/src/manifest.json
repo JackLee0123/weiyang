@@ -9,7 +9,8 @@
   "features": [
     { "name": "system.fetch" },
     { "name": "system.router" },
-    { "name": "system.storage" }
+    { "name": "system.storage" },
+    { "name": "system.brightness" }
   ],
   "config": {
     "designWidth": 480,
@@ -24,6 +25,7 @@
       "pages/index": { "component": "index" },
       "pages/focus": { "component": "index" },
       "pages/timetable": { "component": "index" },
+      "pages/connect": { "component": "index" },
       "pages/settings": { "component": "index" }
     }
   }
