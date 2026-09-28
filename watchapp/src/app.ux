@@ -1,0 +1,19 @@
+<script>
+import { init } from './common/scripts/store.js'
+
+export default {
+  onCreate() {
+    console.info('[everlong] app onCreate')
+    init(this)
+  },
+  onShow() {
+    console.info('[everlong] app onShow')
+  },
+  onHide() {
+    console.info('[everlong] app onHide')
+  },
+  onDestroy() {
+    console.info('[everlong] app onDestroy')
+  }
+}
+</script>

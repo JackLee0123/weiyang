@@ -1,0 +1,15 @@
+{
+  "name": "everlong-watch",
+  "version": "1.0.0",
+  "description": "未央 Everlong 小米手环快应用（当日专注 + 课表）",
+  "private": true,
+  "scripts": {
+    "start": "aiot server --watch --open-nuttx --enable-custom-component",
+    "build": "aiot build --enable-custom-component",
+    "release": "aiot release --enable-custom-component --enable-jsc",
+    "watch": "aiot watch --open-nuttx"
+  },
+  "devDependencies": {
+    "aiot-toolkit": "^2.0.5"
+  }
+}

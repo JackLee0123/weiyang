@@ -1,0 +1,379 @@
+<template>
+  <div class="page">
+    <div class="topbar">
+      <div class="back" onclick="goBack">
+        <text class="back-text">‹</text>
+      </div>
+      <text class="title">设置</text>
+    </div>
+
+    <div class="form">
+      <text class="label">服务器地址</text>
+      <input class="input" type="text" placeholder="http://192.168.1.10:8000" value="{{baseUrl}}" onchange="onBaseUrl" />
+
+      <div class="btn btn-primary" onclick="openPair">
+        <text class="btn-text">连接账户（输入配对码）</text>
+      </div>
+
+      <div class="btn btn-ghost" onclick="testConnection">
+        <text class="btn-text btn-text-accent">测试连接</text>
+      </div>
+
+      <div class="demo-row" onclick="toggleDemo">
+        <text class="label demo-label">演示模式</text>
+        <div class="switch {{demo ? 'switch-on' : ''}}">
+          <div class="knob {{demo ? 'knob-on' : ''}}"></div>
+        </div>
+      </div>
+
+      <text if="{{msg}}" class="msg">{{msg}}</text>
+    </div>
+
+    <div class="help">
+      <text class="help-title">如何连接</text>
+      <text class="help-line">1. 电脑登录未央网页端 → 侧栏「设备连接」</text>
+      <text class="help-line">2. 生成 6 位配对码（5 分钟内有效）</text>
+      <text class="help-line">3. 点上方「连接账户」输入配对码即可</text>
+      <text class="help-line">电脑与手环须能访问同一服务器地址</text>
+    </div>
+
+    <div if="{{pairing}}" class="pair-mask">
+      <div class="pair-panel">
+        <text class="pair-title">输入配对码</text>
+        <div class="pair-dots">
+          <div class="pair-dot {{pairCode.length > 0 ? 'pair-dot-on' : ''}}"></div>
+          <div class="pair-dot {{pairCode.length > 1 ? 'pair-dot-on' : ''}}"></div>
+          <div class="pair-dot {{pairCode.length > 2 ? 'pair-dot-on' : ''}}"></div>
+          <div class="pair-dot {{pairCode.length > 3 ? 'pair-dot-on' : ''}}"></div>
+          <div class="pair-dot {{pairCode.length > 4 ? 'pair-dot-on' : ''}}"></div>
+          <div class="pair-dot {{pairCode.length > 5 ? 'pair-dot-on' : ''}}"></div>
+        </div>
+        <text if="{{pairMsg}}" class="pair-msg">{{pairMsg}}</text>
+        <div class="pair-keys">
+          <div for="{{keys}}" class="pair-key {{$item === 'ok' || $item === 'back' ? 'pair-key-mute' : ''}}" onclick="pressKey($item)">
+            <text class="pair-key-text {{$item === 'ok' ? 'pair-key-ok' : ''}}">{{$item === 'back' ? '⌫' : ($item === 'ok' ? '确定' : $item)}}</text>
+          </div>
+        </div>
+        <text class="pair-cancel" onclick="closePair">取消</text>
+      </div>
+    </div>
+  </div>
+</template>
+
+<style>
+  .page {
+    flex-direction: column;
+    width: 100%;
+    height: 100%;
+    padding: 28px 24px;
+    background-color: #0b0f14;
+  }
+  .topbar {
+    flex-direction: row;
+    align-items: center;
+    margin-bottom: 28px;
+  }
+  .back {
+    width: 56px;
+    height: 56px;
+    border-radius: 28px;
+    background-color: #131a23;
+    justify-content: center;
+    align-items: center;
+    margin-right: 20px;
+  }
+  .back-text {
+    font-size: 40px;
+    color: #94a3b8;
+  }
+  .title {
+    font-size: 34px;
+    font-weight: bold;
+    color: #f1f5f9;
+  }
+  .form {
+    flex-direction: column;
+  }
+  .label {
+    font-size: 22px;
+    color: #94a3b8;
+    margin-bottom: 10px;
+    margin-top: 18px;
+  }
+  .input {
+    width: 100%;
+    height: 72px;
+    border-radius: 18px;
+    background-color: #131a23;
+    border: 2px solid #1e293b;
+    padding: 0 20px;
+    font-size: 24px;
+    color: #e2e8f0;
+  }
+  .btn {
+    width: 100%;
+    height: 72px;
+    border-radius: 36px;
+    justify-content: center;
+    align-items: center;
+    margin-top: 24px;
+  }
+  .btn-primary {
+    background-color: #0f766e;
+  }
+  .btn-ghost {
+    background-color: #131a23;
+    border: 2px solid #334155;
+  }
+  .btn-text {
+    font-size: 26px;
+    color: #f1f5f9;
+  }
+  .btn-text-accent {
+    color: #5eead4;
+  }
+  .demo-row {
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 28px;
+  }
+  .demo-label {
+    margin-top: 0;
+  }
+  .switch {
+    width: 84px;
+    height: 44px;
+    border-radius: 22px;
+    background-color: #1e293b;
+    padding: 4px;
+  }
+  .switch-on {
+    background-color: #0f766e;
+  }
+  .knob {
+    width: 36px;
+    height: 36px;
+    border-radius: 18px;
+    background-color: #64748b;
+  }
+  .knob-on {
+    background-color: #5eead4;
+    margin-left: 40px;
+  }
+  .msg {
+    font-size: 22px;
+    color: #fbbf24;
+    margin-top: 20px;
+  }
+  .help {
+    flex-direction: column;
+    margin-top: 40px;
+    background-color: #131a23;
+    border-radius: 20px;
+    border: 2px solid #1e293b;
+    padding: 24px;
+  }
+  .help-title {
+    font-size: 24px;
+    font-weight: bold;
+    color: #e2e8f0;
+    margin-bottom: 12px;
+  }
+  .help-line {
+    font-size: 20px;
+    color: #94a3b8;
+    margin-top: 6px;
+  }
+  .pair-mask {
+    position: fixed;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(2, 6, 12, 0.92);
+    justify-content: center;
+    align-items: center;
+  }
+  .pair-panel {
+    flex-direction: column;
+    align-items: center;
+    width: 100%;
+    padding: 0 32px;
+  }
+  .pair-title {
+    font-size: 30px;
+    font-weight: bold;
+    color: #f1f5f9;
+    margin-bottom: 24px;
+  }
+  .pair-dots {
+    flex-direction: row;
+    justify-content: center;
+    margin-bottom: 16px;
+  }
+  .pair-dot {
+    width: 22px;
+    height: 22px;
+    border-radius: 11px;
+    border: 2px solid #334155;
+    margin: 0 10px;
+  }
+  .pair-dot-on {
+    background-color: #5eead4;
+    border-color: #5eead4;
+  }
+  .pair-msg {
+    font-size: 20px;
+    color: #fbbf24;
+    margin-bottom: 10px;
+  }
+  .pair-keys {
+    flex-direction: row;
+    flex-wrap: wrap;
+    justify-content: center;
+    width: 100%;
+  }
+  .pair-key {
+    width: 30%;
+    height: 84px;
+    margin: 8px 1.5%;
+    border-radius: 20px;
+    background-color: #131a23;
+    border: 2px solid #1e293b;
+    justify-content: center;
+    align-items: center;
+  }
+  .pair-key-mute {
+    background-color: transparent;
+    border-color: transparent;
+  }
+  .pair-key-text {
+    font-size: 32px;
+    color: #e2e8f0;
+  }
+  .pair-key-ok {
+    font-size: 26px;
+    color: #5eead4;
+  }
+</style>
+
+<script>
+import router from '@system.router'
+import { ready, getConfig, save } from '../../common/scripts/store.js'
+import { fetchMe, pairDevice } from '../../common/scripts/api.js'
+
+export default {
+  private: {
+    baseUrl: '',
+    demo: false,
+    msg: '',
+    pairing: false,
+    pairCode: '',
+    pairMsg: '',
+    keys: [1, 2, 3, 4, 5, 6, 7, 8, 9, 'back', 0, 'ok']
+  },
+
+  onShow() {
+    var self = this
+    ready().then(function () {
+      var cfg = getConfig()
+      self.baseUrl = cfg.baseUrl
+      self.demo = cfg.demo
+    })
+  },
+
+  onBaseUrl(e) {
+    this.baseUrl = e.value || ''
+  },
+
+  toggleDemo() {
+    var self = this
+    this.demo = !this.demo
+    save({ demo: this.demo }).then(function () {
+      self.msg = self.demo ? '演示模式已开启' : '演示模式已关闭'
+    })
+  },
+
+  testConnection() {
+    var self = this
+    this.msg = '连接中…'
+    save({ baseUrl: this.baseUrl, demo: this.demo }).then(function () {
+      if (self.demo) {
+        self.msg = '演示模式：无需连接'
+        return null
+      }
+      if (!getConfig().baseUrl) {
+        self.msg = '请先填写服务器地址'
+        return null
+      }
+      if (!getConfig().token) {
+        self.msg = '尚未连接账户，请先输入配对码'
+        return null
+      }
+      return fetchMe().then(function (user) {
+        self.msg = '连接成功：' + (user.name || user.email)
+      }).catch(function (e) {
+        self.msg = '连接失败：' + (e.message || e)
+      })
+    })
+  },
+
+  goBack() {
+    router.back()
+  },
+
+  openPair() {
+    if (!this.baseUrl) {
+      this.msg = '请先填写服务器地址，再连接账户'
+      return
+    }
+    this.pairing = true
+    this.pairCode = ''
+    this.pairMsg = '在网页端「设备连接」获取配对码'
+  },
+
+  closePair() {
+    this.pairing = false
+  },
+
+  pressKey(key) {
+    if (key === 'back') {
+      this.pairCode = this.pairCode.slice(0, -1)
+      this.pairMsg = ''
+      return
+    }
+    if (key === 'ok') {
+      this.confirmPair()
+      return
+    }
+    if (this.pairCode.length >= 6) return
+    this.pairCode = this.pairCode + String(key)
+    this.pairMsg = ''
+    if (this.pairCode.length === 6) {
+      this.confirmPair()
+    }
+  },
+
+  confirmPair() {
+    var self = this
+    if (this.pairCode.length !== 6) {
+      this.pairMsg = '请输入 6 位配对码'
+      return
+    }
+    this.pairMsg = '连接中…'
+    save({ baseUrl: this.baseUrl }).then(function () {
+      pairDevice(self.pairCode).then(function (data) {
+        return save({ token: data.token }).then(function () {
+          self.pairing = false
+          self.msg = '已连接账户：' + (data.name || '')
+        })
+      }).catch(function (e) {
+        var m = e.message || String(e)
+        self.pairMsg = m.indexOf('400') >= 0 ? '配对码错误或已过期' : '连接失败：' + m
+        self.pairCode = ''
+      })
+    })
+  }
+}
+</script>

@@ -1,0 +1,316 @@
+<template>
+  <div class="page">
+    <div class="topbar">
+      <div class="back" onclick="goBack">
+        <text class="back-text">‹</text>
+      </div>
+      <div class="day-switch">
+        <div class="switch-btn" onclick="prevDay">
+          <text class="switch-text">‹</text>
+        </div>
+        <div class="day-title">
+          <text class="day-name">周{{dayLabel}}</text>
+          <text if="{{isToday}}" class="today-badge">今天</text>
+        </div>
+        <div class="switch-btn" onclick="nextDay">
+          <text class="switch-text">›</text>
+        </div>
+      </div>
+      <div class="week-info">
+        <text class="week-text">{{weekLabel}}</text>
+      </div>
+    </div>
+
+    <text if="{{termLabel}}" class="term">{{termLabel}}</text>
+
+    <div if="{{!hasWeek1}}" class="notice">
+      <text class="notice-text">后端未设置开学第 1 周日期，周次与过滤可能不准确</text>
+    </div>
+
+    <list class="course-list">
+      <list-item for="{{viewCourses}}" class="course-item">
+        <div class="course-card {{$item.isNow ? 'course-now' : ($item.isPast ? 'course-past' : '')}}">
+          <div class="course-time-col">
+            <text class="course-time">{{$item.timeRange}}</text>
+            <text class="course-period">{{$item.periods}}</text>
+            <text if="{{$item.isNow}}" class="now-badge">进行中</text>
+          </div>
+          <div class="course-main">
+            <text class="course-name">{{$item.name}}</text>
+            <text if="{{$item.location}}" class="course-meta">{{$item.location}}</text>
+            <text if="{{$item.teacher}}" class="course-meta">{{$item.teacher}} 老师</text>
+            <text class="course-weeks">{{$item.weeksLabel}}</text>
+          </div>
+        </div>
+      </list-item>
+    </list>
+
+    <div if="{{viewCourses.length === 0}}" class="empty">
+      <text class="empty-text">这一天没有课</text>
+    </div>
+
+    <div if="{{msg}}" class="msg-bar">
+      <text class="msg-text">{{msg}}</text>
+    </div>
+  </div>
+</template>
+
+<style>
+  .page {
+    flex-direction: column;
+    width: 100%;
+    height: 100%;
+    padding: 28px 24px;
+    background-color: #0b0f14;
+  }
+  .topbar {
+    flex-direction: row;
+    align-items: center;
+    margin-bottom: 16px;
+  }
+  .back {
+    width: 56px;
+    height: 56px;
+    border-radius: 28px;
+    background-color: #131a23;
+    justify-content: center;
+    align-items: center;
+  }
+  .back-text {
+    font-size: 40px;
+    color: #94a3b8;
+  }
+  .day-switch {
+    flex: 1;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+  }
+  .switch-btn {
+    width: 48px;
+    height: 48px;
+    border-radius: 24px;
+    background-color: #131a23;
+    justify-content: center;
+    align-items: center;
+    margin: 0 16px;
+  }
+  .switch-text {
+    font-size: 32px;
+    color: #94a3b8;
+  }
+  .day-title {
+    flex-direction: row;
+    align-items: center;
+  }
+  .day-name {
+    font-size: 32px;
+    font-weight: bold;
+    color: #f1f5f9;
+  }
+  .today-badge {
+    font-size: 18px;
+    color: #5eead4;
+    border: 2px solid #134e4a;
+    border-radius: 12px;
+    padding: 2px 10px;
+    margin-left: 10px;
+  }
+  .week-info {
+    width: 56px;
+    align-items: flex-end;
+  }
+  .week-text {
+    font-size: 18px;
+    color: #64748b;
+  }
+  .term {
+    font-size: 20px;
+    color: #475569;
+    margin-bottom: 12px;
+  }
+  .notice {
+    background-color: #1c1917;
+    border-radius: 14px;
+    padding: 12px 18px;
+    margin-bottom: 14px;
+  }
+  .notice-text {
+    font-size: 18px;
+    color: #fbbf24;
+  }
+  .course-list {
+    flex: 1;
+    width: 100%;
+  }
+  .course-item {
+    flex-direction: column;
+  }
+  .course-card {
+    flex-direction: row;
+    background-color: #131a23;
+    border-radius: 20px;
+    border: 2px solid #1e293b;
+    padding: 20px;
+    margin-bottom: 16px;
+    width: 100%;
+  }
+  .course-now {
+    border: 2px solid #0f766e;
+  }
+  .course-past {
+    opacity: 0.45;
+  }
+  .course-time-col {
+    flex-direction: column;
+    width: 150px;
+  }
+  .course-time {
+    font-size: 20px;
+    color: #5eead4;
+  }
+  .course-period {
+    font-size: 18px;
+    color: #64748b;
+    margin-top: 6px;
+  }
+  .now-badge {
+    font-size: 18px;
+    color: #5eead4;
+    margin-top: 8px;
+  }
+  .course-main {
+    flex-direction: column;
+    flex: 1;
+    margin-left: 10px;
+  }
+  .course-name {
+    font-size: 26px;
+    font-weight: bold;
+    color: #f1f5f9;
+  }
+  .course-meta {
+    font-size: 20px;
+    color: #94a3b8;
+    margin-top: 6px;
+  }
+  .course-weeks {
+    font-size: 18px;
+    color: #475569;
+    margin-top: 6px;
+  }
+  .empty {
+    flex: 1;
+    justify-content: center;
+    align-items: center;
+  }
+  .empty-text {
+    font-size: 22px;
+    color: #475569;
+  }
+  .msg-bar {
+    padding: 14px 20px;
+    border-radius: 16px;
+    background-color: #1c1917;
+  }
+  .msg-text {
+    font-size: 20px;
+    color: #fbbf24;
+  }
+</style>
+
+<script>
+import router from '@system.router'
+import { ready, getConfig } from '../../common/scripts/store.js'
+import { fetchCourses } from '../../common/scripts/api.js'
+import {
+  DAY_LABELS, todayISO, mondayOf, weekdayOf, weekIndexFor,
+  courseActiveOn, decorateCourse, nowMinutes
+} from '../../common/scripts/timetable.js'
+import { demoTimetable } from '../../common/scripts/demo.js'
+
+export default {
+  private: {
+    day: 1,
+    isToday: true,
+    dayLabel: '一',
+    weekLabel: '',
+    termLabel: '',
+    hasWeek1: true,
+    courses: [],
+    periodTimes: [],
+    weekIndex: 0,
+    viewCourses: [],
+    msg: ''
+  },
+
+  onShow() {
+    var today = new Date()
+    this.day = weekdayOf(today)
+    this.isToday = true
+    this.dayLabel = DAY_LABELS[this.day - 1]
+    this.load()
+  },
+
+  load() {
+    var self = this
+    this.msg = ''
+    ready().then(function () {
+      if (getConfig().demo) {
+        self.applyData(demoTimetable())
+        return null
+      }
+      if (!getConfig().baseUrl || !getConfig().token) {
+        self.msg = '未配置服务器或令牌'
+        return null
+      }
+      return fetchCourses().then(function (data) {
+        self.applyData(data)
+      }).catch(function (e) {
+        self.msg = e.message || '加载失败'
+      })
+    })
+  },
+
+  applyData(data) {
+    var settings = (data && data.settings) || {}
+    this.courses = (data && data.courses) || []
+    this.periodTimes = settings.period_times || []
+    this.termLabel = settings.active_term || ''
+    this.hasWeek1 = !!settings.week1_date
+    this.weekIndex = weekIndexFor(mondayOf(new Date()), settings.week1_date)
+    this.weekLabel = this.weekIndex > 0 ? '第' + this.weekIndex + '周' : ''
+    this.renderDay()
+  },
+
+  renderDay() {
+    var self = this
+    var todayDay = weekdayOf(new Date())
+    var nowMin = nowMinutes()
+    this.isToday = this.day === todayDay
+    this.dayLabel = DAY_LABELS[this.day - 1]
+    this.viewCourses = this.courses
+      .filter(function (c) {
+        return c.day_of_week === self.day && courseActiveOn(c, self.weekIndex)
+      })
+      .sort(function (a, b) { return (a.start_period || 0) - (b.start_period || 0) })
+      .map(function (c) {
+        return decorateCourse(c, self.weekIndex, self.periodTimes, self.day, todayDay, nowMin)
+      })
+  },
+
+  prevDay() {
+    this.day = this.day === 1 ? 7 : this.day - 1
+    this.renderDay()
+  },
+
+  nextDay() {
+    this.day = this.day === 7 ? 1 : this.day + 1
+    this.renderDay()
+  },
+
+  goBack() {
+    router.back()
+  }
+}
+</script>

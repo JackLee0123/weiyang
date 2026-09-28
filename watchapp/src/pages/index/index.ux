@@ -1,0 +1,214 @@
+<template>
+  <div class="page">
+    <div class="header">
+      <div class="header-left">
+        <text class="title">未央</text>
+        <text class="subtitle">{{headerDate}}</text>
+      </div>
+      <div class="settings-btn" onclick="goSettings">
+        <text class="settings-text">设置</text>
+      </div>
+    </div>
+
+    <div class="cards">
+      <div class="card" onclick="goFocus">
+        <text class="card-title">当日专注</text>
+        <text class="card-value">{{focusMinutesLabel}}</text>
+        <text class="card-sub">{{summary.count}} 次专注</text>
+        <text class="card-arrow">›</text>
+      </div>
+
+      <div class="card" onclick="goTimetable">
+        <text class="card-title">课表</text>
+        <text class="card-value">{{courseCount}} 节课</text>
+        <text class="card-sub">{{courseSubLabel}}</text>
+        <text class="card-arrow">›</text>
+      </div>
+    </div>
+
+    <div if="{{statusMsg}}" class="status">
+      <text class="status-text">{{statusMsg}}</text>
+    </div>
+
+    <div class="footer">
+      <text class="footer-text">小米手环 · 未央 Everlong</text>
+    </div>
+  </div>
+</template>
+
+<style>
+  .page {
+    flex-direction: column;
+    width: 100%;
+    height: 100%;
+    padding: 28px 24px;
+    background-color: #0b0f14;
+  }
+  .header {
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 28px;
+  }
+  .header-left {
+    flex-direction: column;
+  }
+  .title {
+    font-size: 40px;
+    font-weight: bold;
+    color: #f1f5f9;
+  }
+  .subtitle {
+    font-size: 22px;
+    color: #64748b;
+    margin-top: 6px;
+  }
+  .settings-btn {
+    border: 2px solid #334155;
+    border-radius: 28px;
+    padding: 10px 24px;
+  }
+  .settings-text {
+    font-size: 22px;
+    color: #94a3b8;
+  }
+  .cards {
+    flex-direction: column;
+  }
+  .card {
+    flex-direction: column;
+    background-color: #131a23;
+    border-radius: 24px;
+    padding: 28px;
+    margin-bottom: 24px;
+    border: 2px solid #1e293b;
+  }
+  .card-title {
+    font-size: 24px;
+    color: #94a3b8;
+  }
+  .card-value {
+    font-size: 44px;
+    font-weight: bold;
+    color: #5eead4;
+    margin-top: 10px;
+  }
+  .card-sub {
+    font-size: 22px;
+    color: #64748b;
+    margin-top: 8px;
+  }
+  .card-arrow {
+    position: absolute;
+    right: 28px;
+    top: 40px;
+    font-size: 40px;
+    color: #475569;
+  }
+  .status {
+    margin-top: 4px;
+  }
+  .status-text {
+    font-size: 20px;
+    color: #fbbf24;
+  }
+  .footer {
+    flex: 1;
+    justify-content: flex-end;
+    align-items: center;
+  }
+  .footer-text {
+    font-size: 18px;
+    color: #334155;
+  }
+</style>
+
+<script>
+import router from '@system.router'
+import { ready, getConfig } from '../../common/scripts/store.js'
+import { fetchRecords, fetchCourses } from '../../common/scripts/api.js'
+import { summarizeFocus, formatMinutes } from '../../common/scripts/focus.js'
+import { todayISO, weekdayOf, mondayOf, weekIndexFor, DAY_LABELS, courseActiveOn } from '../../common/scripts/timetable.js'
+import { demoTimetable, demoRecords } from '../../common/scripts/demo.js'
+
+export default {
+  private: {
+    headerDate: '',
+    summary: { count: 0, minutes: 0, slices: [] },
+    focusMinutesLabel: '0分钟',
+    courseCount: 0,
+    courseSubLabel: '',
+    statusMsg: ''
+  },
+
+  onInit() {
+    var d = new Date()
+    this.headerDate = (d.getMonth() + 1) + '月' + d.getDate() + '日 周' + DAY_LABELS[weekdayOf(d) - 1]
+  },
+
+  onShow() {
+    this.refresh()
+  },
+
+  refresh() {
+    var self = this
+    this.statusMsg = ''
+    ready().then(function () {
+      if (getConfig().demo) {
+        self.applyFocus(demoRecords())
+        self.applyTimetable(demoTimetable())
+        return null
+      }
+      if (!getConfig().baseUrl || !getConfig().token) {
+        self.statusMsg = '未配置服务器或令牌，请到「设置」页完成配置'
+        return null
+      }
+      var today = todayISO()
+      return Promise.all([
+        fetchRecords(today, today),
+        fetchCourses()
+      ]).then(function (r) {
+        self.applyFocus(r[0] || [])
+        self.applyTimetable(r[1])
+      }).catch(function (e) {
+        self.statusMsg = e.message || '加载失败'
+      })
+    })
+  },
+
+  applyFocus(records) {
+    this.summary = summarizeFocus(records)
+    this.focusMinutesLabel = formatMinutes(this.summary.minutes)
+  },
+
+  applyTimetable(data) {
+    var courses = (data && data.courses) || []
+    var settings = (data && data.settings) || {}
+    var weekIndex = weekIndexFor(mondayOf(new Date()), settings.week1_date)
+    var todayDay = weekdayOf(new Date())
+    var todays = courses.filter(function (c) {
+      return c.day_of_week === todayDay && courseActiveOn(c, weekIndex)
+    })
+    this.courseCount = todays.length
+    if (todays.length) {
+      this.courseSubLabel = '今天 ' + todays.length + ' 节课'
+    } else if (weekIndex <= 0) {
+      this.courseSubLabel = '未设置开学日期'
+    } else {
+      this.courseSubLabel = '今天没课，好好休息'
+    }
+  },
+
+  goFocus() {
+    router.push({ uri: '/pages/focus' })
+  },
+
+  goTimetable() {
+    router.push({ uri: '/pages/timetable' })
+  },
+
+  goSettings() {
+    router.push({ uri: '/pages/settings' })
+  }
+}
+</script>
