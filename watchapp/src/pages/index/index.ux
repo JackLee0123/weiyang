@@ -149,6 +149,9 @@
   @media (shape: pill-shaped) {
     /* 胶囊屏两端是半径 104px 的大圆弧（见 SDK 皮肤配置），四周要留出安全区 */
     .page { padding: 104px 46px; padding-bottom: 104px; }
+    /* 屏幕很高，让卡片组在剩余空间里垂直居中，不要全堆在顶部 */
+    .cards { flex: 1; justify-content: center; }
+    .footer { flex: 1; }
     .title { font-size: 58px; }
     .subtitle { font-size: 32px; }
     .settings-btn { padding: 12px 26px; border-radius: 36px; }
