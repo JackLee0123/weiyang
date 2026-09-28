@@ -238,27 +238,29 @@
 
   /* 胶囊屏（小米手环10，212x520）：更窄，字号再上调一档，左右分栏改为更窄的时间列 */
   @media (shape: pill-shaped) {
-    .page { padding: 34px 18px; }
-    .back { width: 76px; height: 76px; border-radius: 38px; }
-    .back-text { font-size: 54px; }
-    .switch-btn { width: 64px; height: 64px; border-radius: 32px; margin: 0 10px; }
-    .switch-text { font-size: 54px; }
-    .day-name { font-size: 54px; }
-    .today-badge { font-size: 30px; padding: 4px 12px; }
-    .week-info { width: 74px; }
-    .week-text { font-size: 30px; }
-    .term { font-size: 36px; }
-    .notice-text { font-size: 32px; }
-    .course-card { padding: 28px; }
-    .course-time-col { width: 190px; }
-    .course-time { font-size: 36px; }
-    .course-period { font-size: 32px; }
-    .now-badge { font-size: 32px; }
-    .course-name { font-size: 45px; }
-    .course-meta { font-size: 36px; }
-    .course-weeks { font-size: 32px; }
-    .empty-text { font-size: 38px; }
-    .msg-text { font-size: 36px; }
+    /* 胶囊屏上下都是圆弧，底部要留出安全区，否则内容会被屏幕边缘切掉 */
+    .page { padding: 30px 22px; padding-bottom: 56px; }
+    .back { width: 64px; height: 64px; border-radius: 32px; }
+    .back-text { font-size: 44px; }
+    .switch-btn { width: 54px; height: 54px; border-radius: 27px; margin: 0 8px; }
+    .switch-text { font-size: 44px; }
+    .day-name { font-size: 42px; }
+    .today-badge { font-size: 24px; padding: 3px 10px; }
+    .week-info { width: 62px; }
+    .week-text { font-size: 24px; }
+    .term { font-size: 28px; }
+    .notice-text { font-size: 25px; }
+    .course-card { padding: 24px; }
+    .course-time-col { width: 158px; }
+    .course-time { font-size: 28px; }
+    .course-period { font-size: 25px; }
+    .now-badge { font-size: 25px; }
+    .course-name { font-size: 35px; }
+    .course-meta { font-size: 28px; }
+    .course-weeks { font-size: 25px; }
+    .empty-text { font-size: 30px; }
+    .msg-bar { padding: 12px 16px; }
+    .msg-text { font-size: 27px; }
   }
 </style>
 

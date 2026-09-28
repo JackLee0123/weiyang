@@ -318,26 +318,27 @@
 
   /* 胶囊屏（小米手环10，212x520）：更窄，字号再上调一档，圆形计时器撑满宽度 */
   @media (shape: pill-shaped) {
-    .page { padding: 34px 18px; }
-    .back { width: 76px; height: 76px; border-radius: 38px; }
-    .back-text { font-size: 54px; }
-    .tab { padding: 16px 32px; }
-    .tab-text { font-size: 45px; }
-    .date-text { width: 74px; font-size: 33px; }
-    .summary { padding: 36px; }
-    .summary-num { font-size: 74px; }
-    .summary-label { font-size: 36px; }
-    .empty { font-size: 38px; }
-    .slice-label { font-size: 43px; }
-    .slice-minutes { font-size: 43px; }
-    .slice-percent { font-size: 32px; }
-    .timer-circle { width: 420px; height: 420px; border-radius: 210px; }
-    .timer-time { font-size: 118px; }
-    .timer-state { font-size: 38px; }
-    .timer-hint { font-size: 32px; }
-    .btn { width: 84%; height: 118px; border-radius: 59px; }
-    .btn-text { font-size: 44px; }
-    .msg-text { font-size: 36px; }
+    /* 胶囊屏上下都是圆弧，底部要留出安全区 */
+    .page { padding: 30px 22px; padding-bottom: 56px; }
+    .back { width: 64px; height: 64px; border-radius: 32px; }
+    .back-text { font-size: 44px; }
+    .tab { padding: 13px 26px; }
+    .tab-text { font-size: 36px; }
+    .date-text { width: 62px; font-size: 26px; }
+    .summary { padding: 30px; }
+    .summary-num { font-size: 60px; }
+    .summary-label { font-size: 29px; }
+    .empty { font-size: 30px; }
+    .slice-label { font-size: 35px; }
+    .slice-minutes { font-size: 35px; }
+    .slice-percent { font-size: 26px; }
+    .timer-circle { width: 404px; height: 404px; border-radius: 202px; }
+    .timer-time { font-size: 96px; }
+    .timer-state { font-size: 30px; }
+    .timer-hint { font-size: 26px; }
+    .btn { width: 84%; height: 104px; border-radius: 52px; }
+    .btn-text { font-size: 36px; }
+    .msg-text { font-size: 28px; }
   }
 </style>
 

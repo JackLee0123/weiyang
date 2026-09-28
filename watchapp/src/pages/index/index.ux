@@ -137,17 +137,18 @@
 
   /* 胶囊屏（小米手环10，212x520）：更窄，字号再上调一档 */
   @media (shape: pill-shaped) {
-    .page { padding: 36px 18px; }
-    .title { font-size: 74px; }
-    .subtitle { font-size: 40px; }
-    .settings-btn { padding: 14px 30px; border-radius: 40px; }
-    .settings-text { font-size: 40px; }
-    .card { padding: 48px 40px; margin-bottom: 44px; }
-    .card-title { font-size: 43px; }
-    .card-value { font-size: 78px; }
-    .card-sub { font-size: 40px; }
-    .status-text { font-size: 36px; }
-    .footer-text { font-size: 32px; }
+    /* 胶囊屏上下都是圆弧，底部要留出安全区 */
+    .page { padding: 32px 22px; padding-bottom: 58px; }
+    .title { font-size: 58px; }
+    .subtitle { font-size: 32px; }
+    .settings-btn { padding: 12px 26px; border-radius: 36px; }
+    .settings-text { font-size: 32px; }
+    .card { padding: 38px 34px; margin-bottom: 34px; }
+    .card-title { font-size: 34px; }
+    .card-value { font-size: 62px; }
+    .card-sub { font-size: 32px; }
+    .status-text { font-size: 28px; }
+    .footer-text { font-size: 25px; }
   }
 </style>
 

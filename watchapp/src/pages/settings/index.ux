@@ -190,24 +190,25 @@
 
   /* 胶囊屏（小米手环10，212x520）：更窄，字号再上调一档，按钮撑满宽度 */
   @media (shape: pill-shaped) {
-    .page { padding: 34px 18px; }
-    .title { font-size: 62px; }
-    .back { width: 76px; height: 76px; border-radius: 38px; }
-    .back-text { font-size: 54px; }
-    .label { font-size: 42px; }
-    .btn { height: 128px; border-radius: 64px; margin-top: 30px; }
-    .btn-text { font-size: 48px; }
-    .account { margin-top: 30px; }
-    .account-label { font-size: 42px; }
-    .account-value { font-size: 42px; }
-    .msg { font-size: 42px; }
-    .help { margin-top: 34px; padding: 32px; }
-    .help-title { font-size: 44px; }
-    .help-line { font-size: 33px; }
-    .demo-row { margin-top: 34px; }
-    .switch { width: 112px; height: 60px; border-radius: 30px; }
-    .knob { width: 50px; height: 50px; border-radius: 25px; }
-    .knob-on { margin-left: 52px; }
+    /* 胶囊屏上下都是圆弧，底部要留出安全区 */
+    .page { padding: 30px 22px; padding-bottom: 56px; }
+    .title { font-size: 50px; }
+    .back { width: 64px; height: 64px; border-radius: 32px; }
+    .back-text { font-size: 44px; }
+    .label { font-size: 33px; }
+    .btn { height: 108px; border-radius: 54px; margin-top: 26px; }
+    .btn-text { font-size: 40px; }
+    .account { margin-top: 26px; }
+    .account-label { font-size: 33px; }
+    .account-value { font-size: 33px; }
+    .msg { font-size: 33px; }
+    .help { margin-top: 28px; padding: 28px; }
+    .help-title { font-size: 37px; }
+    .help-line { font-size: 28px; }
+    .demo-row { margin-top: 28px; }
+    .switch { width: 100px; height: 54px; border-radius: 27px; }
+    .knob { width: 44px; height: 44px; border-radius: 22px; }
+    .knob-on { margin-left: 46px; }
   }
 </style>
 

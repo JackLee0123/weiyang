@@ -199,24 +199,25 @@
 
   /* 胶囊屏（小米手环10，212x520）：屏幕更窄，二维码要占满宽度，字号再上调一档 */
   @media (shape: pill-shaped) {
-    .page { padding: 34px 16px; }
-    .title { font-size: 62px; }
-    .back { width: 76px; height: 76px; border-radius: 38px; }
-    .back-text { font-size: 54px; }
-    .qr-wrap { width: 404px; height: 404px; padding: 18px; }
-    .qr { width: 368px; height: 368px; }
-    .code { font-size: 64px; letter-spacing: 10px; }
-    .muted { font-size: 42px; }
-    .err { font-size: 42px; }
-    .hint { font-size: 36px; }
-    .hint-dim { font-size: 32px; }
-    .refresh-text { font-size: 36px; }
-    .done-mark { width: 130px; height: 130px; border-radius: 65px; }
-    .done-mark-text { font-size: 70px; }
-    .done-title { font-size: 58px; }
-    .done-name { font-size: 42px; }
-    .btn { width: 82%; height: 118px; border-radius: 59px; }
-    .btn-text { font-size: 42px; }
+    /* 胶囊屏上下都是圆弧，底部要留出安全区 */
+    .page { padding: 30px 20px; padding-bottom: 56px; }
+    .title { font-size: 50px; }
+    .back { width: 64px; height: 64px; border-radius: 32px; }
+    .back-text { font-size: 44px; }
+    .qr-wrap { width: 386px; height: 386px; padding: 16px; }
+    .qr { width: 354px; height: 354px; }
+    .code { font-size: 52px; letter-spacing: 8px; }
+    .muted { font-size: 34px; }
+    .err { font-size: 34px; }
+    .hint { font-size: 29px; }
+    .hint-dim { font-size: 25px; }
+    .refresh-text { font-size: 29px; }
+    .done-mark { width: 116px; height: 116px; border-radius: 58px; }
+    .done-mark-text { font-size: 60px; }
+    .done-title { font-size: 48px; }
+    .done-name { font-size: 34px; }
+    .btn { width: 82%; height: 104px; border-radius: 52px; }
+    .btn-text { font-size: 36px; }
   }
 </style>
 
