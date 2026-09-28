@@ -10,18 +10,18 @@
         </div>
         <div class="day-title">
           <text class="day-name">周{{dayLabel}}</text>
-          <text if="{{isToday}}" class="today-badge">今天</text>
+          <text if="{{isToday && !capsule}}" class="today-badge">今天</text>
         </div>
         <div class="switch-btn" onclick="nextDay">
           <text class="switch-text">›</text>
         </div>
       </div>
-      <div class="week-info">
+      <div class="week-info" show="{{!capsule}}">
         <text class="week-text">{{weekLabel}}</text>
       </div>
     </div>
 
-    <text if="{{termLabel}}" class="term">{{termLabel}}</text>
+    <text if="{{termLine}}" class="term">{{termLine}}</text>
 
     <div if="{{!hasWeek1}}" class="notice">
       <text class="notice-text">后端未设置开学第 1 周日期，周次与过滤可能不准确</text>
@@ -219,11 +219,11 @@
   @media (shape: pill-shaped) {
     /* 胶囊屏两端是半径 104px 的大圆弧（见 SDK 皮肤配置），四周要留出安全区 */
     .page { padding: 104px 46px; padding-bottom: 104px; }
-    .back { width: 64px; height: 64px; border-radius: 32px; }
-    .back-text { font-size: 44px; }
-    .switch-btn { width: 54px; height: 54px; border-radius: 27px; margin: 0 8px; }
-    .switch-text { font-size: 44px; }
-    .day-name { font-size: 42px; }
+    .back { width: 56px; height: 56px; border-radius: 28px; }
+    .back-text { font-size: 40px; }
+    .switch-btn { width: 48px; height: 48px; border-radius: 24px; margin: 0 8px; }
+    .switch-text { font-size: 40px; }
+    .day-name { font-size: 40px; }
     .today-badge { font-size: 24px; padding: 3px 10px; }
     .week-info { width: 62px; }
     .week-text { font-size: 24px; }
@@ -244,6 +244,7 @@
 import router from '@system.router'
 import { ready, getConfig } from '../../common/scripts/store.js'
 import { fetchCourses } from '../../common/scripts/api.js'
+import { initDeviceInfo, isCapsule } from '../../common/scripts/device.js'
 import {
   DAY_LABELS, mondayOf, weekdayOf, weekIndexFor,
   courseActiveOn, decorateCourse, nowMinutes
@@ -257,6 +258,8 @@ export default {
     dayLabel: '一',
     weekLabel: '',
     termLabel: '',
+    termLine: '',
+    capsule: false,
     hasWeek1: true,
     courses: [],
     periodTimes: [],
@@ -270,6 +273,11 @@ export default {
     this.day = weekdayOf(today)
     this.isToday = true
     this.dayLabel = DAY_LABELS[this.day - 1]
+    var self = this
+    initDeviceInfo().then(function () {
+      self.capsule = isCapsule()
+      self.updateTermLine()
+    })
     this.load()
   },
 
@@ -301,7 +309,17 @@ export default {
     this.hasWeek1 = !!settings.week1_date
     this.weekIndex = weekIndexFor(mondayOf(new Date()), settings.week1_date)
     this.weekLabel = this.weekIndex > 0 ? '第' + this.weekIndex + '周' : ''
+    this.updateTermLine()
     this.renderDay()
+  },
+
+  // 胶囊屏顶栏放不下单独的周次列，把周次并到学期这一行
+  updateTermLine() {
+    if (this.capsule && this.weekLabel) {
+      this.termLine = this.weekLabel + ' · ' + this.termLabel
+    } else {
+      this.termLine = this.termLabel
+    }
   },
 
   renderDay() {

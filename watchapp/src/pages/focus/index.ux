@@ -318,9 +318,9 @@
     .page { padding: 104px 46px; padding-bottom: 104px; }
     .back { width: 64px; height: 64px; border-radius: 32px; }
     .back-text { font-size: 44px; }
-    .tab { padding: 13px 26px; }
-    .tab-text { font-size: 36px; }
-    .date-text { width: 62px; font-size: 26px; }
+    .tab { padding: 10px 18px; }
+    .tab-text { font-size: 32px; }
+    .date-text { width: 54px; font-size: 24px; }
     .summary { padding: 30px; }
     .summary-num { font-size: 60px; }
     .summary-label { font-size: 29px; }
