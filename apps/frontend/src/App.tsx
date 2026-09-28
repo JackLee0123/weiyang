@@ -31,6 +31,21 @@ function initialView(): View {
   return 'today'
 }
 
+/**
+ * 从地址栏里读配对用的连接码。
+ * `npm run sync` 会直接打开 `/?code=123456`，这样用户点一下「连接」就行，
+ * 不用再把终端里的 6 位码抄一遍。
+ */
+function readPairCode(): string {
+  if (typeof window === 'undefined') return ''
+  const params = new URLSearchParams(window.location.search)
+  for (const key of ['code', 'pair', 'c']) {
+    const value = params.get(key)
+    if (value) return value
+  }
+  return ''
+}
+
 export default function App() {
   const [view, setView] = useState<View>(initialView)
   const [date, setDate] = useState(todayISO())
@@ -39,6 +54,7 @@ export default function App() {
   const [showNotifications, setShowNotifications] = useState(false)
   const [showBackup, setShowBackup] = useState(false)
   const [showDevices, setShowDevices] = useState(false)
+  const [pairCode] = useState(readPairCode)
   const [isAuthed, setIsAuthed] = useState(() => typeof window !== 'undefined' && !!getToken())
   const { theme, toggleTheme } = useTheme()
   const [user, setUser] = useState<StoredUser | null>(() => getStoredUser())
@@ -51,6 +67,15 @@ export default function App() {
     }
     return onAuthChange(sync)
   }, [])
+
+  // 链接里带连接码时自动打开「设备连接」，并清掉地址栏参数，避免刷新时重复触发。
+  useEffect(() => {
+    if (!pairCode || !isAuthed) return
+    setShowDevices(true)
+    const url = new URL(window.location.href)
+    for (const key of ['code', 'pair', 'c']) url.searchParams.delete(key)
+    window.history.replaceState({}, '', url.pathname + url.search + url.hash)
+  }, [pairCode, isAuthed])
 
   useEffect(() => {
     if (!isAuthed) return
@@ -164,7 +189,7 @@ export default function App() {
       )}
       {showDevices && (
         <Modal title="设备连接" onClose={() => setShowDevices(false)}>
-          <DeviceConnectPanel />
+          <DeviceConnectPanel initialCode={pairCode} />
         </Modal>
       )}
     </div>

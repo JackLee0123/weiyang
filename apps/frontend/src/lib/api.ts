@@ -86,6 +86,30 @@ function qs(params: Record<string, string | number | undefined>): string {
   return '?' + new URLSearchParams(entries as [string, string][]).toString()
 }
 
+/** 下载类接口：成功时拿的是文件流，失败时后端仍然返回 JSON 错误。 */
+async function requestBlob(path: string, options: RequestInit = {}): Promise<Blob> {
+  const token = getToken()
+  const headers = new Headers(options.headers)
+  if (token) headers.set('Authorization', `Bearer ${token}`)
+  const res = await fetch(`${BASE}${path}`, { ...options, headers })
+  if (!res.ok) {
+    let detail: unknown = res.statusText
+    try {
+      const body = await res.json()
+      detail = body.detail ?? detail
+      if (detail && typeof detail === 'object') {
+        const shaped = detail as { msg?: string; message?: string }
+        detail = shaped.msg ?? shaped.message ?? '请求失败'
+      }
+    } catch {
+      /* ignore */
+    }
+    if (res.status === 401) clearAuth()
+    throw new ApiError(String(detail), res.status)
+  }
+  return res.blob()
+}
+
 export const api = {
   createCaptcha() {
     return request<CaptchaChallenge>('/captcha', { method: 'POST' })
@@ -130,6 +154,14 @@ export const api = {
   /** 解绑设备（吊销其访问令牌）。 */
   revokeDevice(id: number) {
     return request<void>(`/devices/${id}`, { method: 'DELETE' })
+  },
+  /** 手环安装包：服务端是否具备打包条件（缺 Node / 依赖 / 签名时给出原因）。 */
+  watchAppBuildStatus() {
+    return request<{ available: boolean; reason: string }>('/devices/watchapp/status')
+  },
+  /** 手环安装包：用当前账号的课表在服务端打包，返回 rpk 文件流。 */
+  buildWatchApp() {
+    return requestBlob('/devices/watchapp/build', { method: 'POST' })
   },
 
   fetchPlans(params: { start?: string; end?: string; status?: string; category?: string; q?: string } = {}) {

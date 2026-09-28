@@ -10,14 +10,17 @@ from datetime import timedelta
 from typing import Optional
 
 from fastapi import APIRouter, Depends, Header, HTTPException, Request, Response
+from fastapi.responses import FileResponse
 from sqlalchemy import select
 from sqlalchemy.orm import Session
+from starlette.background import BackgroundTask
 
 from .. import models, repository, schemas
 from ..config import settings
 from ..database import get_db
 from ..deps import get_current_user
 from ..models import now_utc
+from ..services import watchapp as watchapp_service
 from ..services.net import client_ip
 from ..services.ratelimit import rate_limiter
 from ..services.security import hash_token, new_token
@@ -284,3 +287,45 @@ def revoke_device(
     db.delete(token)
     db.commit()
     return Response(status_code=204)
+
+
+@router.get("/watchapp/status")
+def watchapp_build_status(current_user=Depends(get_current_user)):
+    """服务端是否具备打手环安装包的条件（前端据此显示/隐藏按钮）。"""
+    available, reason = watchapp_service.toolchain_status()
+    return {"available": available, "reason": reason}
+
+
+@router.post("/watchapp/build")
+def build_watchapp(
+    current_user=Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    """用当前账号的课表打一个手环安装包，直接下载。
+
+    手环 10 的快应用不能联网，课表只能随包带进去，所以这一步是「服务端替你跑
+    一次 npm run sync + aiot build」，出来的 rpk 下载后用 AstroBox 推到手环即可。
+    """
+    available, reason = watchapp_service.toolchain_status()
+    if not available:
+        raise HTTPException(status_code=503, detail=reason)
+
+    if not rate_limiter.allow(
+        f"watchapp:build:{current_user.id}",
+        settings.watchapp_build_limit,
+        settings.watchapp_build_window_seconds,
+    ):
+        raise HTTPException(status_code=429, detail="打包太频繁了，请稍后再试")
+
+    try:
+        rpk_path = watchapp_service.build_for_user(db, current_user)
+    except watchapp_service.WatchAppBuildError as exc:
+        raise HTTPException(status_code=503, detail=str(exc)) from exc
+
+    return FileResponse(
+        rpk_path,
+        media_type="application/octet-stream",
+        filename=watchapp_service.download_name(current_user),
+        # 响应发完再删临时目录，避免下载到一半文件就没了。
+        background=BackgroundTask(watchapp_service.cleanup, rpk_path),
+    )

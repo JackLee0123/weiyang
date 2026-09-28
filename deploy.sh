@@ -19,6 +19,15 @@ pnpm install --prefer-offline
 echo "[deploy] build frontend"
 pnpm build:frontend
 
+echo "[deploy] watchapp deps（供服务端打包手环安装包）"
+cd watchapp
+npm install --no-audit --no-fund --loglevel=error
+# 后端以 www 身份跑打包：依赖目录和临时构建目录都得归它，否则 aiot 连
+# node_modules 里的 aapt 二进制都 chmod 不了（EPERM）
+mkdir -p .build
+chown -R www:www node_modules .build
+cd ..
+
 echo "[deploy] backend uv sync + migrations"
 cd backend
 "$HOME/.local/bin/uv" sync

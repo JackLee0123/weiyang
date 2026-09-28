@@ -9,6 +9,8 @@ vi.mock('../lib/api', () => ({
     deviceHandshake: vi.fn(),
     approveDeviceHandshake: vi.fn(),
     revokeDevice: vi.fn(),
+    watchAppBuildStatus: vi.fn(),
+    buildWatchApp: vi.fn(),
   },
 }))
 
@@ -20,6 +22,8 @@ const fetchDevices = vi.mocked(api.fetchDevices)
 const deviceHandshake = vi.mocked(api.deviceHandshake)
 const approveDeviceHandshake = vi.mocked(api.approveDeviceHandshake)
 const revokeDevice = vi.mocked(api.revokeDevice)
+const watchAppBuildStatus = vi.mocked(api.watchAppBuildStatus)
+const buildWatchApp = vi.mocked(api.buildWatchApp)
 
 const WATCH = {
   id: 7,
@@ -34,6 +38,21 @@ describe('DeviceConnectPanel', () => {
   beforeEach(() => {
     vi.clearAllMocks()
     fetchDevices.mockResolvedValue([])
+    watchAppBuildStatus.mockResolvedValue({ available: true, reason: '' })
+  })
+
+  it('可以一键生成并下载手环安装包', async () => {
+    const createObjectURL = vi.fn(() => 'blob:mock')
+    Object.defineProperty(URL, 'createObjectURL', { value: createObjectURL, configurable: true })
+    Object.defineProperty(URL, 'revokeObjectURL', { value: vi.fn(), configurable: true })
+    buildWatchApp.mockResolvedValue(new Blob(['rpk'], { type: 'application/octet-stream' }))
+
+    render(<DeviceConnectPanel />)
+    fireEvent.click(await screen.findByRole('button', { name: /生成并下载 rpk/ }))
+
+    await waitFor(() => expect(buildWatchApp).toHaveBeenCalled())
+    expect(await screen.findByText(/接着用 AstroBox 把它推送到手环/)).toBeInTheDocument()
+    expect(createObjectURL).toHaveBeenCalled()
   })
 
   it('列出已连接的手环', async () => {
@@ -55,6 +74,20 @@ describe('DeviceConnectPanel', () => {
 
     await waitFor(() => expect(approveDeviceHandshake).toHaveBeenCalledWith('123456'))
     expect(await screen.findByText(/已连接到你的账号/)).toBeInTheDocument()
+  })
+
+  it('链接里带连接码时自动进入确认流程', async () => {
+    deviceHandshake.mockResolvedValue({
+      code: '654321',
+      device_label: '课表同步脚本',
+      status: 'pending',
+      expires_in: 300,
+    })
+
+    render(<DeviceConnectPanel initialCode="654321" />)
+
+    expect(await screen.findByText(/确认把「课表同步脚本」连接到当前账号/)).toBeInTheDocument()
+    expect(deviceHandshake).toHaveBeenCalledWith('654321')
   })
 
   it('解绑手环后从列表移除', async () => {

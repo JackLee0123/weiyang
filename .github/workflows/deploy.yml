@@ -35,6 +35,10 @@ jobs:
             --exclude "__pycache__" \
             --exclude ".build" \
             --exclude ".github" \
+            --exclude "watchapp/sign" \
+            --exclude ".temp_watchapp" \
+            --exclude ".sync-token.json" \
+            --exclude "*.log" \
             ./ "root@${HOST}:${REMOTE_DIR}/"
 
           echo "[deploy] running deploy.sh on server"

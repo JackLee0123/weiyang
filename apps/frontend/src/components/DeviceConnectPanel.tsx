@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { CheckCircle2, Loader2, RefreshCw, ScanLine, Smartphone, Trash2, Watch } from 'lucide-react'
+import { Package } from 'lucide-react'
 import { api } from '../lib/api'
 import { deviceKindLabel, deviceTitle, formatDeviceTime, parseConnectPayload } from '../lib/devices'
 import type { ConnectedDevice } from '../lib/types'
@@ -14,10 +15,20 @@ interface Pending {
 }
 
 /**
- * 设备连接：手环上打开「连接账户」显示二维码，这里扫码确认即可把这块手环
- * 绑定到当前账号；没有摄像头时也可以手动输入手环上的 6 位连接码。
+ * 设备连接。
+ *
+ * 主要用途是给「课表同步脚本」配对：手环 10 的快应用不支持联网，课表要靠
+ * `watchapp` 目录下的 `npm run sync` 打包进安装包。脚本会打印并直接打开一个
+ * 带 `?code=` 的链接，在这里点一下「连接」就完成授权，不用再手抄连接码。
+ *
+ * 扫码 / 手动输入 6 位连接码的入口保留着，方便其他形态的设备接入。
  */
-export function DeviceConnectPanel() {
+interface DeviceConnectPanelProps {
+  /** 链接里带来的连接码：打开面板后自动进入确认流程。 */
+  initialCode?: string
+}
+
+export function DeviceConnectPanel({ initialCode }: DeviceConnectPanelProps = {}) {
   const [scanning, setScanning] = useState(false)
   const [manual, setManual] = useState('')
   const [stage, setStage] = useState<Stage>('idle')
@@ -27,6 +38,9 @@ export function DeviceConnectPanel() {
   const [now, setNow] = useState(() => Date.now())
   const [devices, setDevices] = useState<ConnectedDevice[] | null>(null)
   const [busyId, setBusyId] = useState<number | null>(null)
+  const [buildStatus, setBuildStatus] = useState<{ available: boolean; reason: string } | null>(null)
+  const [building, setBuilding] = useState(false)
+  const [buildNotice, setBuildNotice] = useState('')
   const timerRef = useRef<number | null>(null)
 
   const loadDevices = useCallback(async () => {
@@ -40,6 +54,21 @@ export function DeviceConnectPanel() {
   useEffect(() => {
     void loadDevices()
   }, [loadDevices])
+
+  useEffect(() => {
+    let active = true
+    api
+      .watchAppBuildStatus()
+      .then((status) => {
+        if (active) setBuildStatus(status)
+      })
+      .catch(() => {
+        if (active) setBuildStatus({ available: false, reason: '暂时获取不到打包状态' })
+      })
+    return () => {
+      active = false
+    }
+  }, [])
 
   useEffect(() => {
     timerRef.current = window.setInterval(() => setNow(Date.now()), 1000)
@@ -81,6 +110,15 @@ export function DeviceConnectPanel() {
     },
     [],
   )
+
+  const autoResolved = useRef(false)
+  useEffect(() => {
+    if (autoResolved.current || !initialCode) return
+    const code = parseConnectPayload(initialCode)
+    if (!code) return
+    autoResolved.current = true
+    void resolveCode(code)
+  }, [initialCode, resolveCode])
 
   const onScanned = useCallback(
     (raw: string) => {
@@ -135,6 +173,32 @@ export function DeviceConnectPanel() {
     }
   }
 
+  /** 让服务端用当前账号的课表打一个包，然后把 rpk 下载下来。 */
+  const buildPackage = async () => {
+    setBuilding(true)
+    setError('')
+    setBuildNotice('')
+    try {
+      const blob = await api.buildWatchApp()
+      const url = URL.createObjectURL(blob)
+      const now = new Date()
+      const pad = (n: number) => String(n).padStart(2, '0')
+      const link = document.createElement('a')
+      link.href = url
+      link.download = `everlong-watch-${now.getFullYear()}${pad(now.getMonth() + 1)}${pad(now.getDate())}.rpk`
+      document.body.appendChild(link)
+      link.click()
+      link.remove()
+      // 立刻 revoke 会让部分浏览器把下载掐掉，留一点时间。
+      window.setTimeout(() => URL.revokeObjectURL(url), 10000)
+      setBuildNotice('已开始下载，接着用 AstroBox 把它推送到手环')
+    } catch (err) {
+      setError(describeError(err))
+    } finally {
+      setBuilding(false)
+    }
+  }
+
   const remain = pending ? Math.max(0, Math.floor((pending.expiresAt - now) / 1000)) : 0
   const expired = pending !== null && remain <= 0
   const watches = devices?.filter((item) => item.device_kind === 'watch') ?? []
@@ -144,8 +208,13 @@ export function DeviceConnectPanel() {
       <div className="flex items-start gap-3 rounded-md border border-line bg-surface-soft p-3 dark:border-slate-700 dark:bg-slate-900/50">
         <Watch size={18} className="mt-0.5 shrink-0 text-brand-ink dark:text-teal-300" />
         <div className="text-sm leading-relaxed text-ink-soft dark:text-slate-300">
-          <p className="font-medium text-ink dark:text-slate-100">用手环扫码连接</p>
-          <p className="mt-1">在手环上打开「设置 → 连接账户」，手环会显示一个二维码；用手机扫一下并确认，就完成连接。</p>
+          <p className="font-medium text-ink dark:text-slate-100">连接课表同步脚本</p>
+          <p className="mt-1">
+            小米手环 10 的快应用不支持联网（官方支持表里 system.fetch / system.network 一律「不支持」），
+            所以手环上的课表改由打包时注入：在电脑上进入 watchapp 目录跑 <code>npm run sync</code>，
+            脚本会打开一个带连接码的页面，在这里点一次「连接」，它就能把你的课表写进安装包。
+          </p>
+          <p className="mt-1">跑完脚本后接着 <code>npm run build</code>，再用 AstroBox 把 dist 里的 rpk 推到手环即可。</p>
         </div>
       </div>
 
@@ -159,7 +228,8 @@ export function DeviceConnectPanel() {
 
       {stage === 'done' && (
         <div className="rounded-md border border-brand/40 bg-brand-soft/40 p-3 text-sm text-brand-ink dark:border-teal-700 dark:bg-teal-900/20 dark:text-teal-200">
-          手环会在一两秒内自动进入首页，之后在「当日专注」和「课表」里就能直接用了。
+          脚本已经拿到访问令牌。回到终端继续跑 <code>npm run build</code>，然后用 AstroBox 把 dist 里的 rpk 推到手环；
+          手环上的课表是打包时的快照，课表变了要重跑一次。
         </div>
       )}
 
@@ -204,7 +274,7 @@ export function DeviceConnectPanel() {
           </button>
 
           <div className="rounded-md border border-dashed border-line-strong p-3 dark:border-slate-600">
-            <p className="text-xs text-ink-muted dark:text-slate-400">没有摄像头？输入手环上显示的 6 位连接码：</p>
+            <p className="text-xs text-ink-muted dark:text-slate-400">也可以手动输入 6 位连接码（脚本或手环屏幕上显示的）：</p>
             <div className="mt-2 flex gap-2">
               <input
                 className="field flex-1"
@@ -224,6 +294,40 @@ export function DeviceConnectPanel() {
           </div>
         </div>
       )}
+
+      <div className="space-y-3 rounded-md border border-line bg-surface-soft p-3 dark:border-slate-700 dark:bg-slate-900/50">
+        <div className="flex items-start gap-3">
+          <Package size={18} className="mt-0.5 shrink-0 text-brand-ink dark:text-teal-300" />
+          <div className="text-sm leading-relaxed text-ink-soft dark:text-slate-300">
+            <p className="font-medium text-ink dark:text-slate-100">生成手环安装包</p>
+            <p className="mt-1">
+              服务端会用你当前的课表打一个包：课表随包带进去，手环本身不联网。下载下来用 AstroBox
+              推送到手环即可，自己电脑上不用装开发环境。
+            </p>
+          </div>
+        </div>
+
+        {buildStatus && !buildStatus.available && (
+          <p className="text-xs text-ink-muted dark:text-slate-400">{buildStatus.reason}</p>
+        )}
+
+        <button
+          type="button"
+          className="btn-primary w-full justify-center"
+          onClick={() => void buildPackage()}
+          disabled={building || buildStatus?.available === false}
+        >
+          {building ? <Loader2 size={16} className="animate-spin" /> : <Package size={16} />}
+          {building ? '正在打包，约 10 秒…' : '生成并下载 rpk'}
+        </button>
+
+        {buildNotice && (
+          <p className="flex items-center gap-1.5 text-xs text-brand-ink dark:text-teal-300">
+            <CheckCircle2 size={13} />
+            {buildNotice}
+          </p>
+        )}
+      </div>
 
       <div className="space-y-2">
         <div className="flex items-center justify-between">

@@ -107,17 +107,38 @@ python .build/e2e.py
   `apps/frontend/public/sw.js`（离线缓存外壳；`/api` 请求始终走网络，不写入缓存）。
 - 图标取自品牌图标，构建前端时(`pnpm build:frontend`)会一并打包，无需额外配置。
 
-## 手环连接（扫码）
+## 手环端（Xiaomi Vela 快应用，离线快照）
 
-小米手环端见 `watchapp/`（Xiaomi Vela 快应用）。连接由**手环发起**：
+小米手环端见 `watchapp/`。**手环 10 的快应用拿不到联网能力**——官方支持表里
+`system.fetch`、`system.request`、`system.uploadtask`、`system.network` 一律
+「不支持」，只有 Xiaomi Watch S3/S4/S5、REDMI Watch 5/6、小米 S1 Pro 这类手表支持。
+因此手环端不做运行期联网，改成「打包时注入 + 本机记录」：
 
-1. 手环上打开「设置 → 连接账户」，显示一个二维码（5 分钟内有效）。
-2. 手机打开网页端 → 侧栏「设备连接」→「扫码连接手环」，扫手环上的二维码。
-3. 手机上核对设备名后点「连接」，手环自动拿到访问令牌并显示「已连接」。
+- **课表 / 学期设置**：由同步脚本从后端拉一次，写进安装包，随包推进手环；
+- **专注计时**：只记在手环本地（`@system.storage`），不上传，也不与网页端合并。
 
-手机端优先使用系统自带的二维码识别（Android Chrome/Edge），不支持时（iOS Safari 等）
-自动加载 jsQR 在页面里解码；没有摄像头也可以直接输入手环上的 6 位连接码。
-「设备连接」里同时能看到已连接的手环并解绑，解绑后手环令牌立即失效。
+更新数据（学期初或课表变动后跑一次）：
+
+**最省事的方式**：登录网页端 → 侧栏「设备连接」→「生成并下载 rpk」，服务端会用你
+当前的课表打好一个包直接给你下载，然后 AstroBox 推送到手环即可（需要服务端装了
+Node、watchapp 依赖和固定签名，见 `deploy.sh`）。
+
+不想用在线打包、或者要自己改样式，就在本地跑：
+
+```bash
+cd watchapp
+npm run sync     # 首次会自动打开确认链接，在网页端「设备连接」里点一下「连接」
+npm run build    # 产出 dist/cn.everlong.watch.debug.<版本>.rpk
+# 用 AstroBox 把这个 rpk 推到手环
+```
+
+同步脚本复用的还是原来的设备配对链路，令牌缓存在 `watchapp/.sync-token.json`
+（默认 30 天，已 gitignore）。网页端「设备连接」面板现在主要就是给同步脚本配对
+和解绑用的；解绑后缓存令牌立即失效，重跑 `npm run sync` 会自动重新配对。
+
+其他用户（或你自己的另一台手环）怎么从头装一遍，见 `watchapp/README.md`
+的「给其他用户：从零到装上」一节：装 Node.js + AstroBox → `npm run sync`
+（网页端点一次「连接」）→ `npm run build` → 用 AstroBox 推送 rpk。
 
 相关接口（完整清单见文末 API 一览）：
 
@@ -223,12 +244,14 @@ uv run alembic upgrade head
 | GET/DELETE | `/api/timetable/courses` / `/api/timetable/courses/:id` | 查询 / 删除课表课程 |
 | GET/PATCH | `/api/timetable/settings` | 读写学期、开学第 1 周、各节次时间 |
 | POST | `/api/timetable/generate-plans` | 把某周课程批量生成到日历计划 |
-| POST | `/api/devices/handshake` | 手环发起连接，生成一次性短码（无需登录） |
+| POST | `/api/devices/handshake` | 设备端发起连接（手环同步脚本用它配对），生成一次性短码（无需登录） |
 | GET | `/api/devices/handshake/:code` | 查看待确认的手环连接 |
 | POST | `/api/devices/handshake/:code/approve` | 确认把手机扫到的手环绑定到当前账号 |
 | POST | `/api/devices/handshake/:code/poll` | 手环轮询领取访问令牌 |
 | GET | `/api/devices` | 已连接设备列表（手环 + 浏览器登录） |
 | DELETE | `/api/devices/:id` | 解绑设备 |
+| GET | `/api/devices/watchapp/status` | 服务端是否具备打手环安装包的条件 |
+| POST | `/api/devices/watchapp/build` | 用当前账号的课表打包，直接下载 rpk |
 
 除 `health`、`auth` 与手环连接的 `handshake` / `poll`（手环端尚未登录，凭一次性
 `poll_token` 领取令牌）之外，其余接口都需要在请求头携带 `Authorization: Bearer <token>`，
