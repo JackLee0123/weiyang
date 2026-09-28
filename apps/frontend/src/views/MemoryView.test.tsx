@@ -58,9 +58,8 @@ describe('MemoryView', () => {
     expect(screen.getByText('回忆')).toBeInTheDocument()
     expect(screen.getByText('3 段')).toBeInTheDocument()
     expect(screen.getByText('写周报')).toBeInTheDocument()
-    // 完成率与今日页同口径，并把自建计划与记一笔摊开
+    // 完成率与今日页同口径（自建计划 + 记一笔）
     expect(screen.getByText('60%')).toBeInTheDocument()
-    expect(screen.getByText('计划 1/2 · 记录 2/3')).toBeInTheDocument()
   })
 
   it('switches to monthly report and shows the month label', () => {

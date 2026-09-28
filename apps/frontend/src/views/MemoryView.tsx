@@ -125,26 +125,15 @@ export function MemoryView() {
                 <span className="ml-auto text-xs text-ink-muted dark:text-slate-400">{report.total_plans} 项</span>
               </header>
               <div className="mt-3 grid grid-cols-2 gap-3">
-                {(
-                  [
-                    { label: '已抵达', value: report.done_plans },
-                    { label: '未央', value: report.unfinished_plans },
-                    { label: '改道', value: report.cancelled_plans },
-                    {
-                      label: '完成率',
-                      value: `${Math.round(report.completion_rate * 100)}%`,
-                      // 与今日页同口径：完成率只看自建计划与「记一笔」，这里把两组数字摊开
-                      hint:
-                        report.self_plans + report.records_count > 0
-                          ? `计划 ${report.self_done_plans}/${report.self_plans} · 记录 ${report.done_records}/${report.records_count}`
-                          : '还没有自建计划或记一笔',
-                    },
-                  ] as { label: string; value: string | number; hint?: string }[]
-                ).map((item) => (
+                {[
+                  { label: '已抵达', value: report.done_plans },
+                  { label: '未央', value: report.unfinished_plans },
+                  { label: '改道', value: report.cancelled_plans },
+                  { label: '完成率', value: `${Math.round(report.completion_rate * 100)}%` },
+                ].map((item) => (
                   <div key={item.label}>
                     <p className="text-xs text-ink-muted dark:text-slate-400">{item.label}</p>
                     <p className="mt-0.5 text-lg font-semibold text-ink dark:text-slate-100">{item.value}</p>
-                    {item.hint && <p className="mt-0.5 text-[11px] text-ink-faint dark:text-slate-500">{item.hint}</p>}
                   </div>
                 ))}
               </div>
