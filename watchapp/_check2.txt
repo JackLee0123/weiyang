@@ -1,0 +1,3 @@
+aiot-toolkit: True
+version: 2.0.5
+bin: {"aiot":"lib/bin.js"}

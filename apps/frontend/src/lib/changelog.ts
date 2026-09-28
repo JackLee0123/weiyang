@@ -12,7 +12,7 @@ export interface ChangelogEntry {
   items: ChangelogItem[]
 }
 
-export const CURRENT_VERSION = 'v0.6.0'
+export const CURRENT_VERSION = 'v0.7.0'
 
 export const CHANGELOG_KIND_META: Record<ChangelogKind, { label: string; className: string }> = {
   feature: { label: '新增', className: 'bg-teal-50 text-teal-700 dark:bg-teal-500/15 dark:text-teal-300' },
@@ -22,6 +22,20 @@ export const CHANGELOG_KIND_META: Record<ChangelogKind, { label: string; classNa
 }
 
 export const CHANGELOG: ChangelogEntry[] = [
+  {
+    version: 'v0.7.0',
+    date: '2026-09-28',
+    title: '手环端与扫码连接',
+    items: [
+      { kind: 'feature', text: '新增小米手环端应用（Vela 快应用）：当日专注查看与计时、课表按周查看，适配小米手环 10（胶囊屏）与手环 10 Pro（矩形屏）' },
+      { kind: 'feature', text: '新增手环扫码连接：手环上显示二维码，手机端「设备连接」扫一下即可绑定，不用在手表上输入任何内容' },
+      { kind: 'feature', text: '「设备连接」可查看已连接的手环并解绑；扫码识别在 Android 用系统能力，iOS 等浏览器自动回退到内置解码，并保留手输 6 位码兜底' },
+      { kind: 'feature', text: '手环端新增亮色主题，设置页可切换，选择保存在手环本地' },
+      { kind: 'feature', text: '专注记录默认按 a、b、c 依次命名，在网页端或 PWA 里可以直接改名' },
+      { kind: 'improvement', text: '「当日专注」的分段改为按行展示：每段一行、带进度条与占比，比原来的并排卡片更清楚' },
+      { kind: 'notice', text: '手环端需用 AIoT-IDE 打包安装；小米官方目前仅对合作方开放第三方应用安装通道' },
+    ],
+  },
   {
     version: 'v0.6.0',
     date: '2026-09-27',
