@@ -12,7 +12,7 @@ export interface ChangelogEntry {
   items: ChangelogItem[]
 }
 
-export const CURRENT_VERSION = 'v0.7.0'
+export const CURRENT_VERSION = 'v0.8.0'
 
 export const CHANGELOG_KIND_META: Record<ChangelogKind, { label: string; className: string }> = {
   feature: { label: '新增', className: 'bg-teal-50 text-teal-700 dark:bg-teal-500/15 dark:text-teal-300' },
@@ -22,6 +22,41 @@ export const CHANGELOG_KIND_META: Record<ChangelogKind, { label: string; classNa
 }
 
 export const CHANGELOG: ChangelogEntry[] = [
+  {
+    version: 'v0.8.0',
+    date: '2026-09-29',
+    title: '手环端改为离线快照，支持一键生成安装包',
+    items: [
+      {
+        kind: 'fix',
+        text: '修复手环端在真机上必然失败的问题：小米手环 10 的快应用官方不支持联网（system.fetch / system.network 等一律「不支持」），「在手环上直接调后端接口」的旧流程只会报「网络错误 (6)」；模拟器能跑通是因为它走的是电脑的网络',
+      },
+      {
+        kind: 'feature',
+        text: '手环端改为「离线快照」：课表与学期设置在打包时注入，手环运行期完全不联网；当日数据在线拉取、记录上传这类能力随之取消',
+      },
+      {
+        kind: 'feature',
+        text: '「设备连接」新增「生成手环安装包」：服务端用你当前账号的课表打包，点一下即可下载属于自己的 rpk，再用 AstroBox 推送到手环，电脑上不用装开发环境',
+      },
+      {
+        kind: 'feature',
+        text: '手环端新增离线数据同步脚本（watchapp 目录下 npm run sync）：首次运行会自动打开带连接码的页面，点一下「连接」就完成授权，不用再手抄 6 位连接码',
+      },
+      {
+        kind: 'improvement',
+        text: '手环上的专注计时只记在本机（最多保留最近 80 条），统计页明确标注「仅手环上记的专注」，不再让人误以为会同步到网页端',
+      },
+      {
+        kind: 'notice',
+        text: '手环端打包签名已固定：本机打包与服务端打包共用同一套密钥，手环不会把它当成两个应用；请勿删除 watchapp/sign/debug 下的密钥文件',
+      },
+      {
+        kind: 'notice',
+        text: '手环上若还装着旧版（随机签名），请先在 AstroBox 里卸载，再安装新包',
+      },
+    ],
+  },
   {
     version: 'v0.7.0',
     date: '2026-09-28',
