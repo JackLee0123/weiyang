@@ -30,9 +30,6 @@
       <text class="status-text {{light ? 'warn-lt' : ''}}">{{statusMsg}}</text>
     </div>
 
-    <div class="footer">
-      <text class="footer-text {{light ? 'faint-lt' : ''}}">小米手环 · 未央 Everlong</text>
-    </div>
   </div>
 </template>
 
@@ -74,6 +71,9 @@
   }
   .cards {
     flex-direction: column;
+    /* 去掉页脚后，卡片组占满剩余高度并垂直居中 */
+    flex: 1;
+    justify-content: center;
   }
   .card {
     flex-direction: column;
@@ -112,16 +112,6 @@
     font-size: 20px;
     color: #fbbf24;
   }
-  .footer {
-    flex: 1;
-    justify-content: flex-end;
-    align-items: center;
-  }
-  .footer-text {
-    font-size: 18px;
-    color: #334155;
-  }
-
   /* 亮色主题 */
   .page-lt { background-color: #f2f4f8; }
   .title-lt { color: #101828; }
@@ -142,16 +132,14 @@
     .card-value { font-size: 58px; }
     .card-sub { font-size: 30px; }
     .status-text { font-size: 27px; }
-    .footer-text { font-size: 24px; }
   }
 
   /* 胶囊屏（小米手环10，212x520）：更窄，字号再上调一档 */
   @media (shape: pill-shaped) {
     /* 胶囊屏两端是半径 104px 的大圆弧（见 SDK 皮肤配置），四周要留出安全区 */
     .page { padding: 104px 46px; padding-bottom: 104px; }
-    /* 屏幕很高，让卡片组在剩余空间里垂直居中，不要全堆在顶部 */
-    .cards { flex: 1; justify-content: center; }
-    .footer { flex: 1; }
+    /* 屏幕很高，卡片组在剩余空间里垂直居中，不要全堆在顶部 */
+    .cards { justify-content: center; }
     .title { font-size: 58px; }
     .subtitle { font-size: 32px; }
     .settings-btn { padding: 12px 26px; border-radius: 36px; }
@@ -161,7 +149,6 @@
     .card-value { font-size: 62px; }
     .card-sub { font-size: 32px; }
     .status-text { font-size: 28px; }
-    .footer-text { font-size: 25px; }
   }
 </style>
 
