@@ -10,6 +10,7 @@
     "watch": "aiot watch --open-nuttx"
   },
   "devDependencies": {
+    "@aiot-toolkit/jsc": "^1.0.9",
     "aiot-toolkit": "^2.0.5"
   }
 }
