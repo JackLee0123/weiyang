@@ -68,6 +68,11 @@ export function readToken() {
   return sget('token')
 }
 
+/** 直接从本地存储读一次主题（用于排查主题没生效的问题）。 */
+export function readTheme() {
+  return sget('theme')
+}
+
 /**
  * 取当前服务器地址：没配置过时用默认地址，保证「开箱即用」。
  * 页面和请求都走这个函数，避免存储读取失败时整个应用不可用。

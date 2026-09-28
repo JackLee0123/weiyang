@@ -17,6 +17,12 @@
         <text class="account-value {{connected ? 'account-on' : ''}}">{{accountLabel}}</text>
       </div>
 
+      <!-- 诊断：确认主题在存储里的原始值与最终取值 -->
+      <div class="account">
+        <text class="account-label {{light ? 'muted-lt' : ''}}">主题诊断</text>
+        <text class="account-value {{light ? 'muted-lt' : ''}}">{{themeDebug}}</text>
+      </div>
+
       <div class="btn btn-ghost {{light ? 'ghost-lt' : ''}}" onclick="testConnection">
         <text class="btn-text btn-text-accent {{light ? 'accent-lt' : ''}}">测试连接</text>
       </div>
@@ -226,12 +232,13 @@
 
 <script>
 import router from '@system.router'
-import { ready, getConfig, save } from '../../common/scripts/store.js'
+import { ready, getConfig, save, readTheme } from '../../common/scripts/store.js'
 import { fetchMe } from '../../common/scripts/api.js'
 
 export default {
   private: {
     light: false,
+    themeDebug: '',
     connected: false,
     accountLabel: '未连接',
     msg: '',
@@ -244,6 +251,10 @@ export default {
       self.light = cfg.theme === 'light'
       self.connected = !!cfg.token
       self.accountLabel = cfg.token ? (cfg.accountName || '已连接') : '未连接'
+      self.themeDebug = (cfg.theme || '(空)') + ' / 存储:'
+    })
+    readTheme().then(function (raw) {
+      self.themeDebug = (getConfig().theme || '(空)') + ' / 存储:' + (raw === '' ? '(空)' : raw)
     })
   },
 
@@ -252,6 +263,12 @@ export default {
     this.light = !this.light
     save({ theme: this.light ? 'light' : 'dark' }).then(function () {
       self.msg = self.light ? '已切换到亮色模式' : '已切换到暗色模式'
+      // 页面之间是各自独立的上下文，已经创建过的页面不会重新读取主题，
+      // 所以切换后重建页面栈，保证每个页面都按新主题渲染。
+      setTimeout(function () {
+        router.clear()
+        router.replace({ uri: '/pages/index' })
+      }, 900)
     })
   },
 
