@@ -12,7 +12,7 @@
           <text class="tab-text {{light ? 'muted-lt' : ''}} {{tab === 'timer' ? 'tab-text-active' : ''}} {{tab === 'timer' && light ? 'accent-lt' : ''}}">计时</text>
         </div>
       </div>
-      <text class="date-text {{light ? 'faint-lt' : ''}}">{{dateLabel}}</text>
+      <text class="date-text {{light ? 'faint-lt' : ''}}">{{capsule ? dateShort : dateLabel}}</text>
     </div>
 
     <!-- 统计 -->
@@ -120,9 +120,10 @@
     color: #5eead4;
   }
   .date-text {
-    width: 56px;
+    width: 100px;
     font-size: 20px;
     color: #475569;
+    text-align: right;
   }
   .stats {
     flex-direction: column;
@@ -314,7 +315,7 @@
     .back-text { font-size: 44px; }
     .tab { padding: 10px 18px; }
     .tab-text { font-size: 32px; }
-    .date-text { width: 54px; font-size: 24px; }
+    .date-text { width: 64px; font-size: 24px; }
     .summary { padding: 30px; }
     .summary-num { font-size: 60px; }
     .summary-label { font-size: 29px; }
@@ -338,12 +339,15 @@ import router from '@system.router'
 import { ready, getConfig, isLight } from '../../common/scripts/store.js'
 import { fetchRecords, fetchPlans, createRecord } from '../../common/scripts/api.js'
 import { summarizeFocus, formatMinutes, formatClock, nextFocusName } from '../../common/scripts/focus.js'
+import { initDeviceInfo, isCapsule } from '../../common/scripts/device.js'
 import { todayISO } from '../../common/scripts/timetable.js'
 
 export default {
   private: {
     tab: 'stats',
     dateLabel: '',
+    dateShort: '',
+    capsule: false,
     summary: { count: 0, minutes: 0, slices: [] },
     totalLabel: '0分钟',
     slices: [],
@@ -358,6 +362,12 @@ export default {
   onInit() {
     var d = new Date()
     this.dateLabel = (d.getMonth() + 1) + '月' + d.getDate() + '日'
+    // 胶囊屏顶栏窄，用短日期避免折行
+    this.dateShort = (d.getMonth() + 1) + '/' + d.getDate()
+    var self = this
+    initDeviceInfo().then(function () {
+      self.capsule = isCapsule()
+    })
   },
 
   onShow() {
