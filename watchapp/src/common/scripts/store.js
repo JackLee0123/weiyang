@@ -15,7 +15,14 @@ function sget(key) {
   return new Promise(function (resolve) {
     storage.get({
       key: key,
-      success: function (data) { resolve(typeof data === 'string' ? data : '') },
+      // 不同引擎回调里的值形态可能不一样，这里统一成字符串。
+      success: function (data) {
+        if (data === null || data === undefined) return resolve('')
+        if (typeof data === 'string') return resolve(data)
+        if (typeof data === 'object' && typeof data.value === 'string') return resolve(data.value)
+        if (typeof data === 'number' || typeof data === 'boolean') return resolve(String(data))
+        resolve('')
+      },
       fail: function () { resolve('') }
     })
   })
@@ -23,20 +30,33 @@ function sget(key) {
 
 export function init(app) {
   if (readyPromise) return readyPromise
-  readyPromise = Promise.all([sget('baseUrl'), sget('token'), sget('demo'), sget('accountName')]).then(function (r) {
-    config.baseUrl = (r[0] || DEFAULT_BASE_URL).replace(/\/+$/, '')
-    config.token = r[1] || ''
-    config.demo = r[2] === '1'
-    config.accountName = r[3] || ''
-    app.$def.config = config
-    console.info('[everlong] config loaded, demo=' + config.demo)
-    return config
+  readyPromise = load().then(function (cfg) {
+    app.$def.config = cfg
+    console.info('[everlong] config loaded, demo=' + cfg.demo)
+    return cfg
   })
   return readyPromise
 }
 
+function load() {
+  return Promise.all([sget('baseUrl'), sget('token'), sget('demo'), sget('accountName')]).then(function (r) {
+    config.baseUrl = (r[0] || DEFAULT_BASE_URL).replace(/\/+$/, '')
+    config.token = r[1] || ''
+    config.demo = r[2] === '1'
+    config.accountName = r[3] || ''
+    return config
+  })
+}
+
+/**
+ * 页面每次进入都要重新读一遍本地存储。
+ *
+ * 快应用的页面是各自独立的 JS 上下文：连接账户是在「连接」页写的存储，
+ * 课表页如果只读一次（首次进入时还没连接）就会一直拿着空的令牌，
+ * 表现为「手机上明明提示已连接，手环却让我先连接账户」。
+ */
 export function ready() {
-  return readyPromise || Promise.resolve(config)
+  return load()
 }
 
 export function getConfig() {
