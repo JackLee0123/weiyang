@@ -115,8 +115,8 @@
   /* 亮色主题 */
   .page-lt { background-color: #f2f4f8; }
   .title-lt { color: #101828; }
-  .muted-lt { color: #667085; }
-  .faint-lt { color: #98a2b3; }
+  .muted-lt { color: #5a6472; }
+  .faint-lt { color: #7d8797; }
   .accent-lt { color: #0f766e; }
   .ghost-lt { border-color: #d0d5dd; }
   .card-lt { background-color: #ffffff; border-color: #e3e8ef; }

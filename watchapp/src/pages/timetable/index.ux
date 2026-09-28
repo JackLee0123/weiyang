@@ -199,8 +199,8 @@
   .page-lt { background-color: #f2f4f8; }
   .surface-lt { background-color: #ffffff; }
   .strong-lt { color: #101828; }
-  .muted-lt { color: #667085; }
-  .faint-lt { color: #98a2b3; }
+  .muted-lt { color: #5a6472; }
+  .faint-lt { color: #7d8797; }
   .accent-lt { color: #0f766e; }
   .badge-lt { color: #0f766e; border-color: #99f6e4; }
   .notice-lt { background-color: #fef3c7; }

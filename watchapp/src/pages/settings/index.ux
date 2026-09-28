@@ -177,8 +177,8 @@
   .back-lt { background-color: #ffffff; }
   .back-text-lt { color: #475569; }
   .title-lt { color: #101828; }
-  .muted-lt { color: #667085; }
-  .faint-lt { color: #98a2b3; }
+  .muted-lt { color: #5a6472; }
+  .faint-lt { color: #7d8797; }
   .accent-lt { color: #0f766e; }
   .strong-lt { color: #101828; }
   .ghost-lt { background-color: #ffffff; border-color: #d0d5dd; }
