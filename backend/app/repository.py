@@ -229,7 +229,7 @@ def generate_timetable_plans(
                 Plan.date == plan_date,
                 Plan.title == course.name,
                 Plan.start_time == start_time,
-                Plan.source == "timetable",
+                Plan.source == TIMETABLE_SOURCE,
             )
         )
         if duplicate:
@@ -247,7 +247,7 @@ def generate_timetable_plans(
                 status="pending",
                 priority="medium",
                 category="课程",
-                source="timetable",
+                source=TIMETABLE_SOURCE,
             )
         )
         created += 1
@@ -323,17 +323,66 @@ def delete_record(db: Session, record: models.Record) -> None:
     db.commit()
 
 
-def _minutes_from_times(start: Optional[str], end: Optional[str]) -> int:
+# 单条计划允许的最大“跨午夜”跨度：再长就基本是把开始与结束填反了。
+MAX_CROSS_MIDNIGHT_MINUTES = 12 * 60
+
+# 课表生成的课程计划来源标记：这些只是提醒上课，不计入「计划用时」。
+TIMETABLE_SOURCE = "timetable"
+
+
+def _plan_interval(start: Optional[str], end: Optional[str]) -> Optional[tuple[int, int]]:
+    """把一条计划的时间段转成当日分钟区间 [开始, 结束)。
+
+    返回 None 表示这段时间不计入用时：缺少时间、格式无法解析、
+    开始与结束相同，或结束早于开始且跨度长得不像跨午夜（视为填反了）。
+    """
     if not start or not end:
-        return 0
+        return None
     try:
         sh, sm = map(int, start.split(":"))
         eh, em = map(int, end.split(":"))
     except ValueError:
-        return 0
+        return None
     start_min = sh * 60 + sm
     end_min = eh * 60 + em
-    return (end_min - start_min) % (24 * 60)
+    if end_min == start_min:
+        return None
+    if end_min < start_min:
+        end_min += 24 * 60
+    if end_min - start_min > MAX_CROSS_MIDNIGHT_MINUTES:
+        return None
+    return start_min, end_min
+
+
+def _planned_minutes_by_day(plans: list[models.Plan]) -> dict[str, int]:
+    """逐日汇总计划用时：只算自己新建的计划，改道的不算，重叠的部分只算一次。
+
+    课表生成的课程只是提醒上课，不代表"计划要投入的时间"，因此不计入。
+    计划用时衡量的是「这段时间被自己排的计划占住」，所以同一天里重叠的计划
+    不做累加（例如两条计划撞在同一时段），否则总时长会凭空变多。
+    """
+    intervals_by_day: dict[str, list[tuple[int, int]]] = {}
+    for plan in plans:
+        if plan.status == "cancelled" or plan.source == TIMETABLE_SOURCE:
+            continue
+        interval = _plan_interval(plan.start_time, plan.end_time)
+        if interval is None:
+            continue
+        intervals_by_day.setdefault(plan.date, []).append(interval)
+
+    minutes_by_day: dict[str, int] = {}
+    for day, intervals in intervals_by_day.items():
+        intervals.sort()
+        total = 0
+        current_start, current_end = intervals[0]
+        for start, end in intervals[1:]:
+            if start <= current_end:  # 与上一段重叠或相接：合并
+                current_end = max(current_end, end)
+            else:
+                total += current_end - current_start
+                current_start, current_end = start, end
+        minutes_by_day[day] = total + (current_end - current_start)
+    return minutes_by_day
 
 
 def _streak(days: set[str], anchor: date) -> int:
@@ -348,12 +397,26 @@ def _streak(days: set[str], anchor: date) -> int:
     return streak
 
 
+def _empty_day() -> dict[str, int]:
+    return {"total": 0, "done": 0, "planned": 0, "records": 0, "recorded": 0}
+
+
 def _range_stats(plans: list[models.Plan], records: list[models.Record], start: str, end: str) -> schemas.StatsOverview:
     """把一期数据聚合为统计总览；统计总览与回忆报告共用这一份实现，避免重复计算。"""
     total_plans = len(plans)
     done_plans = sum(1 for p in plans if p.status == "done")
-    completion_rate = round(done_plans / total_plans, 4) if total_plans else 0.0
-    planned_minutes = sum(_minutes_from_times(p.start_time, p.end_time) for p in plans)
+    cancelled_plans = sum(1 for p in plans if p.status == "cancelled")
+    # 完成率只看「自己新建的计划」与「记一笔」：课表课程只是提醒上课，不参与
+    own_plans = [p for p in plans if p.source != TIMETABLE_SOURCE]
+    self_plans = sum(1 for p in own_plans if p.status != "cancelled")
+    self_done_plans = sum(1 for p in own_plans if p.status == "done")
+    records_count = len(records)
+    done_records = sum(1 for r in records if r.is_completed)
+    # 改道（取消）的计划既不算完成也不算失败，因此不进分母
+    counted_total = self_plans + records_count
+    completion_rate = round((self_done_plans + done_records) / counted_total, 4) if counted_total else 0.0
+    planned_by_day = _planned_minutes_by_day(plans)
+    planned_minutes = sum(planned_by_day.values())
     recorded_minutes = sum(r.duration_minutes or 0 for r in records)
 
     by_category: dict[str, int] = {}
@@ -363,13 +426,15 @@ def _range_stats(plans: list[models.Plan], records: list[models.Record], start: 
     # 逐日聚合
     day_map: dict[str, dict] = {}
     for p in plans:
-        entry = day_map.setdefault(p.date, {"total": 0, "done": 0, "planned": 0, "records": 0, "recorded": 0})
+        entry = day_map.setdefault(p.date, _empty_day())
         entry["total"] += 1
         if p.status == "done":
             entry["done"] += 1
-        entry["planned"] += _minutes_from_times(p.start_time, p.end_time)
+    for d, minutes in planned_by_day.items():
+        entry = day_map.setdefault(d, _empty_day())
+        entry["planned"] = minutes
     for r in records:
-        entry = day_map.setdefault(r.date, {"total": 0, "done": 0, "planned": 0, "records": 0, "recorded": 0})
+        entry = day_map.setdefault(r.date, _empty_day())
         entry["records"] += 1
         entry["recorded"] += r.duration_minutes or 0
 
@@ -390,6 +455,11 @@ def _range_stats(plans: list[models.Plan], records: list[models.Record], start: 
         end=end,
         total_plans=total_plans,
         done_plans=done_plans,
+        cancelled_plans=cancelled_plans,
+        self_plans=self_plans,
+        self_done_plans=self_done_plans,
+        records_count=records_count,
+        done_records=done_records,
         completion_rate=completion_rate,
         planned_minutes=planned_minutes,
         recorded_minutes=recorded_minutes,
@@ -414,7 +484,7 @@ def memory_report(db: Session, user_id: int, start: str, end: str) -> schemas.Me
     stats = _range_stats(plans, records, start, end)
 
     unfinished_plans = sum(1 for p in plans if p.status in ("pending", "in_progress"))
-    cancelled_plans = sum(1 for p in plans if p.status == "cancelled")
+    cancelled_plans = stats.cancelled_plans
     top_categories = [name for name, _ in sorted(stats.by_category.items(), key=lambda kv: kv[1], reverse=True)[:3]]
     active_days = len({r.date for r in records})
     busiest = [day for day in stats.days if day.records_count]
@@ -426,7 +496,7 @@ def memory_report(db: Session, user_id: int, start: str, end: str) -> schemas.Me
         start=start,
         end=end,
         period_days=period_days,
-        records_count=len(records),
+        records_count=stats.records_count,
         recorded_minutes=stats.recorded_minutes,
         active_days=active_days,
         # 回忆里的连续天数以这段时光的末尾为锚，与「今天」口径不同
@@ -435,6 +505,9 @@ def memory_report(db: Session, user_id: int, start: str, end: str) -> schemas.Me
         done_plans=stats.done_plans,
         unfinished_plans=unfinished_plans,
         cancelled_plans=cancelled_plans,
+        self_plans=stats.self_plans,
+        self_done_plans=stats.self_done_plans,
+        done_records=stats.done_records,
         completion_rate=stats.completion_rate,
         by_category=stats.by_category,
         top_categories=top_categories,

@@ -259,6 +259,12 @@ class StatsOverview(BaseModel):
     end: str
     total_plans: int
     done_plans: int
+    cancelled_plans: int
+    # 完成率只看「自己新建的计划」与「记一笔」，这两组数字就是它的分子分母
+    self_plans: int
+    self_done_plans: int
+    records_count: int
+    done_records: int
     completion_rate: float
     planned_minutes: int
     recorded_minutes: int
@@ -295,6 +301,10 @@ class MemoryReport(BaseModel):
     done_plans: int
     unfinished_plans: int
     cancelled_plans: int
+    # 完成率与今日页同口径：自建计划（不含课表）+ 记一笔
+    self_plans: int
+    self_done_plans: int
+    done_records: int
     completion_rate: float
     by_category: dict[str, int]
     top_categories: list[str]

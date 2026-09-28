@@ -78,7 +78,9 @@ export function TodayView({ date, onChangeDate }: { date: string; onChangeDate: 
         )}
       </div>
 
-      {statsQ.data && <StatsPanel stats={statsQ.data} />}
+      {statsQ.data && (
+        <StatsPanel stats={statsQ.data} date={date} dayLabel={isToday ? '今日' : format(parsed, 'M月d日')} />
+      )}
 
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
         <section className="min-w-0">

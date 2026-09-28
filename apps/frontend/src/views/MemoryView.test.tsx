@@ -25,7 +25,10 @@ function makeReport(overrides: Partial<MemoryReport> = {}): MemoryReport {
     done_plans: 1,
     unfinished_plans: 1,
     cancelled_plans: 1,
-    completion_rate: 0.33,
+    self_plans: 2,
+    self_done_plans: 1,
+    done_records: 2,
+    completion_rate: 0.6,
     by_category: { 工作: 2, 生活: 1 },
     top_categories: ['工作', '生活'],
     busiest_day: today,
@@ -55,6 +58,9 @@ describe('MemoryView', () => {
     expect(screen.getByText('回忆')).toBeInTheDocument()
     expect(screen.getByText('3 段')).toBeInTheDocument()
     expect(screen.getByText('写周报')).toBeInTheDocument()
+    // 完成率与今日页同口径，并把自建计划与记一笔摊开
+    expect(screen.getByText('60%')).toBeInTheDocument()
+    expect(screen.getByText('计划 1/2 · 记录 2/3')).toBeInTheDocument()
   })
 
   it('switches to monthly report and shows the month label', () => {

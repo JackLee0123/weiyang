@@ -44,6 +44,11 @@ def test_memory_report(client, monkeypatch, auth_headers):
     assert data["done_plans"] == 1
     assert data["unfinished_plans"] == 1
     assert data["cancelled_plans"] == 1
+    # 完成率与今日页同口径：自建计划（不含改道）+ 记一笔 = (1 + 3) / (2 + 3)
+    assert data["self_plans"] == 2
+    assert data["self_done_plans"] == 1
+    assert data["done_records"] == 3
+    assert data["completion_rate"] == 0.8
     assert data["by_category"]["工作"] == 2
     assert data["by_category"]["生活"] == 1
     assert data["top_categories"] == ["工作", "生活"]

@@ -31,4 +31,18 @@ describe('PlanForm', () => {
     await waitFor(() => expect(mocks.create).toHaveBeenCalled())
     expect(mocks.create).toHaveBeenCalledWith(expect.objectContaining({ title: '写周报', images: [] }))
   })
+
+  it('时间填反时提示这条计划不计入用时', () => {
+    const { container } = render(<PlanForm defaultDate="2099-01-01" onClose={() => {}} />)
+    const [start, end] = container.querySelectorAll('input[type="time"]')
+
+    fireEvent.change(start, { target: { value: '14:00' } })
+    fireEvent.change(end, { target: { value: '09:00' } })
+    expect(screen.getByText(/看起来像填反了/)).toBeInTheDocument()
+
+    // 真正的跨午夜（23:30-01:00）不算填反，不提示
+    fireEvent.change(start, { target: { value: '23:30' } })
+    fireEvent.change(end, { target: { value: '01:00' } })
+    expect(screen.queryByText(/看起来像填反了/)).not.toBeInTheDocument()
+  })
 })

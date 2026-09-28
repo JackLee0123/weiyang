@@ -12,6 +12,22 @@ interface Props {
   onClose: () => void
 }
 
+/** 跨午夜的计划最长按 12 小时算，再长就基本是把开始与结束填反了（与后端统计同一口径）。 */
+const MAX_CROSS_MIDNIGHT_MINUTES = 12 * 60
+
+function plannedSpanMinutes(start?: string, end?: string): number | null {
+  if (!start || !end) return null
+  const toMinutes = (value: string) => {
+    const [hours, minutes] = value.split(':').map(Number)
+    return hours * 60 + minutes
+  }
+  const startMinutes = toMinutes(start)
+  let endMinutes = toMinutes(end)
+  if (endMinutes === startMinutes) return 0
+  if (endMinutes < startMinutes) endMinutes += 24 * 60
+  return endMinutes - startMinutes
+}
+
 export function PlanForm({ defaultDate, initial, onClose }: Props) {
   const { create, update, remove } = usePlanMutations()
   const [error, setError] = useState('')
@@ -43,6 +59,13 @@ export function PlanForm({ defaultDate, initial, onClose }: Props) {
 
   const set = <K extends keyof PlanPayload>(key: K, value: PlanPayload[K]) => setForm((f) => ({ ...f, [key]: value }))
   const locked = isPast(form.date)
+  const span = plannedSpanMinutes(form.start_time ?? '', form.end_time ?? '')
+  const timeWarning =
+    span === 0
+      ? '开始与结束时间相同，这条计划不会计入「计划用时」。'
+      : span !== null && span > MAX_CROSS_MIDNIGHT_MINUTES
+        ? '结束时间早于开始时间，看起来像填反了，这条计划不会计入「计划用时」。'
+        : ''
 
   const submit = async () => {
     if (!form.title.trim() || locked) return
@@ -113,6 +136,8 @@ export function PlanForm({ defaultDate, initial, onClose }: Props) {
           <input type="time" className="field" value={form.end_time || ''} onChange={(e) => set('end_time', e.target.value)} />
         </div>
       </div>
+
+      {timeWarning && <p className="text-xs text-amber-700 dark:text-amber-300">{timeWarning}</p>}
 
       <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
         <div>

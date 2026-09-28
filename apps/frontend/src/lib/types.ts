@@ -67,6 +67,12 @@ export interface StatsOverview {
   end: string
   total_plans: number
   done_plans: number
+  cancelled_plans: number
+  /** 完成率口径：自己新建的计划（不含课表、不含改道）与「记一笔」 */
+  self_plans: number
+  self_done_plans: number
+  records_count: number
+  done_records: number
   completion_rate: number
   planned_minutes: number
   recorded_minutes: number
@@ -93,6 +99,10 @@ export interface MemoryReport {
   done_plans: number
   unfinished_plans: number
   cancelled_plans: number
+  /** 完成率口径：自己新建的计划（不含课表、不含改道）与「记一笔」 */
+  self_plans: number
+  self_done_plans: number
+  done_records: number
   completion_rate: number
   by_category: Record<string, number>
   top_categories: string[]
