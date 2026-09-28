@@ -63,6 +63,11 @@ export function getConfig() {
   return config
 }
 
+/** 直接从本地存储读一次令牌（用于写入后的回读校验）。 */
+export function readToken() {
+  return sget('token')
+}
+
 /**
  * 取当前服务器地址：没配置过时用默认地址，保证「开箱即用」。
  * 页面和请求都走这个函数，避免存储读取失败时整个应用不可用。

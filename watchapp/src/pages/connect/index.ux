@@ -224,7 +224,7 @@
 <script>
 import router from '@system.router'
 import brightness from '@system.brightness'
-import { ready, getConfig, getBaseUrl, save } from '../../common/scripts/store.js'
+import { ready, getConfig, getBaseUrl, save, readToken } from '../../common/scripts/store.js'
 import { startHandshake, pollHandshake } from '../../common/scripts/api.js'
 
 // 手环端二维码里放短载荷，模块越少越好扫；数字也会显示在二维码下方作为手输备用。
@@ -349,6 +349,15 @@ export default {
         self.stopTimers()
         self.restoreBrightness()
         return save({ token: res.token, accountName: res.name || '' }).then(function () {
+          // 写完立刻回读，确认真的落盘了再告诉用户成功。
+          return readToken()
+        }).then(function (saved) {
+          if (saved !== res.token) {
+            self.state = 'error'
+            self.message = '登录信息没保存成功'
+            self.serverHint = saved ? '存储内容与令牌不一致' : '存储回读为空'
+            return
+          }
           self.accountName = res.name || '你的账号'
           self.state = 'done'
         })
