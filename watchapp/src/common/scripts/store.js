@@ -1,5 +1,5 @@
 /**
- * 本地配置存取：服务器地址 / 访问令牌 / 账号名 / 演示模式。
+ * 本地配置存取：服务器地址 / 访问令牌 / 账号名 / 主题。
  * 配置同时缓存在内存 config 中，页面通过 getConfig() 同步读取。
  */
 import storage from '@system.storage'
@@ -8,7 +8,7 @@ import storage from '@system.storage'
 // 本地开发时可覆盖：设置页修改服务器地址即可。
 export var DEFAULT_BASE_URL = 'https://everlong.net.cn'
 
-var config = { baseUrl: '', token: '', accountName: '', demo: false }
+var config = { baseUrl: '', token: '', accountName: '', theme: 'dark' }
 var readyPromise = null
 
 function sget(key) {
@@ -32,17 +32,17 @@ export function init(app) {
   if (readyPromise) return readyPromise
   readyPromise = load().then(function (cfg) {
     app.$def.config = cfg
-    console.info('[everlong] config loaded, demo=' + cfg.demo)
+    console.info('[everlong] config loaded, theme=' + cfg.theme)
     return cfg
   })
   return readyPromise
 }
 
 function load() {
-  return Promise.all([sget('baseUrl'), sget('token'), sget('demo'), sget('accountName')]).then(function (r) {
+  return Promise.all([sget('baseUrl'), sget('token'), sget('theme'), sget('accountName')]).then(function (r) {
     config.baseUrl = (r[0] || DEFAULT_BASE_URL).replace(/\/+$/, '')
     config.token = r[1] || ''
-    config.demo = r[2] === '1'
+    config.theme = r[2] === 'light' ? 'light' : 'dark'
     config.accountName = r[3] || ''
     return config
   })
@@ -74,6 +74,11 @@ export function readToken() {
  */
 export function getBaseUrl() {
   return (config.baseUrl || DEFAULT_BASE_URL).replace(/\/+$/, '')
+}
+
+/** 是否处于亮色主题（默认暗色）。 */
+export function isLight() {
+  return config.theme === 'light'
 }
 
 export function save(patch) {

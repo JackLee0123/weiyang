@@ -1,51 +1,51 @@
 <template>
-  <div class="page">
+  <div class="page {{light ? 'page-lt' : ''}}">
     <div class="topbar">
-      <div class="back" onclick="goBack">
-        <text class="back-text">‹</text>
+      <div class="back {{light ? 'surface-lt' : ''}}" onclick="goBack">
+        <text class="back-text {{light ? 'muted-lt' : ''}}">‹</text>
       </div>
       <div class="day-switch">
-        <div class="switch-btn" onclick="prevDay">
-          <text class="switch-text">‹</text>
+        <div class="switch-btn {{light ? 'surface-lt' : ''}}" onclick="prevDay">
+          <text class="switch-text {{light ? 'muted-lt' : ''}}">‹</text>
         </div>
         <div class="day-title">
-          <text class="day-name">周{{dayLabel}}</text>
-          <text if="{{isToday && !capsule}}" class="today-badge">今天</text>
+          <text class="day-name {{light ? 'strong-lt' : ''}}">周{{dayLabel}}</text>
+          <text if="{{isToday && !capsule}}" class="today-badge {{light ? 'badge-lt' : ''}}">今天</text>
         </div>
-        <div class="switch-btn" onclick="nextDay">
-          <text class="switch-text">›</text>
+        <div class="switch-btn {{light ? 'surface-lt' : ''}}" onclick="nextDay">
+          <text class="switch-text {{light ? 'muted-lt' : ''}}">›</text>
         </div>
       </div>
       <div class="week-info" show="{{!capsule}}">
-        <text class="week-text">{{weekLabel}}</text>
+        <text class="week-text {{light ? 'faint-lt' : ''}}">{{weekLabel}}</text>
       </div>
     </div>
 
-    <text if="{{termLine}}" class="term">{{termLine}}</text>
+    <text if="{{termLine}}" class="term {{light ? 'faint-lt' : ''}}">{{termLine}}</text>
 
-    <div if="{{!hasWeek1}}" class="notice">
-      <text class="notice-text">后端未设置开学第 1 周日期，周次与过滤可能不准确</text>
+    <div if="{{!hasWeek1}}" class="notice {{light ? 'notice-lt' : ''}}">
+      <text class="notice-text {{light ? 'warn-lt' : ''}}">后端未设置开学第 1 周日期，周次与过滤可能不准确</text>
     </div>
 
     <!-- 不用 list/list-item：改成普通容器循环，一行一门课，稳定得多 -->
     <div class="course-list">
       <div class="course-row" for="{{viewCourses}}">
-        <text class="row-time">{{$item.timeText}}</text>
+        <text class="row-time {{light ? 'accent-lt' : ''}}">{{$item.timeText}}</text>
         <div class="row-main">
-          <text class="row-name {{$item.isNow ? 'row-now' : ($item.isPast ? 'row-past' : '')}}">{{$item.name}}</text>
-          <text class="row-meta" show="{{$item.hasMeta}}">{{$item.metaText}}</text>
+          <text class="row-name {{light ? 'strong-lt' : ''}} {{$item.isNow ? (light ? 'accent-lt' : 'row-now') : ($item.isPast ? 'row-past' : '')}}">{{$item.name}}</text>
+          <text class="row-meta {{light ? 'muted-lt' : ''}}" show="{{$item.hasMeta}}">{{$item.metaText}}</text>
         </div>
       </div>
     </div>
 
     <div if="{{viewCourses.length === 0}}" class="empty">
-      <text class="empty-text">这一天没有课</text>
-      <text class="empty-hint">左右可切换其他天</text>
-      <text if="{{courses.length > 0}}" class="empty-hint">本学期共 {{courses.length}} 门课程</text>
+      <text class="empty-text {{light ? 'faint-lt' : ''}}">这一天没有课</text>
+      <text class="empty-hint {{light ? 'faint-lt' : ''}}">左右可切换其他天</text>
+      <text if="{{courses.length > 0}}" class="empty-hint {{light ? 'faint-lt' : ''}}">本学期共 {{courses.length}} 门课程</text>
     </div>
 
-    <div if="{{msg}}" class="msg-bar">
-      <text class="msg-text">{{msg}}</text>
+    <div if="{{msg}}" class="msg-bar {{light ? 'notice-lt' : ''}}">
+      <text class="msg-text {{light ? 'warn-lt' : ''}}">{{msg}}</text>
     </div>
   </div>
 </template>
@@ -159,6 +159,17 @@
     color: #fbbf24;
   }
 
+  /* 亮色主题 */
+  .page-lt { background-color: #f2f4f8; }
+  .surface-lt { background-color: #ffffff; }
+  .strong-lt { color: #101828; }
+  .muted-lt { color: #667085; }
+  .faint-lt { color: #98a2b3; }
+  .accent-lt { color: #0f766e; }
+  .badge-lt { color: #0f766e; border-color: #99f6e4; }
+  .notice-lt { background-color: #fef3c7; }
+  .warn-lt { color: #b45309; }
+
   /* 课程按行显示：左边时间，右边课程名 + 地点 */
   .course-list {
     flex: 1;
@@ -238,14 +249,13 @@
 
 <script>
 import router from '@system.router'
-import { ready, getConfig } from '../../common/scripts/store.js'
+import { ready, getConfig, isLight } from '../../common/scripts/store.js'
 import { fetchCourses } from '../../common/scripts/api.js'
 import { initDeviceInfo, isCapsule } from '../../common/scripts/device.js'
 import {
   DAY_LABELS, mondayOf, weekdayOf, weekIndexFor,
   courseActiveOn, decorateCourse, nowMinutes
 } from '../../common/scripts/timetable.js'
-import { demoTimetable } from '../../common/scripts/demo.js'
 
 export default {
   private: {
@@ -261,7 +271,8 @@ export default {
     periodTimes: [],
     weekIndex: 0,
     viewCourses: [],
-    msg: ''
+    msg: '',
+    light: false
   },
 
   onShow() {
@@ -281,10 +292,7 @@ export default {
     var self = this
     this.msg = ''
     ready().then(function () {
-      if (getConfig().demo) {
-        self.applyData(demoTimetable())
-        return null
-      }
+      self.light = isLight()
       if (!getConfig().token) {
         self.msg = '请先在设置里连接账户'
         return null

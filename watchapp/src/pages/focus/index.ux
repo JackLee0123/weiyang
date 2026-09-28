@@ -1,44 +1,44 @@
 <template>
-  <div class="page">
+  <div class="page {{light ? 'page-lt' : ''}}">
     <div class="topbar">
-      <div class="back" onclick="goBack">
-        <text class="back-text">‹</text>
+      <div class="back {{light ? 'surface-lt' : ''}}" onclick="goBack">
+        <text class="back-text {{light ? 'muted-lt' : ''}}">‹</text>
       </div>
       <div class="tabs">
-        <div class="tab {{tab === 'stats' ? 'tab-active' : ''}}" onclick="switchTab('stats')">
-          <text class="tab-text {{tab === 'stats' ? 'tab-text-active' : ''}}">统计</text>
+        <div class="tab {{light ? 'surface-lt' : ''}} {{tab === 'stats' ? 'tab-active' : ''}} {{tab === 'stats' && light ? 'tab-active-lt' : ''}}" onclick="switchTab('stats')">
+          <text class="tab-text {{light ? 'muted-lt' : ''}} {{tab === 'stats' ? 'tab-text-active' : ''}} {{tab === 'stats' && light ? 'accent-lt' : ''}}">统计</text>
         </div>
-        <div class="tab {{tab === 'timer' ? 'tab-active' : ''}}" onclick="switchTab('timer')">
-          <text class="tab-text {{tab === 'timer' ? 'tab-text-active' : ''}}">计时</text>
+        <div class="tab {{light ? 'surface-lt' : ''}} {{tab === 'timer' ? 'tab-active' : ''}} {{tab === 'timer' && light ? 'tab-active-lt' : ''}}" onclick="switchTab('timer')">
+          <text class="tab-text {{light ? 'muted-lt' : ''}} {{tab === 'timer' ? 'tab-text-active' : ''}} {{tab === 'timer' && light ? 'accent-lt' : ''}}">计时</text>
         </div>
       </div>
-      <text class="date-text">{{dateLabel}}</text>
+      <text class="date-text {{light ? 'faint-lt' : ''}}">{{dateLabel}}</text>
     </div>
 
     <!-- 统计 -->
     <div if="{{tab === 'stats'}}" class="stats">
-      <div class="summary">
+      <div class="summary {{light ? 'card-lt' : ''}}">
         <div class="summary-block">
-          <text class="summary-num">{{summary.count}}</text>
-          <text class="summary-label">次专注</text>
+          <text class="summary-num {{light ? 'strong-lt' : ''}}">{{summary.count}}</text>
+          <text class="summary-label {{light ? 'muted-lt' : ''}}">次专注</text>
         </div>
-        <div class="divider"></div>
+        <div class="divider {{light ? 'divider-lt' : ''}}"></div>
         <div class="summary-block">
-          <text class="summary-num accent">{{totalLabel}}</text>
-          <text class="summary-label">总计</text>
+          <text class="summary-num accent {{light ? 'accent-lt' : ''}}">{{totalLabel}}</text>
+          <text class="summary-label {{light ? 'muted-lt' : ''}}">总计</text>
         </div>
       </div>
 
-      <text if="{{slices.length === 0}}" class="empty">还没有专注记录</text>
+      <text if="{{slices.length === 0}}" class="empty {{light ? 'faint-lt' : ''}}">还没有专注记录</text>
 
       <!-- 同样不用 list/list-item，普通容器循环渲染更稳 -->
       <div class="slice-list" if="{{slices.length > 0}}">
         <div class="slice-row" for="{{slices}}">
           <div class="slice-head">
-            <text class="slice-label">{{$item.label}}</text>
-            <text class="slice-minutes">{{$item.minutesLabel}} · {{$item.percent}}%</text>
+            <text class="slice-label {{light ? 'strong-lt' : ''}}">{{$item.label}}</text>
+            <text class="slice-minutes {{light ? 'muted-lt' : ''}}">{{$item.minutesLabel}} · {{$item.percent}}%</text>
           </div>
-          <div class="bar-bg">
+          <div class="bar-bg {{light ? 'bar-lt' : ''}}">
             <div class="bar-fg" style="width : {{$item.percent}}%; background-color : {{$item.color}};"></div>
           </div>
         </div>
@@ -47,24 +47,24 @@
 
     <!-- 计时 -->
     <div if="{{tab === 'timer'}}" class="timer">
-      <div class="timer-circle">
-        <text class="timer-time">{{clock}}</text>
-        <text class="timer-state">{{running ? '专注中' : (elapsed > 0 ? '已暂停' : '就绪')}}</text>
+      <div class="timer-circle {{light ? 'circle-lt' : ''}}">
+        <text class="timer-time {{light ? 'accent-lt' : ''}}">{{clock}}</text>
+        <text class="timer-state {{light ? 'muted-lt' : ''}}">{{running ? '专注中' : (elapsed > 0 ? '已暂停' : '就绪')}}</text>
       </div>
 
       <div class="timer-actions">
         <div class="btn btn-primary" onclick="toggleTimer">
           <text class="btn-text">{{running ? '暂停' : '开始'}}</text>
         </div>
-        <div class="btn btn-ghost" if="{{elapsed > 0}}" onclick="finish">
-          <text class="btn-text btn-text-accent">结束保存</text>
+        <div class="btn btn-ghost {{light ? 'ghost-lt' : ''}}" if="{{elapsed > 0}}" onclick="finish">
+          <text class="btn-text btn-text-accent {{light ? 'accent-lt' : ''}}">结束保存</text>
         </div>
-        <div class="btn btn-ghost" if="{{elapsed > 0}}" onclick="discard">
+        <div class="btn btn-ghost {{light ? 'ghost-lt' : ''}}" if="{{elapsed > 0}}" onclick="discard">
           <text class="btn-text btn-text-danger">放弃</text>
         </div>
       </div>
 
-      <text class="timer-hint">结束后写入「当日专注」记录</text>
+      <text class="timer-hint {{light ? 'faint-lt' : ''}}">结束后写入「当日专注」记录</text>
     </div>
 
     <div if="{{msg}}" class="msg-bar">
@@ -272,6 +272,22 @@
     color: #fbbf24;
   }
 
+  /* 亮色主题 */
+  .page-lt { background-color: #f2f4f8; }
+  .surface-lt { background-color: #ffffff; }
+  .card-lt { background-color: #ffffff; border-color: #e3e8ef; }
+  .title-lt { color: #101828; }
+  .strong-lt { color: #101828; }
+  .muted-lt { color: #667085; }
+  .faint-lt { color: #98a2b3; }
+  .accent-lt { color: #0f766e; }
+  .ghost-lt { border-color: #d0d5dd; }
+  .divider-lt { background-color: #e3e8ef; }
+  .bar-lt { background-color: #eaecf0; }
+  .circle-lt { border-color: #99f6e4; }
+  .tab-active-lt { background-color: #ccfbf1; }
+  .warn-lt { color: #b45309; }
+
   /* 手环（dp 宽度远小于手表）字号整体上调，否则实际显示明显偏小 */
   @media (max-width: 190) {
     .tab-text { font-size: 34px; }
@@ -317,11 +333,10 @@
 
 <script>
 import router from '@system.router'
-import { ready, getConfig } from '../../common/scripts/store.js'
+import { ready, getConfig, isLight } from '../../common/scripts/store.js'
 import { fetchRecords, fetchPlans, createRecord } from '../../common/scripts/api.js'
 import { summarizeFocus, formatMinutes, formatClock, nextFocusName } from '../../common/scripts/focus.js'
 import { todayISO } from '../../common/scripts/timetable.js'
-import { demoRecords } from '../../common/scripts/demo.js'
 
 export default {
   private: {
@@ -334,7 +349,8 @@ export default {
     elapsed: 0,
     clock: '00:00',
     msg: '',
-    timerId: null
+    timerId: null,
+    light: false
   },
 
   onInit() {
@@ -368,10 +384,7 @@ export default {
     var self = this
     this.msg = ''
     ready().then(function () {
-      if (getConfig().demo) {
-        self.applySummary(demoRecords())
-        return null
-      }
+      self.light = isLight()
       if (!getConfig().token) {
         self.msg = '请先在设置里连接账户'
         return null
@@ -432,10 +445,7 @@ export default {
       linked_plan_id: null
     }
     ready().then(function () {
-      if (getConfig().demo) {
-        self.afterSaved('演示模式：未真正保存')
-        return null
-      }
+      self.light = isLight()
       // 默认名按当天已有专注段数顺延：a、b、c…… 名称在网页端/PWA 可以再改
       return fetchRecords(today, today).then(function (records) {
         payload.title = nextFocusName(records)

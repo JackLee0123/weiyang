@@ -1,50 +1,42 @@
 <template>
-  <div class="page">
+  <div class="page {{light ? 'page-lt' : ''}}">
     <div class="topbar">
-      <div class="back" onclick="goBack">
-        <text class="back-text">‹</text>
+      <div class="back {{light ? 'surface-lt' : ''}}" onclick="goBack">
+        <text class="back-text {{light ? 'muted-lt' : ''}}">‹</text>
       </div>
-      <text class="title">连接账户</text>
+      <text class="title {{light ? 'strong-lt' : ''}}">连接账户</text>
     </div>
 
     <div if="{{state === 'loading'}}" class="center">
-      <text class="muted">正在生成二维码…</text>
+      <text class="muted {{light ? 'muted-lt' : ''}}">正在生成二维码…</text>
     </div>
 
     <div if="{{state === 'waiting'}}" class="waiting">
       <div class="qr-wrap">
         <qrcode class="qr" value="{{qrValue}}"></qrcode>
       </div>
-      <text class="code">{{code}}</text>
-      <text class="hint">手机端「设备连接」里扫码</text>
-      <text class="hint-dim">{{countdown}} 秒后失效</text>
-      <div class="refresh" onclick="start">
-        <text class="refresh-text">重新生成</text>
+      <text class="code {{light ? 'accent-lt' : ''}}">{{code}}</text>
+      <text class="hint {{light ? 'muted-lt' : ''}}">手机端「设备连接」里扫码</text>
+      <text class="hint-dim {{light ? 'faint-lt' : ''}}">{{countdown}} 秒后失效</text>
+      <div class="refresh {{light ? 'ghost-lt' : ''}}" onclick="start">
+        <text class="refresh-text {{light ? 'muted-lt' : ''}}">重新生成</text>
       </div>
     </div>
 
     <div if="{{state === 'done'}}" class="center">
-      <div class="done-mark">
-        <text class="done-mark-text">✓</text>
+      <div class="done-mark {{light ? 'done-lt' : ''}}">
+        <text class="done-mark-text {{light ? 'accent-lt' : ''}}">✓</text>
       </div>
-      <text class="done-title">已连接</text>
-      <text class="done-name">{{accountName}}</text>
+      <text class="done-title {{light ? 'strong-lt' : ''}}">已连接</text>
+      <text class="done-name {{light ? 'accent-lt' : ''}}">{{accountName}}</text>
       <div class="btn" onclick="goBack">
         <text class="btn-text">完成</text>
       </div>
     </div>
 
-    <div if="{{state === 'demo'}}" class="center">
-      <text class="muted">演示模式无需连接账户</text>
-      <text class="hint-dim">关闭演示模式后再生成二维码</text>
-      <div class="btn" onclick="goBack">
-        <text class="btn-text">返回</text>
-      </div>
-    </div>
-
     <div if="{{state === 'error'}}" class="center">
-      <text class="err">{{message}}</text>
-      <text class="hint-dim">{{serverHint}}</text>
+      <text class="err {{light ? 'warn-lt' : ''}}">{{message}}</text>
+      <text class="hint-dim {{light ? 'faint-lt' : ''}}">{{serverHint}}</text>
       <div class="btn" onclick="start">
         <text class="btn-text">重新生成</text>
       </div>
@@ -182,6 +174,17 @@
     color: #f1f5f9;
   }
 
+  /* 亮色主题 */
+  .page-lt { background-color: #f2f4f8; }
+  .surface-lt { background-color: #ffffff; }
+  .strong-lt { color: #101828; }
+  .muted-lt { color: #667085; }
+  .faint-lt { color: #98a2b3; }
+  .accent-lt { color: #0f766e; }
+  .ghost-lt { border-color: #d0d5dd; }
+  .done-lt { background-color: #ccfbf1; }
+  .warn-lt { color: #b45309; }
+
   /* 手环（dp 宽度远小于手表）字号整体上调，否则实际显示会明显偏小 */
   @media (max-width: 190) {
     .title { font-size: 46px; }
@@ -224,7 +227,7 @@
 <script>
 import router from '@system.router'
 import brightness from '@system.brightness'
-import { ready, getConfig, getBaseUrl, save, readToken } from '../../common/scripts/store.js'
+import { ready, getBaseUrl, save, readToken, isLight } from '../../common/scripts/store.js'
 import { startHandshake, pollHandshake } from '../../common/scripts/api.js'
 
 // 手环端二维码里放短载荷，模块越少越好扫；数字也会显示在二维码下方作为手输备用。
@@ -248,6 +251,7 @@ export default {
     tickTimer: null,
     pollTimer: null,
     failures: 0,
+    light: false,
     prevBrightness: null
   },
 
@@ -286,15 +290,14 @@ export default {
       self.beginHandshake()
     }
     setTimeout(begin, READY_TIMEOUT_MS)
-    ready().then(begin)
+    ready().then(function () {
+      self.light = isLight()
+      begin()
+    })
   },
 
   beginHandshake() {
     var self = this
-    if (getConfig().demo) {
-      this.state = 'demo'
-      return
-    }
     startHandshake(DEVICE_LABEL).then(function (res) {
       self.code = res.code
       self.pollToken = res.poll_token

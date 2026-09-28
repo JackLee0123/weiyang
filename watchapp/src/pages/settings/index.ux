@@ -1,10 +1,10 @@
 <template>
-  <div class="page">
+  <div class="page {{light ? 'page-lt' : ''}}">
     <div class="topbar">
-      <div class="back" onclick="goBack">
-        <text class="back-text">‹</text>
+      <div class="back {{light ? 'back-lt' : ''}}" onclick="goBack">
+        <text class="back-text {{light ? 'back-text-lt' : ''}}">‹</text>
       </div>
-      <text class="title">设置</text>
+      <text class="title {{light ? 'title-lt' : ''}}">设置</text>
     </div>
 
     <div class="form">
@@ -13,30 +13,30 @@
       </div>
 
       <div class="account">
-        <text class="account-label">当前账号</text>
+        <text class="account-label {{light ? 'muted-lt' : ''}}">当前账号</text>
         <text class="account-value {{connected ? 'account-on' : ''}}">{{accountLabel}}</text>
       </div>
 
-      <div class="btn btn-ghost" onclick="testConnection">
-        <text class="btn-text btn-text-accent">测试连接</text>
+      <div class="btn btn-ghost {{light ? 'ghost-lt' : ''}}" onclick="testConnection">
+        <text class="btn-text btn-text-accent {{light ? 'accent-lt' : ''}}">测试连接</text>
       </div>
 
-      <div class="demo-row" onclick="toggleDemo">
-        <text class="label demo-label">演示模式</text>
-        <div class="switch {{demo ? 'switch-on' : ''}}">
-          <div class="knob {{demo ? 'knob-on' : ''}}"></div>
+      <div class="theme-row" onclick="toggleTheme">
+        <text class="label theme-label {{light ? 'muted-lt' : ''}}">亮色模式</text>
+        <div class="switch {{light ? 'switch-on' : ''}}">
+          <div class="knob {{light ? 'knob-on' : ''}}"></div>
         </div>
       </div>
 
-      <text if="{{msg}}" class="msg">{{msg}}</text>
+      <text if="{{msg}}" class="msg {{light ? 'warn-lt' : ''}}">{{msg}}</text>
     </div>
 
-    <div class="help">
-      <text class="help-title">如何连接</text>
-      <text class="help-line">1. 点上方「连接账户」显示二维码</text>
-      <text class="help-line">2. 手机端「设备连接」里扫码</text>
-      <text class="help-line">3. 手机上点「连接」即可</text>
-      <text class="help-line">手环经手机网络联网，需保持蓝牙连接</text>
+    <div class="help {{light ? 'help-lt' : ''}}">
+      <text class="help-title {{light ? 'title-lt' : ''}}">如何连接</text>
+      <text class="help-line {{light ? 'muted-lt' : ''}}">1. 点上方「连接账户」显示二维码</text>
+      <text class="help-line {{light ? 'muted-lt' : ''}}">2. 手机端「设备连接」里扫码</text>
+      <text class="help-line {{light ? 'muted-lt' : ''}}">3. 手机上点「连接」即可</text>
+      <text class="help-line {{light ? 'muted-lt' : ''}}">手环经手机网络联网，需保持蓝牙连接</text>
     </div>
   </div>
 </template>
@@ -121,13 +121,13 @@
   .account-on {
     color: #5eead4;
   }
-  .demo-row {
+  .theme-row {
     flex-direction: row;
     justify-content: space-between;
     align-items: center;
     margin-top: 28px;
   }
-  .demo-label {
+  .theme-label {
     margin-top: 0;
   }
   .switch {
@@ -150,6 +150,18 @@
     background-color: #5eead4;
     margin-left: 40px;
   }
+
+  /* 亮色主题 */
+  .page-lt { background-color: #f2f4f8; }
+  .back-lt { background-color: #ffffff; }
+  .back-text-lt { color: #475569; }
+  .title-lt { color: #101828; }
+  .muted-lt { color: #667085; }
+  .accent-lt { color: #0f766e; }
+  .ghost-lt { border-color: #d0d5dd; }
+  .help-lt { background-color: #ffffff; border-color: #e3e8ef; }
+  .warn-lt { color: #b45309; }
+  .switch-on-lt { background-color: #0f766e; }
   .msg {
     font-size: 22px;
     color: #fbbf24;
@@ -205,7 +217,7 @@
     .help { margin-top: 28px; padding: 28px; }
     .help-title { font-size: 37px; }
     .help-line { font-size: 28px; }
-    .demo-row { margin-top: 28px; }
+    .theme-row { margin-top: 28px; }
     .switch { width: 100px; height: 54px; border-radius: 27px; }
     .knob { width: 44px; height: 44px; border-radius: 22px; }
     .knob-on { margin-left: 46px; }
@@ -219,7 +231,7 @@ import { fetchMe } from '../../common/scripts/api.js'
 
 export default {
   private: {
-    demo: false,
+    light: false,
     connected: false,
     accountLabel: '未连接',
     msg: '',
@@ -229,39 +241,33 @@ export default {
     var self = this
     ready().then(function () {
       var cfg = getConfig()
-      self.demo = cfg.demo
+      self.light = cfg.theme === 'light'
       self.connected = !!cfg.token
       self.accountLabel = cfg.token ? (cfg.accountName || '已连接') : '未连接'
     })
   },
 
-  toggleDemo() {
+  toggleTheme() {
     var self = this
-    this.demo = !this.demo
-    save({ demo: this.demo }).then(function () {
-      self.msg = self.demo ? '演示模式已开启' : '演示模式已关闭'
+    this.light = !this.light
+    save({ theme: this.light ? 'light' : 'dark' }).then(function () {
+      self.msg = self.light ? '已切换到亮色模式' : '已切换到暗色模式'
     })
   },
 
   testConnection() {
     var self = this
     this.msg = '连接中…'
-    save({ demo: this.demo }).then(function () {
-      if (self.demo) {
-        self.msg = '演示模式：无需连接'
-        return null
-      }
-      if (!getConfig().token) {
-        self.msg = '尚未连接账户，请先点「连接账户」扫码'
-        return null
-      }
-      return fetchMe().then(function (user) {
-        self.connected = true
-        self.accountLabel = user.name || user.email || '已连接'
-        self.msg = '连接成功：' + (user.name || user.email)
-      }).catch(function (e) {
-        self.msg = '连接失败：' + (e.message || e)
-      })
+    if (!getConfig().token) {
+      this.msg = '尚未连接账户，请先点「连接账户」扫码'
+      return
+    }
+    fetchMe().then(function (user) {
+      self.connected = true
+      self.accountLabel = user.name || user.email || '已连接'
+      self.msg = '连接成功：' + (user.name || user.email)
+    }).catch(function (e) {
+      self.msg = '连接失败：' + (e.message || e)
     })
   },
 
@@ -270,9 +276,7 @@ export default {
   },
 
   goConnect() {
-    save({ demo: this.demo }).then(function () {
-      router.push({ uri: '/pages/connect' })
-    })
+    router.push({ uri: '/pages/connect' })
   }
 }
 </script>

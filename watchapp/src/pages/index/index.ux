@@ -1,37 +1,37 @@
 <template>
-  <div class="page">
+  <div class="page {{light ? 'page-lt' : ''}}">
     <div class="header">
       <div class="header-left">
-        <text class="title">未央</text>
-        <text class="subtitle">{{headerDate}}</text>
+        <text class="title {{light ? 'title-lt' : ''}}">未央</text>
+        <text class="subtitle {{light ? 'muted-lt' : ''}}">{{headerDate}}</text>
       </div>
-      <div class="settings-btn" onclick="goSettings">
-        <text class="settings-text">设置</text>
+      <div class="settings-btn {{light ? 'ghost-lt' : ''}}" onclick="goSettings">
+        <text class="settings-text {{light ? 'muted-lt' : ''}}">设置</text>
       </div>
     </div>
 
     <div class="cards">
-      <div class="card" onclick="goFocus">
-        <text class="card-title">当日专注</text>
-        <text class="card-value">{{focusMinutesLabel}}</text>
-        <text class="card-sub">{{summary.count}} 次专注</text>
-        <text class="card-arrow">›</text>
+      <div class="card {{light ? 'card-lt' : ''}}" onclick="goFocus">
+        <text class="card-title {{light ? 'muted-lt' : ''}}">当日专注</text>
+        <text class="card-value {{light ? 'accent-lt' : ''}}">{{focusMinutesLabel}}</text>
+        <text class="card-sub {{light ? 'faint-lt' : ''}}">{{summary.count}} 次专注</text>
+        <text class="card-arrow {{light ? 'faint-lt' : ''}}">›</text>
       </div>
 
-      <div class="card" onclick="goTimetable">
-        <text class="card-title">课表</text>
-        <text class="card-value">{{courseCount}} 节课</text>
-        <text class="card-sub">{{courseSubLabel}}</text>
-        <text class="card-arrow">›</text>
+      <div class="card {{light ? 'card-lt' : ''}}" onclick="goTimetable">
+        <text class="card-title {{light ? 'muted-lt' : ''}}">课表</text>
+        <text class="card-value {{light ? 'accent-lt' : ''}}">{{courseCount}} 节课</text>
+        <text class="card-sub {{light ? 'faint-lt' : ''}}">{{courseSubLabel}}</text>
+        <text class="card-arrow {{light ? 'faint-lt' : ''}}">›</text>
       </div>
     </div>
 
     <div if="{{statusMsg}}" class="status">
-      <text class="status-text">{{statusMsg}}</text>
+      <text class="status-text {{light ? 'warn-lt' : ''}}">{{statusMsg}}</text>
     </div>
 
     <div class="footer">
-      <text class="footer-text">小米手环 · 未央 Everlong</text>
+      <text class="footer-text {{light ? 'faint-lt' : ''}}">小米手环 · 未央 Everlong</text>
     </div>
   </div>
 </template>
@@ -122,6 +122,16 @@
     color: #334155;
   }
 
+  /* 亮色主题 */
+  .page-lt { background-color: #f2f4f8; }
+  .title-lt { color: #101828; }
+  .muted-lt { color: #667085; }
+  .faint-lt { color: #98a2b3; }
+  .accent-lt { color: #0f766e; }
+  .ghost-lt { border-color: #d0d5dd; }
+  .card-lt { background-color: #ffffff; border-color: #e3e8ef; }
+  .warn-lt { color: #b45309; }
+
   /* 手环（dp 宽度远小于手表）字号整体上调，否则实际显示明显偏小 */
   @media (max-width: 190) {
     .title { font-size: 54px; }
@@ -154,11 +164,10 @@
 
 <script>
 import router from '@system.router'
-import { ready, getConfig } from '../../common/scripts/store.js'
+import { ready, getConfig, isLight } from '../../common/scripts/store.js'
 import { fetchRecords, fetchCourses } from '../../common/scripts/api.js'
 import { summarizeFocus, formatMinutes } from '../../common/scripts/focus.js'
 import { todayISO, weekdayOf, mondayOf, weekIndexFor, DAY_LABELS, courseActiveOn } from '../../common/scripts/timetable.js'
-import { demoTimetable, demoRecords } from '../../common/scripts/demo.js'
 
 export default {
   private: {
@@ -167,7 +176,8 @@ export default {
     focusMinutesLabel: '0分钟',
     courseCount: 0,
     courseSubLabel: '',
-    statusMsg: ''
+    statusMsg: '',
+    light: false
   },
 
   onInit() {
@@ -183,11 +193,7 @@ export default {
     var self = this
     this.statusMsg = ''
     ready().then(function () {
-      if (getConfig().demo) {
-        self.applyFocus(demoRecords())
-        self.applyTimetable(demoTimetable())
-        return null
-      }
+      self.light = isLight()
       if (!getConfig().token) {
         self.statusMsg = '请先在设置里连接账户'
         return null
