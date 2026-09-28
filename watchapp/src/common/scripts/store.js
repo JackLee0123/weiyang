@@ -1,30 +1,40 @@
 /**
- * 本地配置存取：服务器地址 / 访问令牌 / 账号名 / 主题。
- * 配置同时缓存在内存 config 中，页面通过 getConfig() 同步读取。
+ * 本地配置存取（离线版）。
+ *
+ * 小米手环 10 的快应用拿不到联网能力（官方支持表里 system.fetch / system.network
+ * 都是「不支持」），所以「连接账户 + 令牌」那一套整体去掉了，这里只剩两件事：
+ *   1. 主题偏好（亮色 / 暗色）
+ *   2. 给 records.js 用的底层存储读写
  */
 import storage from '@system.storage'
 
-// 默认后端地址（与 Web 端 https://everlong.net.cn 同源，API 在 /api 下）。
-// 本地开发时可覆盖：设置页修改服务器地址即可。
-export var DEFAULT_BASE_URL = 'https://everlong.net.cn'
-
-var config = { baseUrl: '', token: '', accountName: '', theme: 'dark' }
+var config = { theme: 'dark' }
 var readyPromise = null
 
-function sget(key) {
+/** 不同引擎回调里的值形态可能不一样，这里统一成字符串。 */
+function normalize(data) {
+  if (data === null || data === undefined) return ''
+  if (typeof data === 'string') return data
+  if (typeof data === 'object' && typeof data.value === 'string') return data.value
+  if (typeof data === 'number' || typeof data === 'boolean') return String(data)
+  return ''
+}
+
+/** 读一个键；不存在或读取失败都返回空串。 */
+export function sget(key) {
   return new Promise(function (resolve) {
     storage.get({
       key: key,
-      // 不同引擎回调里的值形态可能不一样，这里统一成字符串。
-      success: function (data) {
-        if (data === null || data === undefined) return resolve('')
-        if (typeof data === 'string') return resolve(data)
-        if (typeof data === 'object' && typeof data.value === 'string') return resolve(data.value)
-        if (typeof data === 'number' || typeof data === 'boolean') return resolve(String(data))
-        resolve('')
-      },
+      success: function (data) { resolve(normalize(data)) },
       fail: function () { resolve('') }
     })
+  })
+}
+
+/** 写一个键；无论成功失败都 resolve，调用方不需要区分。 */
+export function sset(key, value) {
+  return new Promise(function (resolve) {
+    storage.set({ key: key, value: value, success: resolve, fail: resolve })
   })
 }
 
@@ -39,21 +49,15 @@ export function init(app) {
 }
 
 function load() {
-  return Promise.all([sget('baseUrl'), sget('token'), sget('theme'), sget('accountName')]).then(function (r) {
-    config.baseUrl = (r[0] || DEFAULT_BASE_URL).replace(/\/+$/, '')
-    config.token = r[1] || ''
-    config.theme = r[2] === 'light' ? 'light' : 'dark'
-    config.accountName = r[3] || ''
+  return sget('theme').then(function (theme) {
+    config.theme = theme === 'light' ? 'light' : 'dark'
     return config
   })
 }
 
 /**
  * 页面每次进入都要重新读一遍本地存储。
- *
- * 快应用的页面是各自独立的 JS 上下文：连接账户是在「连接」页写的存储，
- * 课表页如果只读一次（首次进入时还没连接）就会一直拿着空的令牌，
- * 表现为「手机上明明提示已连接，手环却让我先连接账户」。
+ * 快应用的页面是各自独立的 JS 上下文，只读一次容易拿到过期值。
  */
 export function ready() {
   return load()
@@ -63,35 +67,16 @@ export function getConfig() {
   return config
 }
 
-/** 直接从本地存储读一次令牌（用于写入后的回读校验）。 */
-export function readToken() {
-  return sget('token')
-}
-
-/**
- * 取当前服务器地址：没配置过时用默认地址，保证「开箱即用」。
- * 页面和请求都走这个函数，避免存储读取失败时整个应用不可用。
- */
-export function getBaseUrl() {
-  return (config.baseUrl || DEFAULT_BASE_URL).replace(/\/+$/, '')
-}
-
 /** 是否处于亮色主题（默认暗色）。 */
 export function isLight() {
   return config.theme === 'light'
 }
 
 export function save(patch) {
-  Object.keys(patch).forEach(function (k) {
-    config[k] = patch[k]
-  })
-  config.baseUrl = (config.baseUrl || DEFAULT_BASE_URL).replace(/\/+$/, '')
   var jobs = Object.keys(patch).map(function (k) {
+    config[k] = patch[k]
     var v = patch[k]
-    var s = typeof v === 'boolean' ? (v ? '1' : '0') : String(v)
-    return new Promise(function (resolve) {
-      storage.set({ key: k, value: s, success: resolve, fail: resolve })
-    })
+    return sset(k, typeof v === 'boolean' ? (v ? '1' : '0') : String(v))
   })
   return Promise.all(jobs)
 }

@@ -29,7 +29,9 @@
         </div>
       </div>
 
-      <text if="{{slices.length === 0}}" class="empty {{light ? 'faint-lt' : ''}}">还没有专注记录</text>
+      <text class="local-note {{light ? 'faint-lt' : ''}}">手环离线运行，这里只统计手环上记的专注</text>
+
+      <text if="{{slices.length === 0}}" class="empty {{light ? 'faint-lt' : ''}}">还没有本机专注记录</text>
 
       <!-- 同样不用 list/list-item，普通容器循环渲染更稳 -->
       <div class="slice-list" if="{{slices.length > 0}}">
@@ -64,7 +66,7 @@
         </div>
       </div>
 
-      <text class="timer-hint {{light ? 'faint-lt' : ''}}">结束后写入「当日专注」记录</text>
+      <text class="timer-hint {{light ? 'faint-lt' : ''}}">结束后只记在手环本地，不会上传</text>
     </div>
 
     <div if="{{msg}}" class="msg-bar">
@@ -166,6 +168,11 @@
     color: #64748b;
     text-align: center;
     margin-top: 40px;
+  }
+  .local-note {
+    font-size: 18px;
+    color: #475569;
+    margin-top: 12px;
   }
   .slice-list {
     flex: 1;
@@ -298,6 +305,7 @@
     .summary-num { font-size: 54px; }
     .summary-label { font-size: 27px; }
     .empty { font-size: 29px; }
+    .local-note { font-size: 24px; }
     .slice-label { font-size: 32px; }
     .slice-minutes { font-size: 29px; }
     .timer-circle { width: 380px; height: 380px; border-radius: 190px; }
@@ -322,6 +330,7 @@
     .summary-num { font-size: 60px; }
     .summary-label { font-size: 29px; }
     .empty { font-size: 30px; }
+    .local-note { font-size: 25px; }
     .slice-label { font-size: 31px; }
     .slice-minutes { font-size: 27px; }
     .timer-circle { width: 360px; height: 360px; border-radius: 180px; }
@@ -338,8 +347,8 @@
 
 <script>
 import router from '@system.router'
-import { ready, getConfig, isLight } from '../../common/scripts/store.js'
-import { fetchRecords, fetchPlans, createRecord } from '../../common/scripts/api.js'
+import { ready, isLight } from '../../common/scripts/store.js'
+import { loadRecords, appendRecord } from '../../common/scripts/records.js'
 import { summarizeFocus, formatMinutes, formatClock, nextFocusName } from '../../common/scripts/focus.js'
 import { initDeviceInfo, isCapsule } from '../../common/scripts/device.js'
 import { todayISO } from '../../common/scripts/timetable.js'
@@ -399,23 +408,15 @@ export default {
     this.msg = ''
     ready().then(function () {
       self.light = isLight()
-      if (!getConfig().token) {
-        self.msg = '请先在设置里连接账户'
-        return null
-      }
       var today = todayISO()
-      return Promise.all([fetchRecords(today, today), fetchPlans(today, today)]).then(function (r) {
-        var titles = {}
-        ;(r[1] || []).forEach(function (p) { titles[p.id] = p.title })
-        self.applySummary(r[0] || [], titles)
-      }).catch(function (e) {
-        self.msg = e.message || '加载失败'
+      return loadRecords().then(function (records) {
+        self.applySummary(records.filter(function (r) { return r.date === today }))
       })
     })
   },
 
-  applySummary(records, titles) {
-    this.summary = summarizeFocus(records, titles)
+  applySummary(records) {
+    this.summary = summarizeFocus(records)
     this.totalLabel = formatMinutes(this.summary.minutes)
     this.slices = this.summary.slices.map(function (s) {
       s.minutesLabel = formatMinutes(s.minutes)
@@ -449,23 +450,19 @@ export default {
     var minutes = Math.max(1, Math.round(this.elapsed / 60) || 1)
     var self = this
     var today = todayISO()
-    var payload = {
-      date: today,
-      title: '',
-      content: '手环专注 · ' + minutes + ' 分钟',
-      duration_minutes: minutes,
-      is_completed: true,
-      category: '其他',
-      linked_plan_id: null
-    }
     ready().then(function () {
       self.light = isLight()
-      // 默认名按当天已有专注段数顺延：a、b、c…… 名称在网页端/PWA 可以再改
-      return fetchRecords(today, today).then(function (records) {
-        payload.title = nextFocusName(records)
-        return createRecord(payload)
+      return loadRecords().then(function (records) {
+        var todayRecords = records.filter(function (r) { return r.date === today })
+        // 默认名按当天已有专注段数顺延：a、b、c…… 手环不联网，名字只在本机有意义
+        return appendRecord({
+          date: today,
+          title: nextFocusName(todayRecords),
+          duration_minutes: minutes,
+          linked_plan_id: null
+        })
       }).then(function () {
-        self.afterSaved('已保存 ' + formatMinutes(minutes) + ' 专注')
+        self.afterSaved('已记下 ' + formatMinutes(minutes) + '（仅本机）')
       }).catch(function (e) {
         self.msg = '保存失败：' + (e.message || e)
         self.tab = 'stats'

@@ -24,7 +24,7 @@
     <text if="{{termLine}}" class="term {{light ? 'faint-lt' : ''}}">{{termLine}}</text>
 
     <div if="{{!hasWeek1}}" class="notice {{light ? 'notice-lt' : ''}}">
-      <text class="notice-text {{light ? 'warn-lt' : ''}}">后端未设置开学第 1 周日期，周次与过滤可能不准确</text>
+      <text class="notice-text {{light ? 'warn-lt' : ''}}">同步的数据里没有开学第 1 周日期，周次与过滤可能不准确</text>
     </div>
 
     <!-- 不用 list/list-item：改成普通容器循环，一行一门课，稳定得多 -->
@@ -249,8 +249,8 @@
 
 <script>
 import router from '@system.router'
-import { ready, getConfig, isLight } from '../../common/scripts/store.js'
-import { fetchCourses } from '../../common/scripts/api.js'
+import { ready, isLight } from '../../common/scripts/store.js'
+import { getTimetable, hasSync } from '../../common/scripts/syncdata.js'
 import { initDeviceInfo, isCapsule } from '../../common/scripts/device.js'
 import {
   DAY_LABELS, mondayOf, weekdayOf, weekIndexFor,
@@ -293,15 +293,12 @@ export default {
     this.msg = ''
     ready().then(function () {
       self.light = isLight()
-      if (!getConfig().token) {
-        self.msg = '请先在设置里连接账户'
-        return null
+      if (!hasSync()) {
+        self.msg = '还没有课表数据，先在电脑上跑 npm run sync 再推送'
+        return
       }
-      return fetchCourses().then(function (data) {
-        self.applyData(data)
-      }).catch(function (e) {
-        self.msg = e.message || '加载失败'
-      })
+      var timetable = getTimetable()
+      self.applyData({ settings: timetable.settings, courses: timetable.courses })
     })
   },
 

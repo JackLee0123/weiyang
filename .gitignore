@@ -18,6 +18,8 @@ backend/data/
 backend/dist/
 # 手环快应用的打包签名（私钥，由 AIoT-IDE 生成，不要提交）
 watchapp/sign/
+# 手环数据同步脚本缓存的设备令牌（含账号凭据，不要提交）
+watchapp/.sync-token.json
 # 临时文件：前端目录下多余的 lock、npm 中断残留
 apps/frontend/pnpm-lock.yaml
 watchapp/_check2.txt

@@ -8,13 +8,24 @@
     </div>
 
     <div class="form">
-      <div class="btn btn-primary" onclick="goConnect">
-        <text class="btn-text">连接账户</text>
+      <div class="account">
+        <text class="account-label {{light ? 'muted-lt' : ''}}">课表数据</text>
+        <text class="account-value {{syncOk ? (light ? 'accent-lt' : 'account-on') : (light ? 'muted-lt' : '')}}">{{syncLabel}}</text>
       </div>
 
       <div class="account">
-        <text class="account-label {{light ? 'muted-lt' : ''}}">当前账号</text>
-        <text class="account-value {{connected ? (light ? 'accent-lt' : 'account-on') : (light ? 'muted-lt' : '')}}">{{accountLabel}}</text>
+        <text class="account-label {{light ? 'muted-lt' : ''}}">课程数</text>
+        <text class="account-value {{light ? 'muted-lt' : ''}}">{{courseCount}} 门</text>
+      </div>
+
+      <div class="account">
+        <text class="account-label {{light ? 'muted-lt' : ''}}">账号</text>
+        <text class="account-value {{light ? 'muted-lt' : ''}}">{{account}}</text>
+      </div>
+
+      <div class="account">
+        <text class="account-label {{light ? 'muted-lt' : ''}}">本机专注记录</text>
+        <text class="account-value {{light ? 'muted-lt' : ''}}">{{recordCount}} 条</text>
       </div>
 
       <div class="theme-row" onclick="toggleTheme">
@@ -28,11 +39,10 @@
     </div>
 
     <div class="help {{light ? 'help-lt' : ''}}">
-      <text class="help-title {{light ? 'title-lt' : ''}}">如何连接</text>
-      <text class="help-line {{light ? 'muted-lt' : ''}}">1. 点上方「连接账户」显示二维码</text>
-      <text class="help-line {{light ? 'muted-lt' : ''}}">2. 手机端「设备连接」里扫码</text>
-      <text class="help-line {{light ? 'muted-lt' : ''}}">3. 手机上点「连接」即可</text>
-      <text class="help-line {{light ? 'muted-lt' : ''}}">手环经手机网络联网，需保持蓝牙连接</text>
+      <text class="help-title {{light ? 'title-lt' : ''}}">离线数据</text>
+      <text class="help-line {{light ? 'muted-lt' : ''}}">手环不支持联网，课表是随安装包一起带进来的</text>
+      <text class="help-line {{light ? 'muted-lt' : ''}}">更新：电脑上跑 npm run sync，再用 AstroBox 推送新包</text>
+      <text class="help-line {{light ? 'muted-lt' : ''}}">计时记录只存在手环本地，不会同步到网页端</text>
     </div>
   </div>
 </template>
@@ -225,23 +235,33 @@
 
 <script>
 import router from '@system.router'
-import { ready, getConfig, save } from '../../common/scripts/store.js'
+import { ready, isLight, save } from '../../common/scripts/store.js'
+import { loadRecords } from '../../common/scripts/records.js'
+import { getTimetable, hasSync, syncedLabel, accountLabel } from '../../common/scripts/syncdata.js'
 
 export default {
   private: {
     light: false,
-    connected: false,
-    accountLabel: '未连接',
-    msg: '',
+    syncOk: false,
+    syncLabel: '未同步',
+    courseCount: 0,
+    recordCount: 0,
+    account: '—',
+    msg: ''
   },
 
   onShow() {
     var self = this
     ready().then(function () {
-      var cfg = getConfig()
-      self.light = cfg.theme === 'light'
-      self.connected = !!cfg.token
-      self.accountLabel = cfg.token ? (cfg.accountName || '已连接') : '未连接'
+      self.light = isLight()
+      var timetable = getTimetable()
+      self.syncOk = hasSync()
+      self.syncLabel = syncedLabel() || '未同步'
+      self.courseCount = timetable.courses.length
+      self.account = accountLabel() || '—'
+      return loadRecords()
+    }).then(function (records) {
+      if (records) self.recordCount = records.length
     })
   },
 
@@ -255,10 +275,6 @@ export default {
 
   goBack() {
     router.back()
-  },
-
-  goConnect() {
-    router.push({ uri: '/pages/connect' })
   }
 }
 </script>

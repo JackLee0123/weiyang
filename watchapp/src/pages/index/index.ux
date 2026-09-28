@@ -155,8 +155,9 @@
 
 <script>
 import router from '@system.router'
-import { ready, getConfig, isLight } from '../../common/scripts/store.js'
-import { fetchRecords, fetchCourses } from '../../common/scripts/api.js'
+import { ready, isLight } from '../../common/scripts/store.js'
+import { loadRecords } from '../../common/scripts/records.js'
+import { getTimetable, hasSync } from '../../common/scripts/syncdata.js'
 import { summarizeFocus, formatMinutes } from '../../common/scripts/focus.js'
 import { todayISO, weekdayOf, mondayOf, weekIndexFor, DAY_LABELS, courseActiveOn } from '../../common/scripts/timetable.js'
 
@@ -185,19 +186,13 @@ export default {
     this.statusMsg = ''
     ready().then(function () {
       self.light = isLight()
-      if (!getConfig().token) {
-        self.statusMsg = '请先在设置里连接账户'
-        return null
-      }
       var today = todayISO()
-      return Promise.all([
-        fetchRecords(today, today),
-        fetchCourses()
-      ]).then(function (r) {
-        self.applyFocus(r[0] || [])
-        self.applyTimetable(r[1])
-      }).catch(function (e) {
-        self.statusMsg = e.message || '加载失败'
+      return loadRecords().then(function (records) {
+        self.applyFocus(records.filter(function (r) { return r.date === today }))
+        self.applyTimetable(getTimetable())
+        if (!hasSync()) {
+          self.statusMsg = '还没有课表数据，先在电脑上跑 npm run sync 再推送'
+        }
       })
     })
   },
