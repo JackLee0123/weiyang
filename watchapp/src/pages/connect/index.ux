@@ -199,13 +199,13 @@
 
   /* 胶囊屏（小米手环10，212x520）：屏幕更窄，二维码要占满宽度，字号再上调一档 */
   @media (shape: pill-shaped) {
-    /* 胶囊屏上下都是圆弧，底部要留出安全区 */
-    .page { padding: 30px 20px; padding-bottom: 56px; }
+    /* 胶囊屏两端是半径 104px 的大圆弧（见 SDK 皮肤配置），四周要留出安全区 */
+    .page { padding: 104px 46px; padding-bottom: 104px; }
     .title { font-size: 50px; }
     .back { width: 64px; height: 64px; border-radius: 32px; }
     .back-text { font-size: 44px; }
-    .qr-wrap { width: 386px; height: 386px; padding: 16px; }
-    .qr { width: 354px; height: 354px; }
+    .qr-wrap { width: 360px; height: 360px; padding: 14px; }
+    .qr { width: 332px; height: 332px; }
     .code { font-size: 52px; letter-spacing: 8px; }
     .muted { font-size: 34px; }
     .err { font-size: 34px; }
@@ -216,7 +216,7 @@
     .done-mark-text { font-size: 60px; }
     .done-title { font-size: 48px; }
     .done-name { font-size: 34px; }
-    .btn { width: 82%; height: 104px; border-radius: 52px; }
+    .btn { width: 100%; height: 104px; border-radius: 52px; }
     .btn-text { font-size: 36px; }
   }
 </style>

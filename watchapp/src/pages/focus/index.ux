@@ -318,8 +318,8 @@
 
   /* 胶囊屏（小米手环10，212x520）：更窄，字号再上调一档，圆形计时器撑满宽度 */
   @media (shape: pill-shaped) {
-    /* 胶囊屏上下都是圆弧，底部要留出安全区 */
-    .page { padding: 30px 22px; padding-bottom: 56px; }
+    /* 胶囊屏两端是半径 104px 的大圆弧（见 SDK 皮肤配置），四周要留出安全区 */
+    .page { padding: 104px 46px; padding-bottom: 104px; }
     .back { width: 64px; height: 64px; border-radius: 32px; }
     .back-text { font-size: 44px; }
     .tab { padding: 13px 26px; }
@@ -332,11 +332,11 @@
     .slice-label { font-size: 35px; }
     .slice-minutes { font-size: 35px; }
     .slice-percent { font-size: 26px; }
-    .timer-circle { width: 404px; height: 404px; border-radius: 202px; }
+    .timer-circle { width: 360px; height: 360px; border-radius: 180px; }
     .timer-time { font-size: 96px; }
     .timer-state { font-size: 30px; }
     .timer-hint { font-size: 26px; }
-    .btn { width: 84%; height: 104px; border-radius: 52px; }
+    .btn { width: 100%; height: 104px; border-radius: 52px; }
     .btn-text { font-size: 36px; }
     .msg-text { font-size: 28px; }
   }

@@ -238,8 +238,8 @@
 
   /* 胶囊屏（小米手环10，212x520）：更窄，字号再上调一档，左右分栏改为更窄的时间列 */
   @media (shape: pill-shaped) {
-    /* 胶囊屏上下都是圆弧，底部要留出安全区，否则内容会被屏幕边缘切掉 */
-    .page { padding: 30px 22px; padding-bottom: 56px; }
+    /* 胶囊屏两端是半径 104px 的大圆弧（见 SDK 皮肤配置），四周要留出安全区 */
+    .page { padding: 104px 46px; padding-bottom: 104px; }
     .back { width: 64px; height: 64px; border-radius: 32px; }
     .back-text { font-size: 44px; }
     .switch-btn { width: 54px; height: 54px; border-radius: 27px; margin: 0 8px; }
