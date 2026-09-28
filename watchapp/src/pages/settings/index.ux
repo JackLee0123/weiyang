@@ -14,7 +14,7 @@
 
       <div class="account">
         <text class="account-label {{light ? 'muted-lt' : ''}}">当前账号</text>
-        <text class="account-value {{connected ? 'account-on' : ''}}">{{accountLabel}}</text>
+        <text class="account-value {{connected ? (light ? 'accent-lt' : 'account-on') : (light ? 'muted-lt' : '')}}">{{accountLabel}}</text>
       </div>
 
       <!-- 诊断：确认主题在存储里的原始值与最终取值 -->
@@ -29,7 +29,7 @@
 
       <div class="theme-row" onclick="toggleTheme">
         <text class="label theme-label {{light ? 'muted-lt' : ''}}">亮色模式</text>
-        <div class="switch {{light ? 'switch-on' : ''}}">
+        <div class="switch {{light ? 'switch-on' : 'switch-lt'}}">
           <div class="knob {{light ? 'knob-on' : ''}}"></div>
         </div>
       </div>
@@ -157,17 +157,6 @@
     margin-left: 40px;
   }
 
-  /* 亮色主题 */
-  .page-lt { background-color: #f2f4f8; }
-  .back-lt { background-color: #ffffff; }
-  .back-text-lt { color: #475569; }
-  .title-lt { color: #101828; }
-  .muted-lt { color: #667085; }
-  .accent-lt { color: #0f766e; }
-  .ghost-lt { border-color: #d0d5dd; }
-  .help-lt { background-color: #ffffff; border-color: #e3e8ef; }
-  .warn-lt { color: #b45309; }
-  .switch-on-lt { background-color: #0f766e; }
   .msg {
     font-size: 22px;
     color: #fbbf24;
@@ -192,6 +181,20 @@
     color: #94a3b8;
     margin-top: 6px;
   }
+
+  /* 亮色主题：必须放在所有暗色规则之后，否则会被覆盖 */
+  .page-lt { background-color: #f2f4f8; }
+  .back-lt { background-color: #ffffff; }
+  .back-text-lt { color: #475569; }
+  .title-lt { color: #101828; }
+  .muted-lt { color: #667085; }
+  .faint-lt { color: #98a2b3; }
+  .accent-lt { color: #0f766e; }
+  .strong-lt { color: #101828; }
+  .ghost-lt { background-color: #ffffff; border-color: #d0d5dd; }
+  .help-lt { background-color: #ffffff; border-color: #e3e8ef; }
+  .switch-lt { background-color: #e4e7ec; }
+  .warn-lt { color: #b45309; }
 
   /* 手环（dp 宽度远小于手表）字号整体上调，否则实际显示明显偏小 */
   @media (max-width: 190) {
@@ -268,7 +271,7 @@ export default {
       setTimeout(function () {
         router.clear()
         router.replace({ uri: '/pages/index' })
-      }, 900)
+      }, 260)
     })
   },
 

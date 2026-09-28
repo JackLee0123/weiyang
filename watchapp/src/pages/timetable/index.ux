@@ -159,17 +159,6 @@
     color: #fbbf24;
   }
 
-  /* 亮色主题 */
-  .page-lt { background-color: #f2f4f8; }
-  .surface-lt { background-color: #ffffff; }
-  .strong-lt { color: #101828; }
-  .muted-lt { color: #667085; }
-  .faint-lt { color: #98a2b3; }
-  .accent-lt { color: #0f766e; }
-  .badge-lt { color: #0f766e; border-color: #99f6e4; }
-  .notice-lt { background-color: #fef3c7; }
-  .warn-lt { color: #b45309; }
-
   /* 课程按行显示：左边时间，右边课程名 + 地点 */
   .course-list {
     flex: 1;
@@ -205,6 +194,17 @@
     color: #94a3b8;
     margin-top: 6px;
   }
+
+  /* 亮色主题：放在所有暗色规则之后才会生效 */
+  .page-lt { background-color: #f2f4f8; }
+  .surface-lt { background-color: #ffffff; }
+  .strong-lt { color: #101828; }
+  .muted-lt { color: #667085; }
+  .faint-lt { color: #98a2b3; }
+  .accent-lt { color: #0f766e; }
+  .badge-lt { color: #0f766e; border-color: #99f6e4; }
+  .notice-lt { background-color: #fef3c7; }
+  .warn-lt { color: #b45309; }
 
   /* 手环（dp 宽度远小于手表）字号整体上调，否则实际显示明显偏小 */
   @media (max-width: 190) {
