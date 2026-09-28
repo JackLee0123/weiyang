@@ -60,20 +60,55 @@ class ResetPasswordOut(BaseModel):
     message: str
 
 
-class DevicePairCodeOut(BaseModel):
+class DeviceHandshakeStartIn(BaseModel):
+    """手环发起握手时可以带上自己的名字，手机端确认页会显示出来。"""
+
+    device_label: Optional[str] = Field(default=None, max_length=80)
+
+
+class DeviceHandshakeStartOut(BaseModel):
     code: str = Field(..., min_length=6, max_length=6)
+    poll_token: str
     expires_in: int
 
 
-class DevicePairIn(BaseModel):
-    code: str = Field(..., min_length=6, max_length=6, pattern=r"^\d{6}$")
+class DeviceHandshakeInfoOut(BaseModel):
+    """手机端确认页需要的信息。"""
 
-
-class DevicePairOut(BaseModel):
-    token: str
+    code: str = Field(..., min_length=6, max_length=6)
+    device_label: str
+    status: Literal["pending", "approved", "claimed", "expired"]
     expires_in: int
-    name: str
-    email: str
+
+
+class DeviceHandshakePollIn(BaseModel):
+    poll_token: str = Field(..., min_length=8, max_length=128)
+
+
+class DeviceHandshakePollOut(BaseModel):
+    """手环轮询结果：approved 时携带一次性下发的访问令牌。"""
+
+    status: Literal["pending", "approved", "claimed", "expired", "invalid"]
+    token: Optional[str] = None
+    expires_in: Optional[int] = None
+    name: Optional[str] = None
+    email: Optional[str] = None
+    device_label: Optional[str] = None
+
+
+class DeviceOut(BaseModel):
+    """已连接设备（本质是一条访问令牌）。"""
+
+    id: int
+    device_kind: str
+    device_label: Optional[str] = None
+    created_at: datetime
+    expires_at: datetime
+    is_current: bool = False
+
+
+class DeviceRevokeOut(BaseModel):
+    message: str
 
 
 class LoginIn(BaseModel):

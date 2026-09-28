@@ -42,6 +42,9 @@ class AuthToken(Base):
     id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
     user_id: Mapped[int] = mapped_column(ForeignKey("users.id", ondelete="CASCADE"), index=True, nullable=False)
     token_hash: Mapped[str] = mapped_column(String(64), unique=True, index=True, nullable=False)
+    # 令牌来源：web（浏览器登录）/ watch（手环扫码连接）。用于「已连接设备」列表。
+    device_kind: Mapped[str] = mapped_column(String(16), default="web", server_default="web", nullable=False)
+    device_label: Mapped[Optional[str]] = mapped_column(String(80), nullable=True)
     created_at: Mapped[datetime] = mapped_column(DateTime, default=now_utc, nullable=False)
     expires_at: Mapped[datetime] = mapped_column(DateTime, nullable=False)
 
@@ -95,22 +98,30 @@ class PushSchedule(Base):
     user: Mapped[User] = relationship(back_populates="push_schedule")
 
 
-class DevicePairCode(Base):
-    """手环/手表等设备的配对码。
+class DeviceHandshake(Base):
+    """手环/手表「设备发起」的连接握手。
 
-    已登录用户在网页端生成 6 位数字配对码（短时效、一次性），
-    手环端凭码换取访问令牌，避免在穿戴设备上输入长令牌。
+    手环端（未登录）生成一次性短码并展示成二维码，已登录的手机端扫码后把设备
+    绑定到当前账号；手环凭 poll_token 轮询领取访问令牌。整个过程无需在手表上打字。
+
+    status：pending（等待手机确认）→ approved（已确认，令牌待领取）→ claimed（已发放）。
     """
 
-    __tablename__ = "device_pair_codes"
+    __tablename__ = "device_handshakes"
     __table_args__ = {"mysql_charset": "utf8mb4"}
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
     code: Mapped[str] = mapped_column(String(6), unique=True, index=True, nullable=False)
-    user_id: Mapped[int] = mapped_column(ForeignKey("users.id", ondelete="CASCADE"), index=True, nullable=False)
+    poll_token_hash: Mapped[str] = mapped_column(String(64), unique=True, index=True, nullable=False)
+    device_label: Mapped[str] = mapped_column(String(80), default="", server_default="", nullable=False)
+    status: Mapped[str] = mapped_column(String(12), default="pending", server_default="pending", nullable=False)
+    user_id: Mapped[Optional[int]] = mapped_column(
+        ForeignKey("users.id", ondelete="CASCADE"), index=True, nullable=True
+    )
     created_at: Mapped[datetime] = mapped_column(DateTime, default=now_utc, nullable=False)
     expires_at: Mapped[datetime] = mapped_column(DateTime, nullable=False)
-    consumed_at: Mapped[Optional[datetime]] = mapped_column(DateTime, nullable=True)
+    approved_at: Mapped[Optional[datetime]] = mapped_column(DateTime, nullable=True)
+    claimed_at: Mapped[Optional[datetime]] = mapped_column(DateTime, nullable=True)
 
 
 class Plan(Base):

@@ -4,7 +4,7 @@ import { Sidebar } from './components/Sidebar'
 import { Modal } from './components/Modal'
 import { NotificationsPanel } from './components/NotificationsPanel'
 import { BackupPanel } from './components/BackupPanel'
-import { DevicePairPanel } from './components/DevicePairPanel'
+import { DeviceConnectPanel } from './components/DeviceConnectPanel'
 import { PushPrompt } from './components/PushPrompt'
 import { PlanForm } from './components/PlanForm'
 import { FocusFlightOverlay } from './components/FocusFlightOverlay'
@@ -164,7 +164,7 @@ export default function App() {
       )}
       {showDevices && (
         <Modal title="设备连接" onClose={() => setShowDevices(false)}>
-          <DevicePairPanel />
+          <DeviceConnectPanel />
         </Modal>
       )}
     </div>

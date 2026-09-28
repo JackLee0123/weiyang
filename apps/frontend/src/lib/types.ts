@@ -318,4 +318,24 @@ export interface PushNotification {
   ts: number
 }
 
+/** 手环扫码连接的状态机：pending → approved → claimed。 */
+export type DeviceHandshakeStatus = 'pending' | 'approved' | 'claimed' | 'expired'
+
+export interface DeviceHandshakeInfo {
+  code: string
+  device_label: string
+  status: DeviceHandshakeStatus
+  expires_in: number
+}
+
+/** 已连接设备（后端一条访问令牌对应一条记录）。 */
+export interface ConnectedDevice {
+  id: number
+  device_kind: string
+  device_label?: string | null
+  created_at: string
+  expires_at: string
+  is_current: boolean
+}
+
 export type View = 'today' | 'weiyang' | 'calendar' | 'list' | 'heatmap' | 'memory' | 'timetable' | 'notifications' | 'changelog' | 'admin'

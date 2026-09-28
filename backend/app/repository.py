@@ -28,8 +28,21 @@ def create_user(db: Session, name: str, email: str, password_hash: str) -> model
     return user
 
 
-def create_auth_token(db: Session, user_id: int, token_hash: str, expires_at) -> models.AuthToken:
-    token = models.AuthToken(user_id=user_id, token_hash=token_hash, expires_at=expires_at)
+def create_auth_token(
+    db: Session,
+    user_id: int,
+    token_hash: str,
+    expires_at,
+    device_kind: str = "web",
+    device_label: Optional[str] = None,
+) -> models.AuthToken:
+    token = models.AuthToken(
+        user_id=user_id,
+        token_hash=token_hash,
+        expires_at=expires_at,
+        device_kind=device_kind,
+        device_label=device_label,
+    )
     db.add(token)
     db.commit()
     db.refresh(token)

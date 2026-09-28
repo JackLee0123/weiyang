@@ -107,6 +107,28 @@ python .build/e2e.py
   `apps/frontend/public/sw.js`（离线缓存外壳；`/api` 请求始终走网络，不写入缓存）。
 - 图标取自品牌图标，构建前端时(`pnpm build:frontend`)会一并打包，无需额外配置。
 
+## 手环连接（扫码）
+
+小米手环端见 `watchapp/`（Xiaomi Vela 快应用）。连接由**手环发起**：
+
+1. 手环上打开「设置 → 连接账户」，显示一个二维码（5 分钟内有效）。
+2. 手机打开网页端 → 侧栏「设备连接」→「扫码连接手环」，扫手环上的二维码。
+3. 手机上核对设备名后点「连接」，手环自动拿到访问令牌并显示「已连接」。
+
+手机端优先使用系统自带的二维码识别（Android Chrome/Edge），不支持时（iOS Safari 等）
+自动加载 jsQR 在页面里解码；没有摄像头也可以直接输入手环上的 6 位连接码。
+「设备连接」里同时能看到已连接的手环并解绑，解绑后手环令牌立即失效。
+
+相关接口（完整清单见文末 API 一览）：
+
+| 方法 | 路径 | 说明 |
+| --- | --- | --- |
+| POST | `/api/devices/handshake` | 手环端发起（无需登录），返回 6 位短码 + 轮询凭据 |
+| GET | `/api/devices/handshake/:code` | 手机端扫码后查看设备名与状态 |
+| POST | `/api/devices/handshake/:code/approve` | 手机端确认，把设备绑定到当前账号 |
+| POST | `/api/devices/handshake/:code/poll` | 手环端轮询，确认后一次性领取访问令牌 |
+| GET / DELETE | `/api/devices` / `/api/devices/:id` | 已连接设备列表 / 解绑设备 |
+
 ## 手机通知（Web Push）
 
 支持 Android Chrome / Edge、iPhone Safari 与 iOS/iPadOS PWA：用户把网站安装到主屏幕后，
@@ -201,8 +223,15 @@ uv run alembic upgrade head
 | GET/DELETE | `/api/timetable/courses` / `/api/timetable/courses/:id` | 查询 / 删除课表课程 |
 | GET/PATCH | `/api/timetable/settings` | 读写学期、开学第 1 周、各节次时间 |
 | POST | `/api/timetable/generate-plans` | 把某周课程批量生成到日历计划 |
+| POST | `/api/devices/handshake` | 手环发起连接，生成一次性短码（无需登录） |
+| GET | `/api/devices/handshake/:code` | 查看待确认的手环连接 |
+| POST | `/api/devices/handshake/:code/approve` | 确认把手机扫到的手环绑定到当前账号 |
+| POST | `/api/devices/handshake/:code/poll` | 手环轮询领取访问令牌 |
+| GET | `/api/devices` | 已连接设备列表（手环 + 浏览器登录） |
+| DELETE | `/api/devices/:id` | 解绑设备 |
 
-除 `health` 与 `auth` 外，其余接口都需要在请求头携带 `Authorization: Bearer <token>`，
+除 `health`、`auth` 与手环连接的 `handshake` / `poll`（手环端尚未登录，凭一次性
+`poll_token` 领取令牌）之外，其余接口都需要在请求头携带 `Authorization: Bearer <token>`，
 数据按登录账号隔离，每个账号只能看到自己的计划与记录。
 
 界面提供 **今日 / 未央 / 回忆 / 日历 / 课表 / 活跃度 / 全部** 等视图：今日用于当天计划勾选与补记，日历按月份浏览，课表以周网格展示课程并可一键生成课程计划，活跃度展示过去 12 个月的 GitHub 风格热力图，全部用于搜索和按状态/分类筛选。

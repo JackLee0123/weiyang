@@ -6,9 +6,11 @@ import type {
   Backup,
   CaptchaChallenge,
   CaptchaResult,
+  ConnectedDevice,
   Course,
   CourseBulkResult,
   CourseDraft,
+  DeviceHandshakeInfo,
   FeedbackResponse,
   GeneratePlansResult,
   LoginPayload,
@@ -113,8 +115,21 @@ export const api = {
     return request<AuthUser>('/auth/me')
   },
 
-  createPairCode() {
-    return request<{ code: string; expires_in: number }>('/devices/pair-codes', { method: 'POST' })
+  /** 手环连接：查看某台手环的握手状态（扫码后确认前先看一眼）。 */
+  deviceHandshake(code: string) {
+    return request<DeviceHandshakeInfo>(`/devices/handshake/${code}`)
+  },
+  /** 手环连接：确认把这台手环绑定到当前账号。 */
+  approveDeviceHandshake(code: string) {
+    return request<DeviceHandshakeInfo>(`/devices/handshake/${code}/approve`, { method: 'POST' })
+  },
+  /** 已连接设备列表（手环 + 浏览器登录）。 */
+  fetchDevices() {
+    return request<ConnectedDevice[]>('/devices')
+  },
+  /** 解绑设备（吊销其访问令牌）。 */
+  revokeDevice(id: number) {
+    return request<void>(`/devices/${id}`, { method: 'DELETE' })
   },
 
   fetchPlans(params: { start?: string; end?: string; status?: string; category?: string; q?: string } = {}) {
