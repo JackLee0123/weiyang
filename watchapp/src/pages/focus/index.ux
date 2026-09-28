@@ -325,6 +325,8 @@
     .timer-time { font-size: 96px; }
     .timer-state { font-size: 30px; }
     .timer-hint { font-size: 26px; }
+    /* 父容器原本按内容宽度收缩，导致按钮的 width:100% 只拿到很窄的宽度，被挤成小圆 */
+    .timer-actions { width: 100%; }
     .btn { width: 100%; height: 104px; border-radius: 52px; }
     .btn-text { font-size: 36px; }
     .msg-text { font-size: 28px; }
