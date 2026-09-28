@@ -31,23 +31,22 @@
 
       <text if="{{slices.length === 0}}" class="empty">还没有专注记录</text>
 
-      <list class="slice-list" if="{{slices.length > 0}}">
-        <list-item for="{{slices}}" type="slice" class="slice-item">
-          <div class="slice-row">
-            <div class="dot" style="background-color : {{$item.color}};"></div>
-            <div class="slice-main">
-              <text class="slice-label">{{$item.label}}</text>
-              <div class="bar-bg">
-                <div class="bar-fg" style="width : {{$item.percent}}%; background-color : {{$item.color}};"></div>
-              </div>
-            </div>
-            <div class="slice-right">
-              <text class="slice-minutes">{{$item.minutesLabel}}</text>
-              <text class="slice-percent">{{$item.percent}}%</text>
+      <!-- 同样不用 list/list-item，普通容器循环渲染更稳 -->
+      <div class="slice-list" if="{{slices.length > 0}}">
+        <div class="slice-row" for="{{slices}}">
+          <div class="dot" style="background-color : {{$item.color}};"></div>
+          <div class="slice-main">
+            <text class="slice-label">{{$item.label}}</text>
+            <div class="bar-bg">
+              <div class="bar-fg" style="width : {{$item.percent}}%; background-color : {{$item.color}};"></div>
             </div>
           </div>
-        </list-item>
-      </list>
+          <div class="slice-right">
+            <text class="slice-minutes">{{$item.minutesLabel}}</text>
+            <text class="slice-percent">{{$item.percent}}%</text>
+          </div>
+        </div>
+      </div>
     </div>
 
     <!-- 计时 -->
@@ -174,9 +173,6 @@
   .slice-list {
     flex: 1;
     width: 100%;
-  }
-  .slice-item {
-    flex-direction: column;
   }
   .slice-row {
     flex-direction: row;

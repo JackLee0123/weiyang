@@ -171,14 +171,21 @@ export function decorateCourse(course, weekIndex, periodTimes, viewDay, todayDay
   var isNow = isToday && startMin >= 0 && endMin >= 0 && nowMin >= startMin && nowMin < endMin
   var isPast = isToday && endMin >= 0 && nowMin >= endMin
 
+  // 行式展示用：时间（拿不到节次时间就退回收节次），地点与老师合并成一行
+  var timeText = startTime && endTime ? startTime + '-' + endTime : periods.length ? startP + '-' + endP + '节' : ''
+  var metaParts = []
+  if (course.location) metaParts.push(course.location)
+  if (course.teacher) metaParts.push(course.teacher)
+  var metaText = metaParts.join(' · ')
+
   return {
     id: course.id,
     name: course.name || '未命名课程',
     location: course.location || '',
     teacher: course.teacher || '',
-    // 列表项内部不能用 if（DOM 结构必须一致），用这两个标记配合 show 控制显隐
-    hasLocation: !!course.location,
-    hasTeacher: !!course.teacher,
+    hasMeta: !!metaText,
+    metaText: metaText,
+    timeText: timeText,
     periods: startP === endP ? startP + '节' : startP + '-' + endP + '节',
     timeRange: startTime && endTime ? startTime + '-' + endTime : '',
     weeksLabel: weeksLabel,
