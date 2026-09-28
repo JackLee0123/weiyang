@@ -121,6 +121,34 @@
     font-size: 18px;
     color: #334155;
   }
+
+  /* 手环（dp 宽度远小于手表）字号整体上调，否则实际显示明显偏小 */
+  @media (max-width: 190) {
+    .title { font-size: 54px; }
+    .subtitle { font-size: 30px; }
+    .settings-text { font-size: 30px; }
+    .card { padding: 36px; margin-bottom: 32px; }
+    .card-title { font-size: 32px; }
+    .card-value { font-size: 58px; }
+    .card-sub { font-size: 30px; }
+    .status-text { font-size: 27px; }
+    .footer-text { font-size: 24px; }
+  }
+
+  /* 胶囊屏（小米手环10，212x520）：更窄，字号再上调一档 */
+  @media (shape: pill-shaped) {
+    .page { padding: 36px 18px; }
+    .title { font-size: 74px; }
+    .subtitle { font-size: 40px; }
+    .settings-btn { padding: 14px 30px; border-radius: 40px; }
+    .settings-text { font-size: 40px; }
+    .card { padding: 48px 40px; margin-bottom: 44px; }
+    .card-title { font-size: 43px; }
+    .card-value { font-size: 78px; }
+    .card-sub { font-size: 40px; }
+    .status-text { font-size: 36px; }
+    .footer-text { font-size: 32px; }
+  }
 </style>
 
 <script>
@@ -160,7 +188,7 @@ export default {
         return null
       }
       if (!getConfig().token) {
-        self.statusMsg = '还没连接账户，请到「设置」→「连接账户」扫码'
+        self.statusMsg = '请先在设置里连接账户'
         return null
       }
       var today = todayISO()

@@ -9,7 +9,7 @@
 
     <div class="form">
       <div class="btn btn-primary" onclick="goConnect">
-        <text class="btn-text">连接账户（手环显示二维码）</text>
+        <text class="btn-text">连接账户</text>
       </div>
 
       <div class="account">
@@ -33,10 +33,10 @@
 
     <div class="help">
       <text class="help-title">如何连接</text>
-      <text class="help-line">1. 点上方「连接账户」，手环显示二维码</text>
-      <text class="help-line">2. 手机打开未央 → 侧栏「设备连接」→ 扫码</text>
-      <text class="help-line">3. 手机上点「连接」，手环会自动完成连接</text>
-      <text class="help-line">手环经手机网络访问服务器，需保持蓝牙连接</text>
+      <text class="help-line">1. 点上方「连接账户」显示二维码</text>
+      <text class="help-line">2. 手机端「设备连接」里扫码</text>
+      <text class="help-line">3. 手机上点「连接」即可</text>
+      <text class="help-line">手环经手机网络联网，需保持蓝牙连接</text>
     </div>
   </div>
 </template>
@@ -173,6 +173,41 @@
     font-size: 20px;
     color: #94a3b8;
     margin-top: 6px;
+  }
+
+  /* 手环（dp 宽度远小于手表）字号整体上调，否则实际显示明显偏小 */
+  @media (max-width: 190) {
+    .title { font-size: 46px; }
+    .label { font-size: 30px; }
+    .btn { height: 96px; border-radius: 48px; }
+    .btn-text { font-size: 35px; }
+    .account-label { font-size: 30px; }
+    .account-value { font-size: 30px; }
+    .msg { font-size: 30px; }
+    .help-title { font-size: 32px; }
+    .help-line { font-size: 27px; }
+  }
+
+  /* 胶囊屏（小米手环10，212x520）：更窄，字号再上调一档，按钮撑满宽度 */
+  @media (shape: pill-shaped) {
+    .page { padding: 34px 18px; }
+    .title { font-size: 62px; }
+    .back { width: 76px; height: 76px; border-radius: 38px; }
+    .back-text { font-size: 54px; }
+    .label { font-size: 42px; }
+    .btn { height: 128px; border-radius: 64px; margin-top: 30px; }
+    .btn-text { font-size: 48px; }
+    .account { margin-top: 30px; }
+    .account-label { font-size: 42px; }
+    .account-value { font-size: 42px; }
+    .msg { font-size: 42px; }
+    .help { margin-top: 34px; padding: 32px; }
+    .help-title { font-size: 44px; }
+    .help-line { font-size: 33px; }
+    .demo-row { margin-top: 34px; }
+    .switch { width: 112px; height: 60px; border-radius: 30px; }
+    .knob { width: 50px; height: 50px; border-radius: 25px; }
+    .knob-on { margin-left: 52px; }
   }
 </style>
 

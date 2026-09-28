@@ -16,7 +16,7 @@
         <qrcode class="qr" value="{{qrValue}}"></qrcode>
       </div>
       <text class="code">{{code}}</text>
-      <text class="hint">手机打开未央 →「设备连接」→ 扫码</text>
+      <text class="hint">手机端「设备连接」里扫码</text>
       <text class="hint-dim">{{countdown}} 秒后失效</text>
       <div class="refresh" onclick="start">
         <text class="refresh-text">重新生成</text>
@@ -181,6 +181,43 @@
     font-size: 24px;
     color: #f1f5f9;
   }
+
+  /* 手环（dp 宽度远小于手表）字号整体上调，否则实际显示会明显偏小 */
+  @media (max-width: 190) {
+    .title { font-size: 46px; }
+    .muted { font-size: 32px; }
+    .err { font-size: 32px; }
+    .code { font-size: 50px; }
+    .hint { font-size: 27px; }
+    .hint-dim { font-size: 25px; }
+    .refresh-text { font-size: 27px; }
+    .done-title { font-size: 44px; }
+    .done-name { font-size: 32px; }
+    .btn { height: 92px; border-radius: 46px; }
+    .btn-text { font-size: 32px; }
+  }
+
+  /* 胶囊屏（小米手环10，212x520）：屏幕更窄，二维码要占满宽度，字号再上调一档 */
+  @media (shape: pill-shaped) {
+    .page { padding: 34px 16px; }
+    .title { font-size: 62px; }
+    .back { width: 76px; height: 76px; border-radius: 38px; }
+    .back-text { font-size: 54px; }
+    .qr-wrap { width: 404px; height: 404px; padding: 18px; }
+    .qr { width: 368px; height: 368px; }
+    .code { font-size: 64px; letter-spacing: 10px; }
+    .muted { font-size: 42px; }
+    .err { font-size: 42px; }
+    .hint { font-size: 36px; }
+    .hint-dim { font-size: 32px; }
+    .refresh-text { font-size: 36px; }
+    .done-mark { width: 130px; height: 130px; border-radius: 65px; }
+    .done-mark-text { font-size: 70px; }
+    .done-title { font-size: 58px; }
+    .done-name { font-size: 42px; }
+    .btn { width: 82%; height: 118px; border-radius: 59px; }
+    .btn-text { font-size: 42px; }
+  }
 </style>
 
 <script>
@@ -269,7 +306,7 @@ export default {
     }).catch(function (e) {
       self.state = 'error'
       self.message = '生成失败：' + (e.message || e)
-      self.serverHint = getBaseUrl()
+      self.serverHint = getBaseUrl().replace(/^https?:\/\//, '')
     })
   },
 
@@ -335,7 +372,7 @@ export default {
         self.restoreBrightness()
         self.state = 'error'
         self.message = '网络不稳定，请检查手机连接后重试'
-        self.serverHint = getBaseUrl()
+        self.serverHint = getBaseUrl().replace(/^https?:\/\//, '')
       }
     })
   },

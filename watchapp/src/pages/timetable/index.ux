@@ -217,6 +217,49 @@
     font-size: 20px;
     color: #fbbf24;
   }
+
+  /* 手环（dp 宽度远小于手表）字号整体上调，否则实际显示明显偏小 */
+  @media (max-width: 190) {
+    .switch-text { font-size: 42px; }
+    .day-name { font-size: 42px; }
+    .today-badge { font-size: 24px; }
+    .week-text { font-size: 24px; }
+    .term { font-size: 27px; }
+    .notice-text { font-size: 24px; }
+    .course-time { font-size: 27px; }
+    .course-period { font-size: 24px; }
+    .now-badge { font-size: 24px; }
+    .course-name { font-size: 35px; }
+    .course-meta { font-size: 27px; }
+    .course-weeks { font-size: 24px; }
+    .empty-text { font-size: 29px; }
+    .msg-text { font-size: 27px; }
+  }
+
+  /* 胶囊屏（小米手环10，212x520）：更窄，字号再上调一档，左右分栏改为更窄的时间列 */
+  @media (shape: pill-shaped) {
+    .page { padding: 34px 18px; }
+    .back { width: 76px; height: 76px; border-radius: 38px; }
+    .back-text { font-size: 54px; }
+    .switch-btn { width: 64px; height: 64px; border-radius: 32px; margin: 0 10px; }
+    .switch-text { font-size: 54px; }
+    .day-name { font-size: 54px; }
+    .today-badge { font-size: 30px; padding: 4px 12px; }
+    .week-info { width: 74px; }
+    .week-text { font-size: 30px; }
+    .term { font-size: 36px; }
+    .notice-text { font-size: 32px; }
+    .course-card { padding: 28px; }
+    .course-time-col { width: 190px; }
+    .course-time { font-size: 36px; }
+    .course-period { font-size: 32px; }
+    .now-badge { font-size: 32px; }
+    .course-name { font-size: 45px; }
+    .course-meta { font-size: 36px; }
+    .course-weeks { font-size: 32px; }
+    .empty-text { font-size: 38px; }
+    .msg-text { font-size: 36px; }
+  }
 </style>
 
 <script>
@@ -261,7 +304,7 @@ export default {
         return null
       }
       if (!getConfig().token) {
-        self.msg = '还没连接账户，请到「设置」→「连接账户」扫码'
+        self.msg = '请先在设置里连接账户'
         return null
       }
       return fetchCourses().then(function (data) {

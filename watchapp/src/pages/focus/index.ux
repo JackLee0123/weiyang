@@ -29,7 +29,7 @@
         </div>
       </div>
 
-      <text if="{{slices.length === 0}}" class="empty">今天还没有专注记录，切到「计时」开始一段专注吧</text>
+      <text if="{{slices.length === 0}}" class="empty">还没有专注记录</text>
 
       <list class="slice-list" if="{{slices.length > 0}}">
         <list-item for="{{slices}}" class="slice-item">
@@ -296,6 +296,49 @@
     font-size: 20px;
     color: #fbbf24;
   }
+
+  /* 手环（dp 宽度远小于手表）字号整体上调，否则实际显示明显偏小 */
+  @media (max-width: 190) {
+    .tab-text { font-size: 34px; }
+    .date-text { font-size: 26px; }
+    .summary-num { font-size: 54px; }
+    .summary-label { font-size: 27px; }
+    .empty { font-size: 29px; }
+    .slice-label { font-size: 32px; }
+    .slice-minutes { font-size: 32px; }
+    .slice-percent { font-size: 24px; }
+    .timer-circle { width: 380px; height: 380px; border-radius: 190px; }
+    .timer-time { font-size: 94px; }
+    .timer-state { font-size: 29px; }
+    .timer-hint { font-size: 24px; }
+    .btn { width: 380px; height: 94px; border-radius: 47px; }
+    .btn-text { font-size: 34px; }
+    .msg-text { font-size: 27px; }
+  }
+
+  /* 胶囊屏（小米手环10，212x520）：更窄，字号再上调一档，圆形计时器撑满宽度 */
+  @media (shape: pill-shaped) {
+    .page { padding: 34px 18px; }
+    .back { width: 76px; height: 76px; border-radius: 38px; }
+    .back-text { font-size: 54px; }
+    .tab { padding: 16px 32px; }
+    .tab-text { font-size: 45px; }
+    .date-text { width: 74px; font-size: 33px; }
+    .summary { padding: 36px; }
+    .summary-num { font-size: 74px; }
+    .summary-label { font-size: 36px; }
+    .empty { font-size: 38px; }
+    .slice-label { font-size: 43px; }
+    .slice-minutes { font-size: 43px; }
+    .slice-percent { font-size: 32px; }
+    .timer-circle { width: 100%; height: 420px; border-radius: 210px; }
+    .timer-time { font-size: 118px; }
+    .timer-state { font-size: 38px; }
+    .timer-hint { font-size: 32px; }
+    .btn { width: 84%; height: 118px; border-radius: 59px; }
+    .btn-text { font-size: 44px; }
+    .msg-text { font-size: 36px; }
+  }
 </style>
 
 <script>
@@ -356,7 +399,7 @@ export default {
         return null
       }
       if (!getConfig().token) {
-        self.msg = '还没连接账户，请到「设置」→「连接账户」扫码'
+        self.msg = '请先在设置里连接账户'
         return null
       }
       var today = todayISO()
