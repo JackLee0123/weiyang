@@ -291,6 +291,8 @@
 
   /* 手环（dp 宽度远小于手表）字号整体上调，否则实际显示明显偏小 */
   @media (max-width: 190) {
+    /* 手环顶栏窄，标签内边距收一点，避免「统计/计时」被挤到显示不全 */
+    .tab { padding: 10px 16px; }
     .tab-text { font-size: 34px; }
     .date-text { font-size: 26px; }
     .summary-num { font-size: 54px; }
