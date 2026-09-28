@@ -32,13 +32,35 @@ export function mondayOf(d) {
   return dateISO(copy)
 }
 
+/**
+ * 'YYYY-MM-DD' → 天数序号。
+ * 不用 new Date('2026-09-28T00:00:00')：手环的 JS 引擎对字符串日期解析支持不稳，
+ * 解析失败会得到 NaN，进而把整周课程都过滤掉（表现为「连接成功但课表空白」）。
+ */
+function dayNumber(iso) {
+  var m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(String(iso || ''))
+  if (!m) return null
+  var year = Number(m[1])
+  var month = Number(m[2])
+  var day = Number(m[3])
+  var monthDays = [31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31]
+  var total = 0
+  for (var y = 1970; y < year; y++) {
+    total += (y % 4 === 0 && y % 100 !== 0) || y % 400 === 0 ? 366 : 365
+  }
+  for (var i = 0; i < month - 1; i++) {
+    total += monthDays[i]
+    if (i === 1 && ((year % 4 === 0 && year % 100 !== 0) || year % 400 === 0)) total += 1
+  }
+  return total + day - 1
+}
+
 /** 周次计算：weekStart(本周周一) 相对 week1Date(开学第 1 周周一) */
 export function weekIndexFor(weekStart, week1Date) {
-  if (!week1Date) return 0
-  var start = new Date(weekStart + 'T00:00:00').getTime()
-  var base = new Date(week1Date + 'T00:00:00').getTime()
-  var diff = Math.round((start - base) / 86400000)
-  return Math.floor(diff / 7) + 1
+  var start = dayNumber(weekStart)
+  var base = dayNumber(week1Date)
+  if (start === null || base === null) return 0
+  return Math.floor(Math.round(start - base) / 7) + 1
 }
 
 /** 解析「第1-16周」「单/双」等周标签 → [1,2,...] */
@@ -88,7 +110,8 @@ export function courseWeeks(course) {
 }
 
 export function courseActiveOn(course, weekIndex) {
-  if (weekIndex <= 0) return true
+  // 周次拿不到（未设置开学日期或解析失败）时不过滤，避免整周课程被误隐藏。
+  if (!(weekIndex > 0)) return true
   var weeks = courseWeeks(course)
   return weeks.length ? weeks.indexOf(weekIndex) >= 0 : true
 }
