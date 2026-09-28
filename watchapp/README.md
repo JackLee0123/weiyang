@@ -56,7 +56,8 @@ watchapp/
 
 没有摄像头时，手机端也可以手动输入手环上二维码下方的 6 位数字，效果一样。
 
-> 服务器地址默认是 `https://everlong.net.cn`，自建部署时在「设置」页改成自己的地址。
+> 服务器地址内置为 `https://everlong.net.cn`（`src/common/scripts/store.js` 里的
+> `DEFAULT_BASE_URL`），自建部署时改这一行重新打包即可，手环上不需要填地址。
 > **手环没有独立网络**，`@system.fetch` 是经蓝牙走手机出网的，所以局域网 IP
 > （`http://192.168.x.x:8000`）通常连不上，请使用公网 HTTPS 域名。
 
