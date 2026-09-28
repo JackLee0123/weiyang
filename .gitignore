@@ -18,6 +18,10 @@ backend/data/
 backend/dist/
 # 手环快应用的打包签名（私钥，由 AIoT-IDE 生成，不要提交）
 watchapp/sign/
+# 临时文件：前端目录下多余的 lock、npm 中断残留
+apps/frontend/pnpm-lock.yaml
+watchapp/_check2.txt
+watchapp/_npm.exit
 # stray empty file accidentally created by a shell redirect
 -w
 # local SSH deploy key used for production (never commit the private key)
