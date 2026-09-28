@@ -169,6 +169,8 @@
   .slice-list {
     flex: 1;
     width: 100%;
+    /* 不设方向时默认横向排列，会把每段专注挤成一排三个 */
+    flex-direction: column;
   }
   .slice-row {
     flex-direction: column;
