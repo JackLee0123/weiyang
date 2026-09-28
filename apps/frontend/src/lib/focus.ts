@@ -38,6 +38,23 @@ export const OTHER_LABEL = '其他'
 
 const AUTO_FOCUS_TITLE = /^专注\s*[·:：]/
 
+/** 0 → a，25 → z，26 → aa：专注记录的默认名称。 */
+export function letterName(index: number): string {
+  let n = Math.max(0, Math.floor(index || 0))
+  let name = ''
+  do {
+    name = String.fromCharCode(97 + (n % 26)) + name
+    n = Math.floor(n / 26) - 1
+  } while (n >= 0)
+  return name
+}
+
+/** 下一段专注的默认名：当天已记了几段就顺延到第几个字母，之后可以手动改名。 */
+export function nextFocusName(records: RecordEntry[]): string {
+  const used = records.filter((record) => Math.round(record.duration_minutes ?? 0) > 0).length
+  return letterName(used)
+}
+
 export function focusSliceLabel(record: RecordEntry, planTitle?: string): string {
   if (planTitle) return planTitle
   const title = (record.title ?? '').trim()

@@ -1,10 +1,11 @@
 import { act, fireEvent, render, screen } from '@testing-library/react'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { FocusFlightOverlay } from './FocusFlightOverlay'
-import { usePlanMutations, usePlans, useRecordMutations } from '../lib/queries'
+import { usePlanMutations, usePlans, useRecordMutations, useRecords } from '../lib/queries'
 import type { Plan, RecordEntry } from '../lib/types'
 
 vi.mock('../lib/queries', () => ({
+  useRecords: vi.fn(),
   usePlans: vi.fn(),
   useRecordMutations: vi.fn(),
   usePlanMutations: vi.fn(),
@@ -32,6 +33,7 @@ beforeEach(() => {
   createRecord.mockReset().mockResolvedValue({ id: 1, date: '2026-08-24', title: '写周报' } as RecordEntry)
   updatePlan.mockReset().mockResolvedValue(makePlan({ status: 'done' }))
   vi.mocked(usePlans).mockReturnValue({ data: [] } as never)
+  vi.mocked(useRecords).mockReturnValue({ data: [] } as never)
   vi.mocked(useRecordMutations).mockReturnValue({ create: { mutateAsync: createRecord } } as never)
   vi.mocked(usePlanMutations).mockReturnValue({ update: { mutateAsync: updatePlan } } as never)
   vi.useFakeTimers()
@@ -93,7 +95,8 @@ describe('FocusFlightOverlay', () => {
 
     expect(createRecord).toHaveBeenCalledWith(
       expect.objectContaining({
-        title: '专注 · 5 分钟',
+        // 未关联计划时按当天已记段数依次起默认名：第一段是 a
+        title: 'a',
         category: '其他',
         duration_minutes: 5,
         linked_plan_id: null,

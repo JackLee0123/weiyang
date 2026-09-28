@@ -98,3 +98,28 @@ describe('summarizeFocus', () => {
     expect(summary).toEqual({ count: 0, minutes: 0, slices: [] })
   })
 })
+import { letterName, nextFocusName } from './focus'
+
+describe('letterName', () => {
+  it('按 a、b、c 顺序命名，超过 z 进位', () => {
+    expect(letterName(0)).toBe('a')
+    expect(letterName(1)).toBe('b')
+    expect(letterName(25)).toBe('z')
+    expect(letterName(26)).toBe('aa')
+    expect(letterName(27)).toBe('ab')
+  })
+})
+
+describe('nextFocusName', () => {
+  const record = (minutes: number) => ({ duration_minutes: minutes }) as never
+
+  it('按当天已有的专注段数顺延', () => {
+    expect(nextFocusName([])).toBe('a')
+    expect(nextFocusName([record(25)])).toBe('b')
+    expect(nextFocusName([record(25), record(50)])).toBe('c')
+  })
+
+  it('没有时长的记录不计入', () => {
+    expect(nextFocusName([record(0), record(25), record(0)])).toBe('b')
+  })
+})

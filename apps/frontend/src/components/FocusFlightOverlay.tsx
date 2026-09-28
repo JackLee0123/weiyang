@@ -1,7 +1,8 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { Plane, X } from 'lucide-react'
 import { FOCUS_MAX, FOCUS_MIN, FOCUS_PRESETS, clampMinutes, formatClock, routeFor } from '../lib/flight'
-import { usePlanMutations, usePlans, useRecordMutations } from '../lib/queries'
+import { nextFocusName } from '../lib/focus'
+import { usePlanMutations, usePlans, useRecordMutations, useRecords } from '../lib/queries'
 import { todayISO } from '../lib/date'
 import { FlightMap } from './FlightMap'
 
@@ -29,6 +30,7 @@ export function FocusFlightOverlay({ onClose }: { onClose: () => void }) {
   const totalMsRef = useRef(0)
 
   const plansQ = usePlans({ start: todayISO(), end: todayISO() })
+  const recordsQ = useRecords({ start: todayISO(), end: todayISO() })
   const { create: createRecord } = useRecordMutations()
   const { update: updatePlan } = usePlanMutations()
 
@@ -63,7 +65,8 @@ export function FocusFlightOverlay({ onClose }: { onClose: () => void }) {
     try {
       await createRecord.mutateAsync({
         date: todayISO(),
-        title: plan?.title ?? `专注 · ${durationMinutes} 分钟`,
+        // 没关联计划时按 a、b、c…… 依次起默认名，之后可在记录里改名
+        title: plan?.title ?? nextFocusName(recordsQ.data ?? []),
         content: `专注航班：${route.from.code} → ${route.to.code}`,
         duration_minutes: durationMinutes,
         is_completed: true,
