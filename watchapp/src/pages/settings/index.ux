@@ -266,12 +266,6 @@ export default {
     this.light = !this.light
     save({ theme: this.light ? 'light' : 'dark' }).then(function () {
       self.msg = self.light ? '已切换到亮色模式' : '已切换到暗色模式'
-      // 页面之间是各自独立的上下文，已经创建过的页面不会重新读取主题，
-      // 所以切换后重建页面栈，保证每个页面都按新主题渲染。
-      setTimeout(function () {
-        router.clear()
-        router.replace({ uri: '/pages/index' })
-      }, 260)
     })
   },
 
