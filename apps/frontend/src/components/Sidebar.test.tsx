@@ -52,3 +52,17 @@ describe('Sidebar install entry', () => {
     expect(prompt).toHaveBeenCalled()
   })
 })
+
+describe('Sidebar mobile entries', () => {
+  it('手机顶部导航也提供设备连接与数据备份入口', () => {
+    // 桌面侧栏 md 以上才显示，手机顶部是另一套结构；两边都要有入口，
+    // 否则手机（扫码连手环的地方）点不到「设备连接」。
+    render(<Sidebar {...baseProps} />)
+    const devices = screen.getAllByRole('button', { name: /设备连接/ })
+    expect(devices.length).toBeGreaterThanOrEqual(2)
+    expect(screen.getAllByRole('button', { name: /数据备份/ }).length).toBeGreaterThanOrEqual(2)
+
+    fireEvent.click(devices[devices.length - 1])
+    expect(baseProps.onOpenDevices).toHaveBeenCalled()
+  })
+})

@@ -154,10 +154,27 @@ export function Sidebar({
         {renderNav(
           true,
           [...NAV, CHANGELOG_NAV, ...(isAdmin ? [ADMIN_NAV] : [])],
-          <InstallAppButton
-            compact
-            className="flex shrink-0 items-center gap-1.5 rounded-md px-3 py-2 text-xs font-medium text-ink-soft hover:bg-surface-soft hover:text-ink dark:text-slate-300 dark:hover:bg-white/5 dark:hover:text-slate-100"
-          />,
+          <>
+            {/* 手机上侧栏是收起的，这些入口要放在顶部才能点到（扫码连手环就在手机上做） */}
+            <button
+              className="flex shrink-0 items-center gap-1.5 rounded-md px-3 py-2 text-xs font-medium text-ink-soft hover:bg-surface-soft hover:text-ink dark:text-slate-300 dark:hover:bg-white/5 dark:hover:text-slate-100"
+              onClick={onOpenDevices}
+            >
+              <Watch size={15} />
+              设备连接
+            </button>
+            <button
+              className="flex shrink-0 items-center gap-1.5 rounded-md px-3 py-2 text-xs font-medium text-ink-soft hover:bg-surface-soft hover:text-ink dark:text-slate-300 dark:hover:bg-white/5 dark:hover:text-slate-100"
+              onClick={onOpenBackup}
+            >
+              <Database size={15} />
+              数据备份
+            </button>
+            <InstallAppButton
+              compact
+              className="flex shrink-0 items-center gap-1.5 rounded-md px-3 py-2 text-xs font-medium text-ink-soft hover:bg-surface-soft hover:text-ink dark:text-slate-300 dark:hover:bg-white/5 dark:hover:text-slate-100"
+            />
+          </>,
         )}
       </div>
 
