@@ -60,6 +60,22 @@ class ResetPasswordOut(BaseModel):
     message: str
 
 
+class DevicePairCodeOut(BaseModel):
+    code: str = Field(..., min_length=6, max_length=6)
+    expires_in: int
+
+
+class DevicePairIn(BaseModel):
+    code: str = Field(..., min_length=6, max_length=6, pattern=r"^\d{6}$")
+
+
+class DevicePairOut(BaseModel):
+    token: str
+    expires_in: int
+    name: str
+    email: str
+
+
 class LoginIn(BaseModel):
     email: str = Field(..., max_length=255)
     password: str = Field(..., max_length=128)

@@ -13,6 +13,7 @@ const baseProps = {
   onOpenFocus: vi.fn(),
   onOpenNotifications: vi.fn(),
   onOpenBackup: vi.fn(),
+  onOpenDevices: vi.fn(),
   onLogout: vi.fn(),
 }
 

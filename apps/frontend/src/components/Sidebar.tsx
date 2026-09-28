@@ -1,4 +1,4 @@
-import { Activity, Bell, BookOpen, CalendarCheck, CalendarDays, CalendarRange, Database, History, List, LogOut, MonitorDown, Moon, Plane, Plus, Route, Sun, Users } from 'lucide-react'
+import { Activity, Bell, BookOpen, CalendarCheck, CalendarDays, CalendarRange, Database, History, List, LogOut, MonitorDown, Moon, Plane, Plus, Route, Sun, Users, Watch } from 'lucide-react'
 import { useEffect, useState, type ReactNode } from 'react'
 import type { Theme } from '../lib/theme'
 import type { View } from '../lib/types'
@@ -72,6 +72,7 @@ export function Sidebar({
   onOpenFocus,
   onOpenNotifications,
   onOpenBackup,
+  onOpenDevices,
   onLogout,
 }: {
   view: View
@@ -84,6 +85,7 @@ export function Sidebar({
   onOpenFocus: () => void
   onOpenNotifications: () => void
   onOpenBackup: () => void
+  onOpenDevices: () => void
   onLogout: () => void
 }) {
   const themeLabel = theme === 'dark' ? '切换到浅色模式' : '切换到深色模式'
@@ -196,6 +198,10 @@ export function Sidebar({
           <button className="btn-ghost w-full justify-center" onClick={onOpenBackup}>
             <Database size={16} />
             数据备份
+          </button>
+          <button className="btn-ghost w-full justify-center" onClick={onOpenDevices}>
+            <Watch size={16} />
+            设备连接
           </button>
           <button
             className={`btn-ghost w-full justify-center ${

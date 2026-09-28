@@ -113,6 +113,10 @@ export const api = {
     return request<AuthUser>('/auth/me')
   },
 
+  createPairCode() {
+    return request<{ code: string; expires_in: number }>('/devices/pair-codes', { method: 'POST' })
+  },
+
   fetchPlans(params: { start?: string; end?: string; status?: string; category?: string; q?: string } = {}) {
     return request<Plan[]>(`/plans${qs(params)}`)
   },

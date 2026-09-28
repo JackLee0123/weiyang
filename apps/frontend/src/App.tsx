@@ -4,6 +4,7 @@ import { Sidebar } from './components/Sidebar'
 import { Modal } from './components/Modal'
 import { NotificationsPanel } from './components/NotificationsPanel'
 import { BackupPanel } from './components/BackupPanel'
+import { DevicePairPanel } from './components/DevicePairPanel'
 import { PushPrompt } from './components/PushPrompt'
 import { PlanForm } from './components/PlanForm'
 import { FocusFlightOverlay } from './components/FocusFlightOverlay'
@@ -37,6 +38,7 @@ export default function App() {
   const [showFocus, setShowFocus] = useState(false)
   const [showNotifications, setShowNotifications] = useState(false)
   const [showBackup, setShowBackup] = useState(false)
+  const [showDevices, setShowDevices] = useState(false)
   const [isAuthed, setIsAuthed] = useState(() => typeof window !== 'undefined' && !!getToken())
   const { theme, toggleTheme } = useTheme()
   const [user, setUser] = useState<StoredUser | null>(() => getStoredUser())
@@ -111,6 +113,7 @@ export default function App() {
         onOpenFocus={openFocus}
         onOpenNotifications={() => setShowNotifications(true)}
         onOpenBackup={() => setShowBackup(true)}
+        onOpenDevices={() => setShowDevices(true)}
         onLogout={logout}
       />
       <main className="flex-1 overflow-y-auto">
@@ -157,6 +160,11 @@ export default function App() {
       {showBackup && (
         <Modal title="数据备份" onClose={() => setShowBackup(false)}>
           <BackupPanel onClose={() => setShowBackup(false)} />
+        </Modal>
+      )}
+      {showDevices && (
+        <Modal title="设备连接" onClose={() => setShowDevices(false)}>
+          <DevicePairPanel />
         </Modal>
       )}
     </div>

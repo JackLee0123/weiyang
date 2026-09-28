@@ -95,6 +95,24 @@ class PushSchedule(Base):
     user: Mapped[User] = relationship(back_populates="push_schedule")
 
 
+class DevicePairCode(Base):
+    """手环/手表等设备的配对码。
+
+    已登录用户在网页端生成 6 位数字配对码（短时效、一次性），
+    手环端凭码换取访问令牌，避免在穿戴设备上输入长令牌。
+    """
+
+    __tablename__ = "device_pair_codes"
+    __table_args__ = {"mysql_charset": "utf8mb4"}
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+    code: Mapped[str] = mapped_column(String(6), unique=True, index=True, nullable=False)
+    user_id: Mapped[int] = mapped_column(ForeignKey("users.id", ondelete="CASCADE"), index=True, nullable=False)
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=now_utc, nullable=False)
+    expires_at: Mapped[datetime] = mapped_column(DateTime, nullable=False)
+    consumed_at: Mapped[Optional[datetime]] = mapped_column(DateTime, nullable=True)
+
+
 class Plan(Base):
     __tablename__ = "plans"
     __table_args__ = {"mysql_charset": "utf8mb4"}
