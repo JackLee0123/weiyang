@@ -32,7 +32,7 @@
       <text if="{{slices.length === 0}}" class="empty">还没有专注记录</text>
 
       <list class="slice-list" if="{{slices.length > 0}}">
-        <list-item for="{{slices}}" class="slice-item">
+        <list-item for="{{slices}}" type="slice" class="slice-item">
           <div class="slice-row">
             <div class="dot" style="background-color : {{$item.color}};"></div>
             <div class="slice-main">
@@ -347,7 +347,7 @@ import router from '@system.router'
 import { ready, getConfig } from '../../common/scripts/store.js'
 import { fetchRecords, fetchPlans, createRecord } from '../../common/scripts/api.js'
 import { summarizeFocus, formatMinutes, formatClock } from '../../common/scripts/focus.js'
-import { todayISO, weekdayOf, DAY_LABELS } from '../../common/scripts/timetable.js'
+import { todayISO } from '../../common/scripts/timetable.js'
 import { demoRecords } from '../../common/scripts/demo.js'
 
 export default {

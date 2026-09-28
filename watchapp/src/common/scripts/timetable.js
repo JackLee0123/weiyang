@@ -176,6 +176,9 @@ export function decorateCourse(course, weekIndex, periodTimes, viewDay, todayDay
     name: course.name || '未命名课程',
     location: course.location || '',
     teacher: course.teacher || '',
+    // 列表项内部不能用 if（DOM 结构必须一致），用这两个标记配合 show 控制显隐
+    hasLocation: !!course.location,
+    hasTeacher: !!course.teacher,
     periods: startP === endP ? startP + '节' : startP + '-' + endP + '节',
     timeRange: startTime && endTime ? startTime + '-' + endTime : '',
     weeksLabel: weeksLabel,

@@ -28,17 +28,18 @@
     </div>
 
     <list class="course-list">
-      <list-item for="{{viewCourses}}" class="course-item">
+      <!-- type 为必填；item 内部不放 if，否则相同 type 的 DOM 结构不一致会导致渲染异常 -->
+      <list-item for="{{viewCourses}}" type="course" class="course-item">
         <div class="course-card {{$item.isNow ? 'course-now' : ($item.isPast ? 'course-past' : '')}}">
           <div class="course-time-col">
             <text class="course-time">{{$item.timeRange}}</text>
             <text class="course-period">{{$item.periods}}</text>
-            <text if="{{$item.isNow}}" class="now-badge">进行中</text>
+            <text class="now-badge" show="{{$item.isNow}}">进行中</text>
           </div>
           <div class="course-main">
             <text class="course-name">{{$item.name}}</text>
-            <text if="{{$item.location}}" class="course-meta">{{$item.location}}</text>
-            <text if="{{$item.teacher}}" class="course-meta">{{$item.teacher}} 老师</text>
+            <text class="course-meta" show="{{$item.hasLocation}}">{{$item.location}}</text>
+            <text class="course-meta" show="{{$item.hasTeacher}}">{{$item.teacher}} 老师</text>
             <text class="course-weeks">{{$item.weeksLabel}}</text>
           </div>
         </div>
@@ -279,7 +280,7 @@ import router from '@system.router'
 import { ready, getConfig } from '../../common/scripts/store.js'
 import { fetchCourses } from '../../common/scripts/api.js'
 import {
-  DAY_LABELS, todayISO, mondayOf, weekdayOf, weekIndexFor,
+  DAY_LABELS, mondayOf, weekdayOf, weekIndexFor,
   courseActiveOn, decorateCourse, nowMinutes
 } from '../../common/scripts/timetable.js'
 import { demoTimetable } from '../../common/scripts/demo.js'
