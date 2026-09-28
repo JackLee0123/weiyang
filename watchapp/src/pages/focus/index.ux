@@ -34,16 +34,12 @@
       <!-- 同样不用 list/list-item，普通容器循环渲染更稳 -->
       <div class="slice-list" if="{{slices.length > 0}}">
         <div class="slice-row" for="{{slices}}">
-          <div class="dot" style="background-color : {{$item.color}};"></div>
-          <div class="slice-main">
+          <div class="slice-head">
             <text class="slice-label">{{$item.label}}</text>
-            <div class="bar-bg">
-              <div class="bar-fg" style="width : {{$item.percent}}%; background-color : {{$item.color}};"></div>
-            </div>
+            <text class="slice-minutes">{{$item.minutesLabel}} · {{$item.percent}}%</text>
           </div>
-          <div class="slice-right">
-            <text class="slice-minutes">{{$item.minutesLabel}}</text>
-            <text class="slice-percent">{{$item.percent}}%</text>
+          <div class="bar-bg">
+            <div class="bar-fg" style="width : {{$item.percent}}%; background-color : {{$item.color}};"></div>
           </div>
         </div>
       </div>
@@ -175,52 +171,33 @@
     width: 100%;
   }
   .slice-row {
-    flex-direction: row;
-    align-items: center;
-    background-color: #131a23;
-    border-radius: 20px;
-    border: 2px solid #1e293b;
-    padding: 20px;
-    margin-bottom: 16px;
+    flex-direction: column;
+    margin-bottom: 22px;
     width: 100%;
   }
-  .dot {
-    width: 16px;
-    height: 16px;
-    border-radius: 8px;
-    margin-right: 16px;
-  }
-  .slice-main {
-    flex-direction: column;
-    flex: 1;
+  /* 每段专注占一行：上面是名称与时长，下面是进度条 */
+  .slice-head {
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
   }
   .slice-label {
     font-size: 24px;
     color: #e2e8f0;
   }
   .bar-bg {
-    height: 8px;
-    border-radius: 4px;
+    height: 12px;
+    border-radius: 6px;
     background-color: #1e293b;
-    margin-top: 10px;
   }
   .bar-fg {
-    height: 8px;
-    border-radius: 4px;
-  }
-  .slice-right {
-    flex-direction: column;
-    align-items: flex-end;
-    margin-left: 16px;
+    height: 12px;
+    border-radius: 6px;
   }
   .slice-minutes {
-    font-size: 24px;
-    color: #f1f5f9;
-  }
-  .slice-percent {
-    font-size: 18px;
-    color: #64748b;
-    margin-top: 4px;
+    font-size: 22px;
+    color: #94a3b8;
   }
   .timer {
     flex-direction: column;
@@ -301,8 +278,7 @@
     .summary-label { font-size: 27px; }
     .empty { font-size: 29px; }
     .slice-label { font-size: 32px; }
-    .slice-minutes { font-size: 32px; }
-    .slice-percent { font-size: 24px; }
+    .slice-minutes { font-size: 29px; }
     .timer-circle { width: 380px; height: 380px; border-radius: 190px; }
     .timer-time { font-size: 94px; }
     .timer-state { font-size: 29px; }
@@ -325,9 +301,8 @@
     .summary-num { font-size: 60px; }
     .summary-label { font-size: 29px; }
     .empty { font-size: 30px; }
-    .slice-label { font-size: 35px; }
-    .slice-minutes { font-size: 35px; }
-    .slice-percent { font-size: 26px; }
+    .slice-label { font-size: 31px; }
+    .slice-minutes { font-size: 27px; }
     .timer-circle { width: 360px; height: 360px; border-radius: 180px; }
     .timer-time { font-size: 96px; }
     .timer-state { font-size: 30px; }
@@ -342,7 +317,7 @@
 import router from '@system.router'
 import { ready, getConfig } from '../../common/scripts/store.js'
 import { fetchRecords, fetchPlans, createRecord } from '../../common/scripts/api.js'
-import { summarizeFocus, formatMinutes, formatClock } from '../../common/scripts/focus.js'
+import { summarizeFocus, formatMinutes, formatClock, nextFocusName } from '../../common/scripts/focus.js'
 import { todayISO } from '../../common/scripts/timetable.js'
 import { demoRecords } from '../../common/scripts/demo.js'
 
@@ -444,10 +419,11 @@ export default {
     this.pauseTimer()
     var minutes = Math.max(1, Math.round(this.elapsed / 60) || 1)
     var self = this
+    var today = todayISO()
     var payload = {
-      date: todayISO(),
-      title: '专注 · ' + minutes + ' 分钟',
-      content: '手环专注',
+      date: today,
+      title: '',
+      content: '手环专注 · ' + minutes + ' 分钟',
       duration_minutes: minutes,
       is_completed: true,
       category: '其他',
@@ -458,7 +434,11 @@ export default {
         self.afterSaved('演示模式：未真正保存')
         return null
       }
-      return createRecord(payload).then(function () {
+      // 默认名按当天已有专注段数顺延：a、b、c…… 名称在网页端/PWA 可以再改
+      return fetchRecords(today, today).then(function (records) {
+        payload.title = nextFocusName(records)
+        return createRecord(payload)
+      }).then(function () {
         self.afterSaved('已保存 ' + formatMinutes(minutes) + ' 专注')
       }).catch(function (e) {
         self.msg = '保存失败：' + (e.message || e)

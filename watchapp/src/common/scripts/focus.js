@@ -102,3 +102,27 @@ export function formatClock(totalSeconds) {
   var s = totalSeconds % 60
   return (m < 10 ? '0' : '') + m + ':' + (s < 10 ? '0' : '') + s
 }
+
+/** 0 → a，25 → z，26 → aa：手环端专注记录的默认名称。 */
+export function letterName(index) {
+  var n = Math.max(0, Math.floor(index || 0))
+  var name = ''
+  do {
+    name = String.fromCharCode(97 + (n % 26)) + name
+    n = Math.floor(n / 26) - 1
+  } while (n >= 0)
+  return name
+}
+
+/**
+ * 下一段专注的默认名：当天已经记了几段就顺延到第几个字母。
+ * 名称起好后在网页端/PWA 都能改。
+ */
+export function nextFocusName(records) {
+  var used = 0
+  var list = records || []
+  for (var i = 0; i < list.length; i++) {
+    if (Math.round(list[i].duration_minutes || 0) > 0) used += 1
+  }
+  return letterName(used)
+}
