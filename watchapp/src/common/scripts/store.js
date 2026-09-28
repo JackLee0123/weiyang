@@ -43,6 +43,14 @@ export function getConfig() {
   return config
 }
 
+/**
+ * 取当前服务器地址：没配置过时用默认地址，保证「开箱即用」。
+ * 页面和请求都走这个函数，避免存储读取失败时整个应用不可用。
+ */
+export function getBaseUrl() {
+  return (config.baseUrl || DEFAULT_BASE_URL).replace(/\/+$/, '')
+}
+
 export function save(patch) {
   Object.keys(patch).forEach(function (k) {
     config[k] = patch[k]

@@ -10,7 +10,7 @@
  *   POST /api/devices/handshake/:code/poll  连接账户：轮询领取访问令牌
  */
 import fetch from '@system.fetch'
-import { getConfig } from './store.js'
+import { getBaseUrl, getConfig } from './store.js'
 
 function request(path, options) {
   options = options || {}
@@ -21,7 +21,7 @@ function request(path, options) {
     header.Authorization = 'Bearer ' + cfg.token
   }
   var params = {
-    url: cfg.baseUrl + '/api' + path,
+    url: getBaseUrl() + '/api' + path,
     method: options.method || 'GET',
     header: header,
     responseType: 'json',

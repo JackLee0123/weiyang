@@ -191,12 +191,13 @@
 
 <script>
 import router from '@system.router'
-import { ready, getConfig, save } from '../../common/scripts/store.js'
+import { ready, getConfig, getBaseUrl, save, DEFAULT_BASE_URL } from '../../common/scripts/store.js'
 import { fetchMe } from '../../common/scripts/api.js'
 
 export default {
   private: {
-    baseUrl: '',
+    // 先显示默认地址，存储读取完成后再用用户配置覆盖。
+    baseUrl: DEFAULT_BASE_URL,
     demo: false,
     connected: false,
     accountLabel: '未连接',
@@ -207,7 +208,7 @@ export default {
     var self = this
     ready().then(function () {
       var cfg = getConfig()
-      self.baseUrl = cfg.baseUrl
+      self.baseUrl = getBaseUrl()
       self.demo = cfg.demo
       self.connected = !!cfg.token
       self.accountLabel = cfg.token ? (cfg.accountName || '已连接') : '未连接'
@@ -215,7 +216,9 @@ export default {
   },
 
   onBaseUrl(e) {
-    this.baseUrl = e.value || ''
+    // 运行时初始化可能抛出空值，别用它把默认地址冲掉。
+    var value = e && e.value ? String(e.value).trim() : ''
+    if (value) this.baseUrl = value
   },
 
   toggleDemo() {
@@ -229,13 +232,9 @@ export default {
   testConnection() {
     var self = this
     this.msg = '连接中…'
-    save({ baseUrl: this.baseUrl, demo: this.demo }).then(function () {
+    save({ baseUrl: this.effectiveBaseUrl(), demo: this.demo }).then(function () {
       if (self.demo) {
         self.msg = '演示模式：无需连接'
-        return null
-      }
-      if (!getConfig().baseUrl) {
-        self.msg = '请先填写服务器地址'
         return null
       }
       if (!getConfig().token) {
@@ -257,13 +256,15 @@ export default {
   },
 
   goConnect() {
-    if (!this.baseUrl) {
-      this.msg = '请先填写服务器地址，再连接账户'
-      return
-    }
-    save({ baseUrl: this.baseUrl }).then(function () {
+    save({ baseUrl: this.effectiveBaseUrl(), demo: this.demo }).then(function () {
       router.push({ uri: '/pages/connect' })
     })
+  },
+
+  // 页面上填了就用填的，留空则回落到默认地址。
+  effectiveBaseUrl() {
+    var typed = (this.baseUrl || '').trim()
+    return typed || DEFAULT_BASE_URL
   }
 }
 </script>

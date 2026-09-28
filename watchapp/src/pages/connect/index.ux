@@ -44,6 +44,7 @@
 
     <div if="{{state === 'error'}}" class="center">
       <text class="err">{{message}}</text>
+      <text class="hint-dim">{{serverHint}}</text>
       <div class="btn" onclick="start">
         <text class="btn-text">重新生成</text>
       </div>
@@ -185,13 +186,15 @@
 <script>
 import router from '@system.router'
 import brightness from '@system.brightness'
-import { ready, getConfig, save } from '../../common/scripts/store.js'
+import { ready, getConfig, getBaseUrl, save } from '../../common/scripts/store.js'
 import { startHandshake, pollHandshake } from '../../common/scripts/api.js'
 
 // 手环端二维码里放短载荷，模块越少越好扫；数字也会显示在二维码下方作为手输备用。
 var QR_PREFIX = 'EVP:'
 var DEVICE_LABEL = '小米手环'
 var POLL_INTERVAL_MS = 3000
+// 本地配置读取异常时的兜底等待时间：超时就先用默认配置开始连接。
+var READY_TIMEOUT_MS = 3000
 
 export default {
   private: {
@@ -201,6 +204,7 @@ export default {
     countdown: 0,
     accountName: '',
     message: '',
+    serverHint: '',
     pollToken: '',
     expiredAt: 0,
     tickTimer: null,
@@ -234,27 +238,38 @@ export default {
     this.stopTimers()
     this.state = 'loading'
     this.message = ''
+    this.serverHint = ''
     this.failures = 0
 
-    ready().then(function () {
-      if (getConfig().demo) {
-        self.state = 'demo'
-        return null
-      }
+    var begun = false
+    var begin = function () {
+      if (begun || self.state !== 'loading') return
+      begun = true
+      self.beginHandshake()
+    }
+    setTimeout(begin, READY_TIMEOUT_MS)
+    ready().then(begin)
+  },
 
-      return startHandshake(DEVICE_LABEL).then(function (res) {
-        self.code = res.code
-        self.pollToken = res.poll_token
-        self.qrValue = QR_PREFIX + res.code
-        self.expiredAt = new Date().getTime() + res.expires_in * 1000
-        self.countdown = res.expires_in
-        self.state = 'waiting'
-        self.brighten()
-        self.startTimers()
-      }).catch(function (e) {
-        self.state = 'error'
-        self.message = '生成失败：' + (e.message || e)
-      })
+  beginHandshake() {
+    var self = this
+    if (getConfig().demo) {
+      this.state = 'demo'
+      return
+    }
+    startHandshake(DEVICE_LABEL).then(function (res) {
+      self.code = res.code
+      self.pollToken = res.poll_token
+      self.qrValue = QR_PREFIX + res.code
+      self.expiredAt = new Date().getTime() + res.expires_in * 1000
+      self.countdown = res.expires_in
+      self.state = 'waiting'
+      self.brighten()
+      self.startTimers()
+    }).catch(function (e) {
+      self.state = 'error'
+      self.message = '生成失败：' + (e.message || e)
+      self.serverHint = getBaseUrl()
     })
   },
 
@@ -320,6 +335,7 @@ export default {
         self.restoreBrightness()
         self.state = 'error'
         self.message = '网络不稳定，请检查手机连接后重试'
+        self.serverHint = getBaseUrl()
       }
     })
   },

@@ -260,8 +260,8 @@ export default {
         self.applyData(demoTimetable())
         return null
       }
-      if (!getConfig().baseUrl || !getConfig().token) {
-        self.msg = '未配置服务器或令牌'
+      if (!getConfig().token) {
+        self.msg = '还没连接账户，请到「设置」→「连接账户」扫码'
         return null
       }
       return fetchCourses().then(function (data) {
