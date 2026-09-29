@@ -47,14 +47,48 @@ def _ensure_verification_email_ready() -> None:
         raise HTTPException(status_code=503, detail="邮件服务未配置，暂时无法发送验证码，请稍后再试")
 
 
+def _normalize_email(value: str) -> str:
+    return value.strip().lower()
+
+
+def _enforce_code_limits(request: Request, email_address: str) -> None:
+    """限制验证码发送的来源、目标邮箱和目标域名，降低邮件接口被滥用的影响。"""
+    normalized = _normalize_email(email_address)
+    domain = normalized.rsplit("@", 1)[-1]
+    _enforce(
+        request,
+        "code-ip",
+        f"ip:{client_ip(request)}",
+        limit=settings.verify_code_ip_limit_per_hour,
+        window=3600,
+    )
+    _enforce(
+        request,
+        "code-email",
+        f"email:{normalized}",
+        limit=settings.verify_code_email_limit_per_hour,
+        window=3600,
+    )
+    _enforce(
+        request,
+        "code-domain",
+        f"domain:{domain}",
+        limit=settings.verify_code_domain_limit_per_hour,
+        window=3600,
+    )
+
+
 @router.post("/send-code", response_model=schemas.SendCodeOut)
 def send_code(data: schemas.SendCodeIn, request: Request):
     _ensure_verification_email_ready()
-    _enforce(request, "code", f"ip:{client_ip(request)}", limit=30, window=3600)
+    if not captcha.is_token_valid(data.captcha_token):
+        raise HTTPException(status_code=400, detail="拼图验证失败，请重新验证")
+    email_address = _normalize_email(data.email)
+    _enforce_code_limits(request, email_address)
     try:
         code = request_code(
             "register",
-            data.email,
+            email_address,
             ttl_seconds=settings.verify_code_ttl_seconds,
             cooldown_seconds=settings.verify_code_cooldown_seconds,
         )
@@ -63,7 +97,7 @@ def send_code(data: schemas.SendCodeIn, request: Request):
 
     try:
         result = email.send_verification_email(
-            data.email,
+            email_address,
             code,
             ttl_seconds=settings.verify_code_ttl_seconds,
             kind="register",
@@ -88,16 +122,18 @@ def send_code(data: schemas.SendCodeIn, request: Request):
 @router.post("/register", response_model=schemas.AuthSessionOut, status_code=201)
 def register(data: schemas.RegisterIn, request: Request, db: Session = Depends(get_db)):
     _enforce(request, "register", f"ip:{client_ip(request)}", limit=10, window=300)
-    if repository.get_user_by_email(db, data.email):
+    email_address = _normalize_email(data.email)
+    _enforce(request, "register-email", f"email:{email_address}", limit=10, window=600)
+    if repository.get_user_by_email(db, email_address):
         raise HTTPException(status_code=409, detail="该邮箱已注册，请直接登录")
     if not captcha.is_token_valid(data.captcha_token):
         raise HTTPException(status_code=400, detail="拼图验证失败，请重新验证")
-    if not consume_code("register", data.email, data.code):
+    if not consume_code("register", email_address, data.code):
         raise HTTPException(status_code=400, detail="验证码错误或已过期")
     user = repository.create_user(
         db,
         name=data.name,
-        email=data.email,
+        email=email_address,
         password_hash=hash_password(data.password),
     )
     return _issue_session(db, user)
@@ -125,15 +161,16 @@ def me(current_user=Depends(get_current_user)):
 @router.post("/forgot-password", response_model=schemas.SendCodeOut)
 def forgot_password(data: schemas.ForgotPasswordIn, request: Request, db: Session = Depends(get_db)):
     _ensure_verification_email_ready()
-    _enforce(request, "code", f"ip:{client_ip(request)}", limit=30, window=3600)
+    email_address = _normalize_email(data.email)
     if not captcha.is_token_valid(data.captcha_token):
         raise HTTPException(status_code=400, detail="拼图验证失败，请重新验证")
-    if not repository.get_user_by_email(db, data.email):
+    _enforce_code_limits(request, email_address)
+    if not repository.get_user_by_email(db, email_address):
         raise HTTPException(status_code=404, detail="该邮箱未注册")
     try:
         code = request_code(
             "reset",
-            data.email,
+            email_address,
             ttl_seconds=settings.verify_code_ttl_seconds,
             cooldown_seconds=settings.verify_code_cooldown_seconds,
         )
@@ -142,7 +179,7 @@ def forgot_password(data: schemas.ForgotPasswordIn, request: Request, db: Sessio
 
     try:
         result = email.send_verification_email(
-            data.email,
+            email_address,
             code,
             ttl_seconds=settings.verify_code_ttl_seconds,
             kind="reset",
@@ -165,11 +202,16 @@ def forgot_password(data: schemas.ForgotPasswordIn, request: Request, db: Sessio
 
 
 @router.post("/reset-password", response_model=schemas.ResetPasswordOut)
-def reset_password(data: schemas.ResetPasswordIn, db: Session = Depends(get_db)):
-    user = repository.get_user_by_email(db, data.email)
+def reset_password(data: schemas.ResetPasswordIn, request: Request, db: Session = Depends(get_db)):
+    _enforce(request, "reset-password", f"ip:{client_ip(request)}", limit=10, window=600)
+    email_address = _normalize_email(data.email)
+    _enforce(request, "reset-password-email", f"email:{email_address}", limit=10, window=600)
+    if not captcha.is_token_valid(data.captcha_token):
+        raise HTTPException(status_code=400, detail="拼图验证失败，请重新验证")
+    user = repository.get_user_by_email(db, email_address)
     if not user:
         raise HTTPException(status_code=404, detail="该邮箱未注册")
-    if not consume_code("reset", data.email, data.code):
+    if not consume_code("reset", email_address, data.code):
         raise HTTPException(status_code=400, detail="验证码错误或已过期")
     user.password_hash = hash_password(data.password)
     db.commit()

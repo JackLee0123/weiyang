@@ -41,6 +41,11 @@ def _clean_verification_codes():
     reset_captcha()
 
 
+def _send_code(client, email):
+    captcha_token = _captcha_token(client)
+    return client.post("/api/auth/send-code", json={"email": email, "captcha_token": captcha_token})
+
+
 def _captcha_token(client):
     """开发模式下取得一个已验证的拼图凭证（target_x 仅在 DEV_MODE 下返回）。"""
     captcha = client.post("/api/captcha").json()
@@ -77,7 +82,7 @@ def client():
 @pytest.fixture()
 def auth_headers(client):
     email = "owner@example.com"
-    code = client.post("/api/auth/send-code", json={"email": email}).json()["dev_code"]
+    code = _send_code(client, email).json()["dev_code"]
     captcha_token = _captcha_token(client)
     session = client.post(
         "/api/auth/register",
@@ -89,7 +94,7 @@ def auth_headers(client):
 @pytest.fixture()
 def register_user(client):
     def _register(email: str):
-        code = client.post("/api/auth/send-code", json={"email": email}).json()["dev_code"]
+        code = _send_code(client, email).json()["dev_code"]
         captcha_token = _captcha_token(client)
         session = client.post(
             "/api/auth/register",

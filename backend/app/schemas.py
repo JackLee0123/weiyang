@@ -18,6 +18,7 @@ PASSWORD_MIN_LENGTH = 8
 
 class SendCodeIn(BaseModel):
     email: str = Field(..., pattern=EMAIL_RE, max_length=255)
+    captcha_token: str = Field(..., min_length=1, max_length=128)
 
 
 class PasswordPolicy(BaseModel):
@@ -54,6 +55,7 @@ class ForgotPasswordIn(BaseModel):
 class ResetPasswordIn(PasswordPolicy):
     email: str = Field(..., pattern=EMAIL_RE, max_length=255)
     code: str = Field(..., min_length=4, max_length=10)
+    captcha_token: str = Field(..., min_length=1, max_length=128)
 
 
 class ResetPasswordOut(BaseModel):

@@ -73,13 +73,13 @@ export function LoginPage({ theme, onToggleTheme, onLogin }: LoginPageProps) {
     }
     setError('')
     setInfo('')
-    if (mode === 'forgot' && !captchaToken) {
+    if (mode !== 'login' && !captchaToken) {
       setError('请先完成拼图验证')
       return
     }
     setSendingCode(true)
     try {
-      const result = mode === 'forgot' ? await api.sendResetCode(email, captchaToken!) : await api.sendCode(email)
+      const result = mode === 'forgot' ? await api.sendResetCode(email, captchaToken!) : await api.sendCode(email, captchaToken!)
       setInfo(result.message)
       if (result.dev_code) setInfo(`${result.message}，开发模式验证码：${result.dev_code}`)
       setCooldown(result.cooldown)
@@ -117,7 +117,7 @@ export function LoginPage({ theme, onToggleTheme, onLogin }: LoginPageProps) {
           setLoading(false)
           return
         }
-        await api.resetPassword({ email, code: code.trim(), password })
+        await api.resetPassword({ email, code: code.trim(), password, captcha_token: captchaToken })
         switchMode('login')
         setInfo('密码已重置，请用新密码登录')
       } catch (err) {
@@ -251,7 +251,7 @@ export function LoginPage({ theme, onToggleTheme, onLogin }: LoginPageProps) {
                   type="button"
                   className="btn-ghost shrink-0 whitespace-nowrap border border-line dark:border-slate-600"
                   onClick={() => void requestCode()}
-                  disabled={sendingCode || cooldown > 0 || (mode === 'forgot' && !captchaToken)}
+                  disabled={sendingCode || cooldown > 0 || !captchaToken}
                 >
                   {cooldown > 0 ? `重新发送 ${cooldown}s` : sendingCode ? '发送中…' : '获取验证码'}
                 </button>

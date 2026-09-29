@@ -40,6 +40,11 @@ class Settings(BaseSettings):
     feedback_to_email: str = ""
     verify_code_ttl_seconds: int = 600
     verify_code_cooldown_seconds: int = 60
+    # 验证码发送的第二层限流：除单个邮箱冷却外，再按来源 IP、邮箱和邮箱域名限制。
+    # 这些限制默认偏保守，生产环境可按实际邮件量调整；限流器本身应在多实例部署时替换为 Redis。
+    verify_code_ip_limit_per_hour: int = 10
+    verify_code_email_limit_per_hour: int = 3
+    verify_code_domain_limit_per_hour: int = 30
     auth_token_ttl_seconds: int = 2592000
     # 超级管理员：启动时把指定邮箱的用户提升为管理员；
     # 若该邮箱尚未注册，则用配置的密码创建管理员账号（仅作首次引导，请设置强密码）。

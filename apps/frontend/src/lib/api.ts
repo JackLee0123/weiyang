@@ -117,8 +117,8 @@ export const api = {
   verifyCaptcha(payload: { captcha_id: string; x: number }) {
     return request<CaptchaResult>('/captcha/verify', { method: 'POST', body: JSON.stringify(payload) })
   },
-  sendCode(email: string) {
-    return request<SendCodeResult>('/auth/send-code', { method: 'POST', body: JSON.stringify({ email }) })
+  sendCode(email: string, captcha_token: string) {
+    return request<SendCodeResult>('/auth/send-code', { method: 'POST', body: JSON.stringify({ email, captcha_token }) })
   },
   register(payload: RegisterPayload) {
     return request<AuthSession>('/auth/register', { method: 'POST', body: JSON.stringify(payload) })

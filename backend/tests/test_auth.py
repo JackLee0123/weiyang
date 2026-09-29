@@ -1,20 +1,29 @@
 def test_send_code_returns_dev_code_when_smtp_unset(client):
-    response = client.post("/api/auth/send-code", json={"email": "a@example.com"})
+    response = _send_code(client, "a@example.com")
     assert response.status_code == 200
     data = response.json()
     assert data["dev_code"] is not None
     assert len(data["dev_code"]) == 6
     assert data["expires_in"] > 0
 
+def _send_code(client, email):
+    captcha = client.post("/api/captcha").json()
+    token = client.post(
+        "/api/captcha/verify",
+        json={"captcha_id": captcha["captcha_id"], "x": captcha["target_x"]},
+    ).json()["captcha_token"]
+    return client.post("/api/auth/send-code", json={"email": email, "captcha_token": token})
+
+
 
 def test_send_code_respects_cooldown(client):
-    assert client.post("/api/auth/send-code", json={"email": "b@example.com"}).status_code == 200
-    second = client.post("/api/auth/send-code", json={"email": "b@example.com"})
+    assert _send_code(client, "b@example.com").status_code == 200
+    second = _send_code(client, "b@example.com")
     assert second.status_code == 429
 
 
 def test_register_with_valid_code(client, captcha_ok):
-    code = client.post("/api/auth/send-code", json={"email": "c@example.com"}).json()["dev_code"]
+    code = _send_code(client, "c@example.com").json()["dev_code"]
     response = client.post(
         "/api/auth/register",
         json={"name": "小明", "email": "c@example.com", "password": "Secret1!", "code": code, "captcha_token": captcha_ok()},
@@ -37,7 +46,7 @@ def test_register_requires_valid_code(client):
 
 
 def test_register_enforces_password_policy(client, captcha_ok):
-    code = client.post("/api/auth/send-code", json={"email": "g@example.com"}).json()["dev_code"]
+    code = _send_code(client, "g@example.com").json()["dev_code"]
     base = {"name": "小张", "email": "g@example.com", "code": code}
     # 少于 8 位
     assert client.post("/api/auth/register", json={**base, "password": "Ab1!y"}).status_code == 422
@@ -48,14 +57,14 @@ def test_register_enforces_password_policy(client, captcha_ok):
 
 
 def test_register_rejects_duplicate_email(client, captcha_ok):
-    code = client.post("/api/auth/send-code", json={"email": "e@example.com"}).json()["dev_code"]
+    code = _send_code(client, "e@example.com").json()["dev_code"]
     payload = {"name": "小李", "email": "e@example.com", "password": "Secret1!", "code": code, "captcha_token": captcha_ok()}
     assert client.post("/api/auth/register", json=payload).status_code == 201
     assert client.post("/api/auth/register", json=payload).status_code == 409
 
 
 def test_login_with_registered_user(client, captcha_ok):
-    code = client.post("/api/auth/send-code", json={"email": "f@example.com"}).json()["dev_code"]
+    code = _send_code(client, "f@example.com").json()["dev_code"]
     client.post(
         "/api/auth/register",
         json={"name": "小刚", "email": "f@example.com", "password": "Secret1!", "code": code, "captcha_token": captcha_ok()},
@@ -73,7 +82,7 @@ def test_login_with_registered_user(client, captcha_ok):
 
 
 def test_forgot_and_reset_password(client, captcha_ok):
-    code = client.post("/api/auth/send-code", json={"email": "h@example.com"}).json()["dev_code"]
+    code = _send_code(client, "h@example.com").json()["dev_code"]
     session = client.post(
         "/api/auth/register",
         json={"name": "小何", "email": "h@example.com", "password": "Old1!abcd", "code": code, "captcha_token": captcha_ok()},
@@ -91,7 +100,7 @@ def test_forgot_and_reset_password(client, captcha_ok):
     assert (
         client.post(
             "/api/auth/reset-password",
-            json={"email": "h@example.com", "code": "000000", "password": "New1!zzzz"},
+            json={"email": "h@example.com", "code": "000000", "password": "New1!zzzz", "captcha_token": captcha_ok()},
         ).status_code
         == 400
     )
@@ -99,7 +108,7 @@ def test_forgot_and_reset_password(client, captcha_ok):
     # 正确验证码：200
     response = client.post(
         "/api/auth/reset-password",
-        json={"email": "h@example.com", "code": reset_code, "password": "New1!zzzz"},
+        json={"email": "h@example.com", "code": reset_code, "password": "New1!zzzz", "captcha_token": captcha_ok()},
     )
     assert response.status_code == 200
     assert response.json()["message"]

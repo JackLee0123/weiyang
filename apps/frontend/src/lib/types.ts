@@ -193,6 +193,7 @@ export interface ResetPasswordPayload {
   email: string
   code: string
   password: string
+  captcha_token: string
 }
 
 export interface PeriodTime {
