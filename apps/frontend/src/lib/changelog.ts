@@ -12,7 +12,7 @@ export interface ChangelogEntry {
   items: ChangelogItem[]
 }
 
-export const CURRENT_VERSION = 'v0.8.0'
+export const CURRENT_VERSION = 'v0.8.1'
 
 export const CHANGELOG_KIND_META: Record<ChangelogKind, { label: string; className: string }> = {
   feature: { label: '新增', className: 'bg-teal-50 text-teal-700 dark:bg-teal-500/15 dark:text-teal-300' },
@@ -22,6 +22,25 @@ export const CHANGELOG_KIND_META: Record<ChangelogKind, { label: string; classNa
 }
 
 export const CHANGELOG: ChangelogEntry[] = [
+  {
+    version: 'v0.8.1',
+    date: '2026-09-29',
+    title: '全新品牌标志',
+    items: [
+      {
+        kind: 'feature',
+        text: '品牌标志换成新的「无限环」：两个环彼此接续、始终没有闭合，延续「未央」——没有终点，仍在途中',
+      },
+      {
+        kind: 'improvement',
+        text: '网页页签图标、PWA 应用图标、手机主屏图标、手环端图标与二维码中心标志同步换新，桌面端与移动端保持一致',
+      },
+      {
+        kind: 'notice',
+        text: '本次只替换标志图形，界面主色（青绿）与其它配色保持不变；已安装到主屏幕的应用图标可能会在系统缓存过期后更新',
+      },
+    ],
+  },
   {
     version: 'v0.8.0',
     date: '2026-09-29',
