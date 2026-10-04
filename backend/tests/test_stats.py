@@ -34,14 +34,16 @@ def test_stats_overview(client, auth_headers):
     # 完成率 = (已抵达的自建计划 + 已完成的记一笔) / 两者合计 = (1 + 1) / (2 + 1)
     assert data["self_plans"] == 2
     assert data["self_done_plans"] == 1
-    assert data["records_count"] == 1
-    assert data["done_records"] == 1
+    # 计划「a」是勾选完成状态，会同步生成一条记录，所以记录数是 2 条
+    assert data["records_count"] == 2
+    assert data["done_records"] == 2
     assert data["completion_rate"] == 0.6667
     assert data["planned_minutes"] == 90
-    assert data["recorded_minutes"] == 20
-    assert data["by_category"] == {"学习": 1}
+    # 60 分钟来自完成计划「a」自动补的记录（09:00-10:00），20 分钟是手写那条
+    assert data["recorded_minutes"] == 80
+    assert data["by_category"] == {"学习": 1, "默认": 1}
     # 热力图直接用 days 里的逐日聚合，这里锁定字段口径
-    assert data["days"][0]["records_count"] == 1
+    assert data["days"][0]["records_count"] == 2
     assert data["days"][0]["done_plans"] == 1
     assert data["consecutive_recording_days"] == 1
 
@@ -115,8 +117,9 @@ def test_completion_rate_combines_self_plans_and_records(client, auth_headers):
         headers=auth_headers,
     )
     data = client.get("/api/stats/overview", params={"start": TODAY, "end": TODAY}, headers=auth_headers).json()
-    assert data["done_records"] == 1
-    assert data["records_count"] == 2
+    # 记录数包含「计划完成自动补的那条」，但完成率只按手写的记录算，避免重复计数
+    assert data["done_records"] == 2
+    assert data["records_count"] == 3
     assert data["completion_rate"] == 0.6667
 
 

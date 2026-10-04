@@ -31,4 +31,27 @@ describe('RecordForm', () => {
     await waitFor(() => expect(mocks.create).toHaveBeenCalled())
     expect(mocks.create).toHaveBeenCalledWith(expect.objectContaining({ title: '写了周报', images: [] }))
   })
+
+  it('计划同步来的记录不能在这里直接删除，并给出说明', () => {
+    render(
+      <RecordForm
+        defaultDate="2099-01-01"
+        initial={{
+          id: 5,
+          date: '2099-01-01',
+          title: '写周报',
+          content: '',
+          is_completed: true,
+          category: '工作',
+          linked_plan_id: 3,
+          source: 'plan',
+          images: [],
+          created_at: '2099-01-01T09:00:00',
+        }}
+        onClose={() => {}}
+      />,
+    )
+    expect(screen.getByText(/这条记录来自已完成的计划/)).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: /删除/ })).toBeDisabled()
+  })
 })

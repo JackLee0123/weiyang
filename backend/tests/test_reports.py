@@ -36,7 +36,8 @@ def test_memory_report(client, monkeypatch, auth_headers):
     data = response.json()
 
     assert data["period_days"] == 2
-    assert data["records_count"] == 3
+    # 勾选完成的计划会同步生成一条记录，所以是 3 条手写记录 + 1 条自动记录
+    assert data["records_count"] == 4
     assert data["recorded_minutes"] == 60
     assert data["active_days"] == 2
     assert data["consecutive_recording_days"] == 2
@@ -44,14 +45,16 @@ def test_memory_report(client, monkeypatch, auth_headers):
     assert data["done_plans"] == 1
     assert data["unfinished_plans"] == 1
     assert data["cancelled_plans"] == 1
-    # 完成率与今日页同口径：自建计划（不含改道）+ 记一笔 = (1 + 3) / (2 + 3)
+    # 完成率与今日页同口径：自建计划（不含改道）+ 记一笔（不含计划自动补的）= (1 + 3) / (2 + 3)
     assert data["self_plans"] == 2
     assert data["self_done_plans"] == 1
-    assert data["done_records"] == 3
+    assert data["done_records"] == 4
     assert data["completion_rate"] == 0.8
     assert data["by_category"]["工作"] == 2
     assert data["by_category"]["生活"] == 1
-    assert data["top_categories"] == ["工作", "生活"]
+    # 完成的计划同步过来的那条记录带着计划自己的分类（这里是默认分类）
+    assert data["by_category"]["默认"] == 1
+    assert data["top_categories"] == ["工作", "生活", "默认"]
     assert data["busiest_day"] == TODAY
     assert [item["title"] for item in data["unfinished"]] == ["pending"]
 

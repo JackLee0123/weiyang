@@ -1,5 +1,5 @@
-import { render, screen } from '@testing-library/react'
-import { describe, expect, it } from 'vitest'
+import { fireEvent, render, screen } from '@testing-library/react'
+import { describe, expect, it, vi } from 'vitest'
 import { FocusPanel } from './FocusPanel'
 import type { RecordEntry } from '../lib/types'
 
@@ -61,5 +61,29 @@ describe('FocusPanel', () => {
 
     expect(screen.getByText(/这一天还没有专注记录/)).toBeInTheDocument()
     expect(screen.queryByRole('img')).not.toBeInTheDocument()
+  })
+
+  it('完成的计划没填用时：次数照算，列出是哪几项并能点进去补用时', () => {
+    const onOpenRecord = vi.fn()
+    render(
+      <FocusPanel
+        date="2026-10-04"
+        records={[
+          record({ id: 1, title: '词汇课', duration_minutes: null, source: 'plan', linked_plan_id: 1 }),
+          record({ id: 2, title: '阅读课1', duration_minutes: null, source: 'plan', linked_plan_id: 2 }),
+        ]}
+        onOpenRecord={onOpenRecord}
+      />,
+    )
+
+    expect(screen.getByText('2')).toBeInTheDocument()
+    expect(screen.getByText('词汇课')).toBeInTheDocument()
+    expect(screen.getByText('阅读课1')).toBeInTheDocument()
+    expect(screen.getAllByText(/未填用时/)).toHaveLength(2)
+    expect(screen.getByText(/到「当天记录」里给它们加上用时/)).toBeInTheDocument()
+    expect(screen.queryByRole('img')).not.toBeInTheDocument()
+
+    fireEvent.click(screen.getByText('词汇课'))
+    expect(onOpenRecord).toHaveBeenCalledWith(1)
   })
 })

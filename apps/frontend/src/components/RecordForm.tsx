@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { Lock, Pi, Trash2 } from 'lucide-react'
+import { ClipboardCheck, Lock, Pi, Trash2 } from 'lucide-react'
 import { ImageUpload } from './ImageUpload'
 import { useRecordMutations } from '../lib/queries'
 import type { Plan, RecordEntry, RecordEntryPayload } from '../lib/types'
@@ -44,6 +44,7 @@ export function RecordForm({ defaultDate, initial, plans = EMPTY_PLANS, onClose 
 
   const set = <K extends keyof RecordEntryPayload>(key: K, value: RecordEntryPayload[K]) => setForm((f) => ({ ...f, [key]: value }))
   const locked = isPast(form.date)
+  const fromPlan = initial?.source === 'plan'
   const dayPlans = plans.filter((p) => p.date === form.date && p.status !== 'cancelled')
 
   const submit = async () => {
@@ -64,6 +65,12 @@ export function RecordForm({ defaultDate, initial, plans = EMPTY_PLANS, onClose 
         <div className="flex items-start gap-2 rounded-md border border-amber-300/70 bg-amber-50 px-3 py-2 text-sm text-amber-800 dark:border-amber-400/30 dark:bg-amber-400/10 dark:text-amber-200">
           <Lock size={14} className="mt-0.5 shrink-0" />
           过去的日期已封存为永久回忆，无法添加或修改记录。
+        </div>
+      )}
+      {fromPlan && (
+        <div className="flex items-start gap-2 rounded-md border border-line bg-surface-soft px-3 py-2 text-sm text-ink-soft dark:border-slate-700 dark:bg-slate-900/40 dark:text-slate-300">
+          <ClipboardCheck size={14} className="mt-0.5 shrink-0" />
+          这条记录来自已完成的计划，标题和用时跟着计划走；要移除它，取消那个计划的勾选即可。
         </div>
       )}
       <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
@@ -130,7 +137,8 @@ export function RecordForm({ defaultDate, initial, plans = EMPTY_PLANS, onClose 
         {initial && (
           <button
             className="btn text-rose-600 hover:bg-rose-50 disabled:cursor-not-allowed disabled:text-slate-300 disabled:hover:bg-transparent dark:text-rose-300 dark:hover:bg-rose-500/10 dark:disabled:text-slate-600"
-            disabled={locked}
+            disabled={locked || fromPlan}
+            title={fromPlan ? '来自计划的记录，请取消计划的勾选来移除' : undefined}
             onClick={async () => {
               try {
                 await remove.mutateAsync(initial.id)

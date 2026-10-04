@@ -27,7 +27,13 @@ export function PlanItem({ plan, onEdit }: { plan: Plan; onEdit: (plan: Plan) =>
         }`}
         onClick={toggle}
         aria-label={locked ? '已封存' : done ? '标记未完成' : '标记完成'}
-        title={locked ? '已封存' : done ? '标记未完成' : '标记完成'}
+        title={
+          locked
+            ? '已封存'
+            : done
+              ? '标记未完成（记录里同步的那条会一起移除）'
+              : '标记完成（会在记录里同步一条）'
+        }
       >
         <Check size={12} strokeWidth={3} />
       </button>

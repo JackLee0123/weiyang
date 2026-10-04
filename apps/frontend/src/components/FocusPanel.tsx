@@ -56,10 +56,13 @@ export function FocusPanel({
   date,
   records,
   planTitles,
+  onOpenRecord,
 }: {
   date: string
   records: RecordEntry[]
   planTitles?: Map<number, string>
+  /** 点「未填用时」的条目时，打开对应记录去补用时 */
+  onOpenRecord?: (recordId: number) => void
 }) {
   const summary = useMemo(() => summarizeFocus(records, planTitles), [records, planTitles])
   const duration = minutesParts(summary.minutes)
@@ -100,24 +103,62 @@ export function FocusPanel({
           </div>
 
           {summary.slices.length === 0 ? (
-            <p className="mt-3 text-sm text-ink-muted dark:text-slate-400">
-              这一天还没有专注记录，用左侧的「专注航班」开始一段专注，或给记录填上用时。
-            </p>
+            summary.untimed.length > 0 ? (
+              <div className="mt-3 space-y-3">
+                <ul className="space-y-2">
+                  {summary.untimed.map((item) => {
+                    const clickable = Boolean(onOpenRecord && item.recordId)
+                    return (
+                      <li
+                        key={item.key}
+                        className={`flex items-center gap-2 text-sm ${
+                          clickable ? 'cursor-pointer rounded px-1 py-0.5 hover:bg-surface-soft dark:hover:bg-slate-700/40' : 'px-1'
+                        }`}
+                        onClick={clickable ? () => onOpenRecord?.(item.recordId as number) : undefined}
+                        title={clickable ? '去这条记录里填用时' : undefined}
+                      >
+                        <span className="h-2.5 w-2.5 shrink-0 rounded-full bg-brand/50" />
+                        <span className="min-w-0 flex-1 truncate text-ink-soft dark:text-slate-300">{item.label}</span>
+                        <span className="shrink-0 text-xs text-ink-muted dark:text-slate-400">
+                          未填用时{clickable ? ' · 去填写' : ''}
+                        </span>
+                      </li>
+                    )
+                  })}
+                </ul>
+                <p className="text-xs text-ink-muted dark:text-slate-400">
+                  这些是今天完成的计划，还没有填写用时。到「当天记录」里给它们加上用时（点上面这几条，或点记录右侧的铅笔），这里就会显示专注时长分布。
+                </p>
+              </div>
+            ) : (
+              <p className="mt-3 text-sm text-ink-muted dark:text-slate-400">
+                这一天还没有专注记录，用左侧的「专注航班」开始一段专注，或给记录填上用时。
+              </p>
+            )
           ) : (
-            <div className="mt-3 flex flex-col items-center gap-5 sm:flex-row sm:items-center">
-              <Donut slices={summary.slices} minutes={summary.minutes} />
-              <ul className="w-full min-w-0 space-y-2">
-                {summary.slices.map((slice) => (
-                  <li key={slice.key} className="flex items-center gap-2 text-sm">
-                    <span className="h-2.5 w-2.5 shrink-0 rounded-full" style={{ backgroundColor: slice.color }} />
-                    <span className="min-w-0 flex-1 truncate text-ink-soft dark:text-slate-300">{slice.label}</span>
-                    <span className="shrink-0 text-xs text-ink-muted dark:text-slate-400">{formatMinutes(slice.minutes)}</span>
-                    <span className="w-12 shrink-0 text-right text-xs font-medium text-ink dark:text-slate-200">
-                      {slice.percent.toFixed(1)}%
-                    </span>
-                  </li>
-                ))}
-              </ul>
+            <div className="mt-3 space-y-3">
+              <div className="flex flex-col items-center gap-5 sm:flex-row sm:items-center">
+                <Donut slices={summary.slices} minutes={summary.minutes} />
+                <ul className="w-full min-w-0 space-y-2">
+                  {summary.slices.map((slice) => (
+                    <li key={slice.key} className="flex items-center gap-2 text-sm">
+                      <span className="h-2.5 w-2.5 shrink-0 rounded-full" style={{ backgroundColor: slice.color }} />
+                      <span className="min-w-0 flex-1 truncate text-ink-soft dark:text-slate-300">{slice.label}</span>
+                      <span className="shrink-0 text-xs text-ink-muted dark:text-slate-400">{formatMinutes(slice.minutes)}</span>
+                      <span className="w-12 shrink-0 text-right text-xs font-medium text-ink dark:text-slate-200">
+                        {slice.percent.toFixed(1)}%
+                      </span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+              {summary.untimed.length > 0 && (
+                <p className="text-xs text-ink-muted dark:text-slate-400">
+                  另有 {summary.untimed.length} 项完成的计划还没填用时，暂不计入时长：
+                  {summary.untimed.map((item) => item.label).join('、')}
+                  。到「当天记录」里给它们加上用时就会显示出来。
+                </p>
+              )}
             </div>
           )}
         </div>

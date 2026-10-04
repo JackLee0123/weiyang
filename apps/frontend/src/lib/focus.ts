@@ -17,6 +17,16 @@ export interface FocusSummary {
   count: number
   minutes: number
   slices: FocusSlice[]
+  /** 来自已完成计划、但计划里没写时间的条目：算「今天做过」，只是不计入时长 */
+  untimed: FocusItem[]
+}
+
+export interface FocusItem {
+  key: string
+  label: string
+  count: number
+  /** 这一组里的第一条记录，点一下可以直接去改它的用时 */
+  recordId?: number
 }
 
 /** 饼图配色，深浅色主题下都保持足够对比度。 */
@@ -64,14 +74,26 @@ export function focusSliceLabel(record: RecordEntry, planTitle?: string): string
 
 export function summarizeFocus(records: RecordEntry[], planTitles?: Map<number, string>): FocusSummary {
   const groups = new Map<string, { label: string; minutes: number; count: number }>()
+  const untimedGroups = new Map<string, FocusItem>()
   let count = 0
   let minutes = 0
 
   for (const record of records) {
     const duration = Math.max(0, Math.round(record.duration_minutes ?? 0))
-    if (duration <= 0) continue
+    // 填了用时的记录算一段专注；勾选完成计划同步过来的记录，即使没填用时也算今天做过的事
+    const isPlanItem = record.source === 'plan' && record.is_completed
+    if (duration <= 0 && !isPlanItem) continue
 
     const label = focusSliceLabel(record, record.linked_plan_id ? planTitles?.get(record.linked_plan_id) : undefined)
+    if (duration <= 0) {
+      const item =
+        untimedGroups.get(label) ??
+        { key: `untimed-${untimedGroups.size}-${label}`, label, count: 0, recordId: record.id }
+      item.count += 1
+      untimedGroups.set(label, item)
+      count += 1
+      continue
+    }
     const group = groups.get(label) ?? { label, minutes: 0, count: 0 }
     group.minutes += duration
     group.count += 1
@@ -79,6 +101,10 @@ export function summarizeFocus(records: RecordEntry[], planTitles?: Map<number, 
     count += 1
     minutes += duration
   }
+
+  const untimed = [...untimedGroups.values()].sort(
+    (a, b) => b.count - a.count || a.label.localeCompare(b.label, 'zh-Hans-CN'),
+  )
 
   const sorted = [...groups.values()].sort(
     (a, b) => b.minutes - a.minutes || a.label.localeCompare(b.label, 'zh-Hans-CN'),
@@ -107,5 +133,5 @@ export function summarizeFocus(records: RecordEntry[], planTitles?: Map<number, 
     color: FOCUS_COLORS[index % FOCUS_COLORS.length],
   }))
 
-  return { count, minutes, slices }
+  return { count, minutes, slices, untimed }
 }

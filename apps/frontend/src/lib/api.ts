@@ -1,6 +1,9 @@
 import type {
   AdminUser,
   AdminUserUpdate,
+  AdminScheduleImportPayload,
+  AdminScheduleImportResult,
+  AdminSchedulePreview,
   AuthSession,
   AuthUser,
   Backup,
@@ -208,6 +211,20 @@ export const api = {
   },
   deleteUser(id: number) {
     return request<void>(`/admin/users/${id}`, { method: 'DELETE' })
+  },
+  previewAdminSchedule(file: File) {
+    const form = new FormData()
+    form.append('file', file)
+    return request<AdminSchedulePreview>('/admin/schedule/preview', { method: 'POST', body: form })
+  },
+  importAdminSchedule(payload: AdminScheduleImportPayload) {
+    return request<AdminScheduleImportResult>('/admin/schedule/import', { method: 'POST', body: JSON.stringify(payload) })
+  },
+  rollbackAdminSchedule(plan_ids: number[]) {
+    return request<{ deleted: number }>('/admin/schedule/rollback', { method: 'POST', body: JSON.stringify({ plan_ids }) })
+  },
+  downloadAdminScheduleTemplate() {
+    return requestBlob('/admin/schedule/template')
   },
   exportBackup() {
     return request<Backup>('/backup/export', { method: 'POST' })

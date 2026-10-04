@@ -106,5 +106,23 @@ def register_user(client):
 
 
 @pytest.fixture()
+def admin_headers(client, register_user):
+    """注册一个普通用户，再把它提升为管理员（项目里没有现成的管理员注册入口）。"""
+    headers = register_user("admin@example.com")
+    override = main_module.app.dependency_overrides[get_db]
+    session_gen = override()
+    session = next(session_gen)
+    try:
+        from app import models  # noqa: PLC0415
+
+        user = session.query(models.User).filter(models.User.email == "admin@example.com").one()
+        user.is_admin = True
+        session.commit()
+    finally:
+        session_gen.close()
+    return headers
+
+
+@pytest.fixture()
 def captcha_ok(client):
     return lambda: _captcha_token(client)

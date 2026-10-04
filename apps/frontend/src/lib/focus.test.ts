@@ -95,7 +95,34 @@ describe('summarizeFocus', () => {
 
   it('没有专注记录时返回空分布', () => {
     const summary = summarizeFocus([])
-    expect(summary).toEqual({ count: 0, minutes: 0, slices: [] })
+    expect(summary).toEqual({ count: 0, minutes: 0, slices: [], untimed: [] })
+  })
+
+  it('完成的计划没填时间时：计次数、列出来，但不进时长分布', () => {
+    const summary = summarizeFocus([
+      record({ id: 1, title: '词汇课', duration_minutes: null, source: 'plan', linked_plan_id: 11 }),
+      record({ id: 2, title: '阅读课1', duration_minutes: null, source: 'plan', linked_plan_id: 12 }),
+    ])
+
+    expect(summary.count).toBe(2)
+    expect(summary.minutes).toBe(0)
+    expect(summary.slices).toEqual([])
+    expect(summary.untimed.map((item) => item.label)).toEqual(['词汇课', '阅读课1'])
+  })
+
+  it('完成的计划填了时间就照常进分布', () => {
+    const summary = summarizeFocus([
+      record({ id: 1, title: '写周报', duration_minutes: 90, source: 'plan', linked_plan_id: 3 }),
+    ])
+    expect(summary.count).toBe(1)
+    expect(summary.minutes).toBe(90)
+    expect(summary.slices[0].label).toBe('写周报')
+    expect(summary.untimed).toEqual([])
+  })
+
+  it('自己记的、没填用时的记录仍然不计入专注', () => {
+    const summary = summarizeFocus([record({ id: 1, title: '随手一记', duration_minutes: null, source: 'manual' })])
+    expect(summary).toEqual({ count: 0, minutes: 0, slices: [], untimed: [] })
   })
 })
 import { letterName, nextFocusName } from './focus'

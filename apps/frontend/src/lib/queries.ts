@@ -1,6 +1,14 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { api } from './api'
-import type { AdminUserUpdate, CourseDraft, HeatmapDay, PeriodTime, PlanPayload, RecordEntryPayload } from './types'
+import type {
+  AdminScheduleImportPayload,
+  AdminUserUpdate,
+  CourseDraft,
+  HeatmapDay,
+  PeriodTime,
+  PlanPayload,
+  RecordEntryPayload,
+} from './types'
 
 export function usePlans(params: { start?: string; end?: string; status?: string; category?: string; q?: string } = {}) {
   return useQuery({ queryKey: ['plans', params], queryFn: () => api.fetchPlans(params) })
@@ -41,7 +49,10 @@ export function usePlanMutations() {
   const qc = useQueryClient()
   const refresh = () => {
     qc.invalidateQueries({ queryKey: ['plans'] })
+    // 勾选完成会在「记录」里同步一条，所以记录和回忆都要一起刷新
+    qc.invalidateQueries({ queryKey: ['records'] })
     qc.invalidateQueries({ queryKey: ['stats'] })
+    qc.invalidateQueries({ queryKey: ['memory'] })
   }
   const create = useMutation({ mutationFn: (p: PlanPayload) => api.createPlan(p), onSuccess: refresh })
   const update = useMutation({ mutationFn: (v: { id: number; payload: Partial<PlanPayload> }) => api.updatePlan(v.id, v.payload), onSuccess: refresh })
@@ -75,6 +86,27 @@ export function useAdminMutations() {
   })
   const remove = useMutation({ mutationFn: (id: number) => api.deleteUser(id), onSuccess: refresh })
   return { update, remove }
+}
+
+/** 管理员批量导入日程：解析预览 / 正式导入 / 撤销本次导入。 */
+export function useAdminScheduleImport() {
+  const qc = useQueryClient()
+  const refresh = () => {
+    qc.invalidateQueries({ queryKey: ['plans'] })
+    qc.invalidateQueries({ queryKey: ['stats'] })
+    qc.invalidateQueries({ queryKey: ['admin-users'] })
+  }
+  const preview = useMutation({ mutationFn: (file: File) => api.previewAdminSchedule(file) })
+  const importRows = useMutation({
+    mutationFn: (payload: AdminScheduleImportPayload) => api.importAdminSchedule(payload),
+    onSuccess: refresh,
+  })
+  const rollback = useMutation({
+    mutationFn: (planIds: number[]) => api.rollbackAdminSchedule(planIds),
+    onSuccess: refresh,
+  })
+  const template = useMutation({ mutationFn: () => api.downloadAdminScheduleTemplate() })
+  return { preview, importRows, rollback, template }
 }
 
 export function useCourses(term?: string) {

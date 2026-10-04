@@ -12,7 +12,7 @@ export interface ChangelogEntry {
   items: ChangelogItem[]
 }
 
-export const CURRENT_VERSION = 'v0.8.1'
+export const CURRENT_VERSION = 'v0.8.2'
 
 export const CHANGELOG_KIND_META: Record<ChangelogKind, { label: string; className: string }> = {
   feature: { label: '新增', className: 'bg-teal-50 text-teal-700 dark:bg-teal-500/15 dark:text-teal-300' },
@@ -22,6 +22,45 @@ export const CHANGELOG_KIND_META: Record<ChangelogKind, { label: string; classNa
 }
 
 export const CHANGELOG: ChangelogEntry[] = [
+  {
+    version: 'v0.8.2',
+    date: '2026-10-04',
+    title: '管理员批量导入日程表',
+    items: [
+      {
+        kind: 'feature',
+        text: '「用户管理」新增「批量导入日程」：上传一份 .xlsx 日程表，解析预览确认后，可一次性写进你自己和勾选用户的日程里；开始/结束时间、备注、分类、优先级、状态这些列有就识别',
+      },
+      {
+        kind: 'feature',
+        text: '日程表不用改格式：会自动识别哪一列是日期、哪一列是日程内容（表头写成「上课时间 / 课程名称」也行，没有表头也能认），解析后会显示按哪两列识别，方便核对',
+      },
+      {
+        kind: 'feature',
+        text: '支持横向按周排布的表格：第一行是星期几或日期、下面格子里写当天安排（如学习计划表），会自动把每个格子放进对应日期，格子里多行或带「08:00 早读」这样的时间也能识别',
+      },
+      {
+        kind: 'feature',
+        text: '计划勾选「完成」后，会同时在当天的「记录」里生成一条（标题、分类、备注、用时都跟着计划），并标上「来自计划」；取消勾选就会把那条自动记录一起移除，手写的记录不受影响',
+      },
+      {
+        kind: 'improvement',
+        text: '「当日专注」把当天完成的计划也算进来：计划里写了时间的直接进时长分布；没写时间的会列出来并标注「未填用时」，点一下就能打开那条记录补用时，补完立刻出现在分布里',
+      },
+      {
+        kind: 'feature',
+        text: '支持可选的「重复 / 重复至」两列，一条「每天」「工作日」「每周X」的日程会自动展开成对应日期的多条日程；模板可直接下载，照着填即可',
+      },
+      {
+        kind: 'improvement',
+        text: '导入前会先预览每一条解析结果，过去的日期不会写入；已存在的相同日程（同一天、同一标题、同一开始时间）会自动跳过，避免重复导入',
+      },
+      {
+        kind: 'improvement',
+        text: '导入完成后显示每个人写入的条数，并可一键「撤销本次导入」，只删除这次导入生成的日程，不影响手写和其它来源的计划',
+      },
+    ],
+  },
   {
     version: 'v0.8.1',
     date: '2026-09-29',

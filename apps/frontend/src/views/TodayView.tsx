@@ -116,7 +116,15 @@ export function TodayView({ date, onChangeDate }: { date: string; onChangeDate: 
         </section>
       </div>
 
-      <FocusPanel date={date} records={records} planTitles={planTitles} />
+      <FocusPanel
+        date={date}
+        records={records}
+        planTitles={planTitles}
+        onOpenRecord={(recordId) => {
+          const record = records.find((item) => item.id === recordId)
+          if (record && !locked) setModal({ type: 'record', initial: record })
+        }}
+      />
 
       {modal?.type === 'plan' && (
         <Modal title={modal.initial ? '编辑计划' : '新建计划'} onClose={() => setModal(null)}>

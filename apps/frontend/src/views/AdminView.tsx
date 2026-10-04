@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { Check, Loader2, ShieldAlert, Trash2 } from 'lucide-react'
 import { useAdminMutations, useAdminUsers } from '../lib/queries'
+import { AdminScheduleImport } from '../components/AdminScheduleImport'
 import { Modal } from '../components/Modal'
 import { EmptyState } from '../components/EmptyState'
 import type { AdminUser } from '../lib/types'
@@ -156,6 +157,8 @@ export function AdminView({ meId }: { meId: number }) {
           </table>
         </div>
       )}
+
+      <AdminScheduleImport meId={meId} users={users} />
 
       {resetTarget && (
         <Modal title={`重置密码 · ${resetTarget.name}`} onClose={() => setResetTarget(null)}>

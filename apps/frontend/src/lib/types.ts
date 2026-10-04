@@ -37,6 +37,8 @@ export interface RecordEntry {
   is_completed: boolean
   category: string
   linked_plan_id?: number | null
+  /** manual：自己记的；plan：勾选计划完成后自动生成 */
+  source?: 'manual' | 'plan'
   images?: string[]
   done_at?: string | null
   created_at: string
@@ -173,6 +175,49 @@ export interface AdminUserUpdate {
   is_admin?: boolean
   is_active?: boolean
   password?: string
+}
+
+/** 管理员批量导入日程：解析出来的一行（与后端 AdminScheduleRow 对齐）。 */
+export interface AdminScheduleRow {
+  date: string
+  title: string
+  description: string
+  start_time: string | null
+  end_time: string | null
+  category: string
+  priority: Priority
+  status: PlanStatus
+}
+
+export interface AdminSchedulePreview {
+  rows: AdminScheduleRow[]
+  warnings: string[]
+  skipped: number
+  columns: Record<string, string>
+}
+
+export interface AdminScheduleImportPayload {
+  rows: AdminScheduleRow[]
+  user_ids?: number[]
+  include_self?: boolean
+  all_users?: boolean
+  skip_duplicates?: boolean
+}
+
+export interface AdminScheduleTarget {
+  user_id: number
+  name: string
+  created: number
+  skipped_past: number
+  skipped_duplicate: number
+}
+
+export interface AdminScheduleImportResult {
+  created: number
+  skipped_past: number
+  skipped_duplicate: number
+  targets: AdminScheduleTarget[]
+  plan_ids: number[]
 }
 
 export interface RegisterPayload {

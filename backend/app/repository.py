@@ -138,6 +138,7 @@ def create_plan(db: Session, user_id: int, data: schemas.PlanCreate) -> models.P
     db.add(plan)
     db.commit()
     db.refresh(plan)
+    sync_plan_record(db, plan)
     return plan
 
 
@@ -146,12 +147,183 @@ def update_plan(db: Session, plan: models.Plan, data: schemas.PlanUpdate) -> mod
         setattr(plan, key, value)
     db.commit()
     db.refresh(plan)
+    sync_plan_record(db, plan)
     return plan
 
 
 def delete_plan(db: Session, plan: models.Plan) -> None:
+    # 计划删除时，连带它自动生成的记录一起删；手写的记录只解除关联（外键 SET NULL）
+    for record in db.scalars(
+        select(models.Record).where(
+            models.Record.linked_plan_id == plan.id,
+            models.Record.source == PLAN_RECORD_SOURCE,
+        )
+    ).all():
+        db.delete(record)
     db.delete(plan)
     db.commit()
+
+
+# 记录来源标记：plan 表示这条记录由「计划勾选完成」自动生成，并跟随计划变化。
+PLAN_RECORD_SOURCE = "plan"
+MANUAL_RECORD_SOURCE = "manual"
+
+
+def is_plan_record(record: models.Record) -> bool:
+    return getattr(record, "source", MANUAL_RECORD_SOURCE) == PLAN_RECORD_SOURCE
+
+
+def _plan_duration_minutes(start: Optional[str], end: Optional[str]) -> Optional[int]:
+    """按计划的开始 / 结束时间算出用时（分钟）；缺时间或算不出就不填。"""
+    if not start or not end:
+        return None
+    try:
+        start_h, start_m = (int(part) for part in start.split(":"))
+        end_h, end_m = (int(part) for part in end.split(":"))
+    except (ValueError, AttributeError):
+        return None
+    minutes = (end_h * 60 + end_m) - (start_h * 60 + start_m)
+    return minutes if minutes > 0 else None
+
+
+def sync_plan_record(db: Session, plan: models.Plan) -> Optional[models.Record]:
+    """计划勾选完成后，在「记录」里同步一条；取消完成则移除这条自动记录。
+
+    只会增删改 source=plan 的记录，手写（manual）的记录完全不受影响。
+    """
+    record = db.scalar(
+        select(models.Record).where(
+            models.Record.linked_plan_id == plan.id,
+            models.Record.source == PLAN_RECORD_SOURCE,
+        )
+    )
+    if plan.status != "done":
+        if record is not None:
+            db.delete(record)
+            db.commit()
+        return None
+
+    computed_minutes = _plan_duration_minutes(plan.start_time, plan.end_time)
+    fields = {
+        "date": plan.date,
+        "title": plan.title,
+        "content": plan.description or "",
+        "duration_minutes": computed_minutes,
+        "is_completed": True,
+        "category": plan.category,
+        "linked_plan_id": plan.id,
+        "source": PLAN_RECORD_SOURCE,
+    }
+    if record is None:
+        record = models.Record(user_id=plan.user_id, done_at=now_utc(), **fields)
+        db.add(record)
+    else:
+        # 计划自己没有可算的时间时，保留用户在这条记录里手填的用时
+        if computed_minutes is None:
+            fields["duration_minutes"] = record.duration_minutes
+        for key, value in fields.items():
+            setattr(record, key, value)
+        record.done_at = record.done_at or now_utc()
+    db.commit()
+    db.refresh(record)
+    return record
+
+
+# 管理员批量导入的日程来源标记：便于按批次撤销。
+ADMIN_IMPORT_SOURCE = "admin_import"
+
+
+def bulk_create_plans(
+    db: Session,
+    user_ids: list[int],
+    rows: list[dict],
+    *,
+    skip_duplicates: bool = True,
+) -> dict:
+    """把同一批日程复制给多个用户。跳过过去日期，并按 (日期, 标题, 开始时间) 去重。
+
+    rows 里每项是已校验的 Plan 字段（date/title/description/start_time/...）。
+    返回总计与逐用户明细，便于前端展示导入结果。
+    """
+    today = today_iso()
+    targets: list[int] = []
+    for user_id in user_ids:
+        if user_id not in targets:
+            targets.append(user_id)
+    if not targets or not rows:
+        return {"created": 0, "skipped_past": 0, "skipped_duplicate": 0, "targets": [], "plan_ids": []}
+
+    names = {
+        user.id: user.name
+        for user in db.scalars(select(models.User).where(models.User.id.in_(targets))).all()
+    }
+
+    existing: set[tuple[int, str, str, str]] = set()
+    if skip_duplicates:
+        stmt = select(models.Plan.user_id, models.Plan.date, models.Plan.title, models.Plan.start_time).where(
+            models.Plan.user_id.in_(targets)
+        )
+        for user_id, plan_date, title, start_time in db.execute(stmt):
+            existing.add((user_id, plan_date, title, start_time or ""))
+
+    created_plans: list[models.Plan] = []
+    details: list[dict] = []
+    total_past = total_duplicate = 0
+
+    for user_id in targets:
+        detail = {"user_id": user_id, "name": names.get(user_id, ""), "created": 0, "skipped_past": 0, "skipped_duplicate": 0}
+        for row in rows:
+            plan_date = row["date"]
+            if plan_date < today:
+                detail["skipped_past"] += 1
+                total_past += 1
+                continue
+            key = (user_id, plan_date, row["title"], row.get("start_time") or "")
+            if skip_duplicates and key in existing:
+                detail["skipped_duplicate"] += 1
+                total_duplicate += 1
+                continue
+            existing.add(key)
+            plan = models.Plan(
+                user_id=user_id,
+                date=plan_date,
+                title=row["title"],
+                description=row.get("description") or "",
+                start_time=row.get("start_time"),
+                end_time=row.get("end_time"),
+                status=row.get("status") or "pending",
+                priority=row.get("priority") or "medium",
+                category=row.get("category") or "日程",
+                source=ADMIN_IMPORT_SOURCE,
+            )
+            db.add(plan)
+            created_plans.append(plan)
+            detail["created"] += 1
+        details.append(detail)
+
+    db.commit()
+    for plan in created_plans:
+        db.refresh(plan)
+    return {
+        "created": sum(item["created"] for item in details),
+        "skipped_past": total_past,
+        "skipped_duplicate": total_duplicate,
+        "targets": details,
+        "plan_ids": [plan.id for plan in created_plans],
+    }
+
+
+def delete_imported_plans(db: Session, plan_ids: list[int]) -> int:
+    """撤销某次批量导入：只删除来源为 admin_import 的计划。"""
+    if not plan_ids:
+        return 0
+    deleted = (
+        db.query(models.Plan)
+        .filter(models.Plan.id.in_(plan_ids), models.Plan.source == ADMIN_IMPORT_SOURCE)
+        .delete(synchronize_session=False)
+    )
+    db.commit()
+    return int(deleted or 0)
 
 
 def list_courses(db: Session, user_id: int, term: Optional[str] = None) -> list[models.Course]:
@@ -425,9 +597,12 @@ def _range_stats(plans: list[models.Plan], records: list[models.Record], start: 
     self_done_plans = sum(1 for p in own_plans if p.status == "done")
     records_count = len(records)
     done_records = sum(1 for r in records if r.is_completed)
+    # 计划完成会自动生成一条对应记录，这条已经在计划里算过，不能重复计入完成率
+    counted_records = [r for r in records if not is_plan_record(r)]
+    counted_done_records = sum(1 for r in counted_records if r.is_completed)
     # 改道（取消）的计划既不算完成也不算失败，因此不进分母
-    counted_total = self_plans + records_count
-    completion_rate = round((self_done_plans + done_records) / counted_total, 4) if counted_total else 0.0
+    counted_total = self_plans + len(counted_records)
+    completion_rate = round((self_done_plans + counted_done_records) / counted_total, 4) if counted_total else 0.0
     planned_by_day = _planned_minutes_by_day(plans)
     planned_minutes = sum(planned_by_day.values())
     recorded_minutes = sum(r.duration_minutes or 0 for r in records)

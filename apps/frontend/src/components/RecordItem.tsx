@@ -31,6 +31,14 @@ export function RecordItem({ record, onEdit }: { record: RecordEntry; onEdit: (r
       <div className={`min-w-0 flex-1 ${locked ? '' : 'cursor-pointer'}`} title={record.title} onClick={() => !locked && onEdit(record)}>
         <div className="flex items-center gap-2">
           <p className={`truncate text-sm font-medium text-ink dark:text-slate-100 ${record.is_completed ? '' : 'text-ink-soft'}`}>{record.title}</p>
+          {record.source === 'plan' && (
+            <span
+              className="shrink-0 rounded-sm bg-brand-soft px-2 py-0.5 text-xs text-brand-ink dark:bg-brand/15 dark:text-teal-200"
+              title="这条记录来自已完成的计划，取消计划的勾选就会一起移除"
+            >
+              来自计划
+            </span>
+          )}
           <span className="rounded-sm bg-surface-soft px-2 py-0.5 text-xs text-ink-muted dark:bg-slate-700/70 dark:text-slate-300">{record.category}</span>
         </div>
         {record.content && <p className="mt-0.5 truncate text-xs text-ink-muted dark:text-slate-400">{record.content}</p>}

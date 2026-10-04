@@ -192,6 +192,68 @@ class AdminUserUpdate(BaseModel):
         return value
 
 
+class AdminScheduleRow(BaseModel):
+    """管理员批量导入时的一行日程（对应一条 Plan）。"""
+
+    date: str = Field(..., pattern=DATE_RE)
+    title: str = Field(..., min_length=1, max_length=200)
+    description: str = ""
+    start_time: Optional[str] = Field(default=None, pattern=TIME_RE)
+    end_time: Optional[str] = Field(default=None, pattern=TIME_RE)
+    category: str = "日程"
+    priority: Priority = "medium"
+    status: PlanStatus = "pending"
+
+    @field_validator("description")
+    @classmethod
+    def _clip_description(cls, value: str) -> str:
+        return (value or "")[:2000]
+
+    @field_validator("category")
+    @classmethod
+    def _clip_category(cls, value: str) -> str:
+        return (value or "").strip()[:50] or "日程"
+
+
+class AdminSchedulePreviewOut(BaseModel):
+    rows: list[AdminScheduleRow]
+    warnings: list[str]
+    skipped: int
+    columns: dict[str, str]
+
+
+class AdminScheduleImportIn(BaseModel):
+    rows: list[AdminScheduleRow] = Field(..., min_length=1, max_length=2000)
+    user_ids: list[int] = Field(default_factory=list)
+    include_self: bool = False
+    all_users: bool = False
+    skip_duplicates: bool = True
+
+
+class AdminScheduleTargetOut(BaseModel):
+    user_id: int
+    name: str
+    created: int
+    skipped_past: int
+    skipped_duplicate: int
+
+
+class AdminScheduleImportOut(BaseModel):
+    created: int
+    skipped_past: int
+    skipped_duplicate: int
+    targets: list[AdminScheduleTargetOut]
+    plan_ids: list[int] = []
+
+
+class AdminScheduleRollbackIn(BaseModel):
+    plan_ids: list[int] = Field(..., min_length=1, max_length=20000)
+
+
+class AdminScheduleRollbackOut(BaseModel):
+    deleted: int
+
+
 class PlanBase(BaseModel):
     date: str = Field(..., pattern=DATE_RE)
     title: str = Field(..., min_length=1, max_length=200)
@@ -294,6 +356,8 @@ class RecordUpdate(BaseModel):
 class RecordOut(RecordBase):
     model_config = ConfigDict(from_attributes=True)
     id: int
+    # manual（自己记的）/ plan（计划勾选完成后自动生成）
+    source: str = "manual"
     done_at: Optional[datetime] = None
     created_at: datetime
 

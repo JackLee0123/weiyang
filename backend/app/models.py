@@ -160,6 +160,8 @@ class Record(Base):
     done_at: Mapped[Optional[datetime]] = mapped_column(DateTime, nullable=True)
     category: Mapped[str] = mapped_column(String(50), default="默认", nullable=False)
     linked_plan_id: Mapped[Optional[int]] = mapped_column(ForeignKey("plans.id", ondelete="SET NULL"), nullable=True)
+    # 记录来源：manual（自己记的）/ plan（计划勾选完成后自动生成并跟随计划）
+    source: Mapped[str] = mapped_column(String(20), default="manual", server_default="manual", nullable=False)
     images: Mapped[Optional[list]] = mapped_column(JSON, default=list, nullable=True)
     created_at: Mapped[datetime] = mapped_column(DateTime, default=now_utc, nullable=False)
 
