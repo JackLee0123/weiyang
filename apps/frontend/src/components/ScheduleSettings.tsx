@@ -178,8 +178,8 @@ export function ScheduleSettings({ onClose }: { onClose: () => void }) {
         <p
           className={`rounded-md px-3 py-2 text-sm ${
             message.kind === 'ok'
-              ? 'bg-teal-50 text-teal-700 dark:bg-teal-500/10 dark:text-teal-200'
-              : 'bg-rose-50 text-rose-600 dark:bg-rose-500/10 dark:text-rose-300'
+              ? 'text-teal-700 dark:text-teal-300'
+              : 'text-rose-600 dark:text-rose-300'
           }`}
         >
           {message.text}

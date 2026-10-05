@@ -60,41 +60,38 @@ export function TimetableView() {
 
   return (
     <div className="space-y-5">
-      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+      <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
         <div>
-          <h1 className="text-xl font-semibold text-ink dark:text-slate-100">课表</h1>
-          <p className="mt-1 text-sm text-ink-muted dark:text-slate-400">
+          <h1 className="text-3xl font-light tracking-title text-ink dark:text-slate-100">课表</h1>
+          <p className="mt-1 text-xs text-ink-muted dark:text-slate-400">
             {activeTerm ? `${activeTerm} · 第 ${weekIndex} 周` : '未选择学期'} · {format(new Date(weekStart + 'T00:00:00'), 'M月d日')} -{' '}
             {format(new Date(weekEnd + 'T00:00:00'), 'M月d日')}
           </p>
         </div>
         <div className="flex flex-wrap items-center gap-2">
-          <div className="flex items-center gap-1 rounded-md border border-line bg-surface p-0.5 shadow-sm dark:border-slate-700 dark:bg-slate-800">
+          <div className="flex items-center gap-0.5">
             <button className="btn-ghost p-1.5" onClick={() => setWeekStart(addDaysISO(weekStart, -7))} aria-label="上一周">
-              <ChevronLeft size={16} />
+              <ChevronLeft size={16} strokeWidth={1.75} />
             </button>
             <button className="btn-ghost p-1.5" onClick={() => setWeekStart(addDaysISO(weekStart, 7))} aria-label="下一周">
-              <ChevronRight size={16} />
+              <ChevronRight size={16} strokeWidth={1.75} />
             </button>
-            <button className="btn-ghost px-2 text-xs" onClick={() => setWeekStart(mondayOf(todayISO()))}>
+            <button className="btn-quiet px-2" onClick={() => setWeekStart(mondayOf(todayISO()))}>
               本周
             </button>
           </div>
-          <button
-            className="btn bg-brand-soft text-brand-ink hover:bg-brand/20 dark:bg-brand/15 dark:text-teal-100 dark:hover:bg-brand/25"
-            onClick={() => setShowImport(true)}
-          >
-            <Upload size={15} /> 导入课表
+          <button className="btn-record" onClick={() => setShowImport(true)}>
+            <Upload size={14} strokeWidth={1.75} /> 导入课表
           </button>
           <button className="btn-primary" onClick={doGenerate} disabled={busy || !activeTerm || !hasWeek1 || !weekCourses.length}>
-            <CalendarPlus size={15} /> 生成本周计划
+            <CalendarPlus size={14} strokeWidth={1.75} /> 生成本周计划
           </button>
         </div>
       </div>
 
       {!hasWeek1 && (
-        <div className="flex items-start gap-2 rounded-md border border-amber-300/70 bg-amber-50 px-3 py-2 text-sm text-amber-800 dark:border-amber-400/30 dark:bg-amber-400/10 dark:text-amber-200">
-          <AlertTriangle size={15} className="mt-0.5 shrink-0" />
+        <div className="flex items-start gap-2 border-l-2 border-amber-400 bg-amber-50/60 px-3 py-2 text-xs leading-5 text-amber-800 dark:border-amber-300/60 dark:bg-amber-400/10 dark:text-amber-200">
+          <AlertTriangle size={14} strokeWidth={1.75} className="mt-0.5 shrink-0" />
           <div>
             尚未设置开学第 1 周周一的日期，无法生成课程计划。请先在「导入课表」中确认。
           </div>
@@ -135,7 +132,7 @@ export function TimetableView() {
                   gridColumn: c.day_of_week + 1,
                   gridRow: `${c.start_period + 1} / span ${Math.max(1, c.end_period - c.start_period + 1)}`,
                 }}
-                className="mx-0.5 my-0.5 overflow-hidden rounded-sm bg-brand-soft px-1.5 py-1 text-[10px] leading-tight text-brand-ink dark:bg-brand/15 dark:text-teal-100"
+                className="mx-0.5 my-0.5 overflow-hidden rounded-sm border-l-2 border-brand bg-brand-soft px-1.5 py-1 text-[10px] leading-tight text-brand-ink dark:border-teal-300 dark:bg-teal-500/15 dark:text-teal-100"
               >
                 <p className="truncate font-medium">{c.name}</p>
                 {(c.teacher || c.location) && (
@@ -146,11 +143,11 @@ export function TimetableView() {
           </div>
         </div>
       ) : (
-        <div className="panel flex flex-col items-center gap-3 px-6 py-12 text-center">
-          <p className="text-sm font-medium text-ink dark:text-slate-100">还没有该学期的课表</p>
-          <p className="text-sm text-ink-muted dark:text-slate-400">从教务系统导入，或上传课表文件。</p>
-          <button className="btn-primary" onClick={() => setShowImport(true)}>
-            <Upload size={15} /> 导入课表
+        <div className="flex flex-col items-center gap-3 border-t border-line px-6 py-14 text-center dark:border-slate-800">
+          <p className="text-sm text-ink dark:text-slate-100">还没有该学期的课表</p>
+          <p className="text-xs text-ink-muted dark:text-slate-400">从教务系统导入，或上传课表文件。</p>
+          <button className="btn-primary mt-1" onClick={() => setShowImport(true)}>
+            <Upload size={14} strokeWidth={1.75} /> 导入课表
           </button>
         </div>
       )}
@@ -159,17 +156,17 @@ export function TimetableView() {
         <section className="panel">
           <div className="grid grid-cols-1 md:grid-cols-2">
             <div className="border-b border-line-soft md:border-b-0 md:border-r dark:border-slate-700/60">
-              <header className="flex items-center justify-between border-b border-line-soft px-4 py-2.5 dark:border-slate-700/60">
-                <h2 className="text-sm font-semibold text-ink dark:text-slate-100">已导入课程</h2>
-                <span className="text-xs text-ink-muted dark:text-slate-400">{allCourses.length} 条</span>
+              <header className="flex items-baseline justify-between border-b border-line-soft px-4 py-2.5 dark:border-slate-700/60">
+                <h2 className="eyebrow">已导入课程</h2>
+                <span className="tnum text-2xs text-ink-faint dark:text-slate-500">{allCourses.length} 条</span>
               </header>
               <div className="max-h-72 overflow-auto">
                 <ul className="divide-y divide-line-soft dark:divide-slate-700/60">
                   {allCourses.map((c) => (
-                    <li key={c.id} className="flex items-center gap-3 px-4 py-2.5">
+                  <li key={c.id} className="group flex items-center gap-3 px-4 py-2.5 transition-colors hover:bg-surface-soft/60 dark:hover:bg-slate-800/40">
                       <div className="min-w-0 flex-1">
-                        <p className="truncate text-sm font-medium text-ink dark:text-slate-100">{c.name}</p>
-                        <p className="truncate text-xs text-ink-muted dark:text-slate-400">
+                        <p className="truncate text-sm text-ink dark:text-slate-100">{c.name}</p>
+                        <p className="truncate text-2xs text-ink-faint dark:text-slate-500">
                           {`周${DAY_LABELS[c.day_of_week - 1]}`} {c.start_period}
                           {c.end_period !== c.start_period ? `-${c.end_period}` : ''}节
                           {c.teacher ? ` · ${c.teacher}` : ''}
@@ -177,8 +174,8 @@ export function TimetableView() {
                           {c.week_label ? ` · ${c.week_label}` : ''}
                         </p>
                       </div>
-                      <button className="btn-ghost p-1.5" onClick={() => deleteCourse(c.id)} aria-label="删除课程" title="删除课程">
-                        <Trash2 size={15} />
+                      <button className="btn-ghost p-1.5 text-ink-faint dark:text-slate-500" onClick={() => deleteCourse(c.id)} aria-label="删除课程" title="删除课程">
+                        <Trash2 size={14} strokeWidth={1.75} />
                       </button>
                     </li>
                   ))}
@@ -186,8 +183,8 @@ export function TimetableView() {
               </div>
             </div>
             <div>
-              <header className="flex items-center justify-between border-b border-line-soft px-4 py-2.5 dark:border-slate-700/60">
-                <h2 className="text-sm font-semibold text-ink dark:text-slate-100">学校地图</h2>
+              <header className="flex items-baseline justify-between border-b border-line-soft px-4 py-2.5 dark:border-slate-700/60">
+                <h2 className="eyebrow">学校地图</h2>
               </header>
               <div className="p-4">
                 <SchoolMapViewer />

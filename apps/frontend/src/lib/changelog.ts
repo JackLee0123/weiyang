@@ -12,16 +12,47 @@ export interface ChangelogEntry {
   items: ChangelogItem[]
 }
 
-export const CURRENT_VERSION = 'v0.8.2'
+export const CURRENT_VERSION = 'v0.9.0'
 
 export const CHANGELOG_KIND_META: Record<ChangelogKind, { label: string; className: string }> = {
-  feature: { label: '新增', className: 'bg-teal-50 text-teal-700 dark:bg-teal-500/15 dark:text-teal-300' },
-  improvement: { label: '优化', className: 'bg-blue-50 text-blue-700 dark:bg-blue-500/15 dark:text-blue-300' },
-  fix: { label: '修复', className: 'bg-amber-50 text-amber-700 dark:bg-amber-500/15 dark:text-amber-300' },
-  notice: { label: '说明', className: 'bg-slate-100 text-slate-600 dark:bg-slate-700/70 dark:text-slate-300' },
+  feature: { label: '新增', className: 'text-teal-700 dark:text-teal-300' },
+  improvement: { label: '优化', className: 'text-blue-700 dark:text-blue-300' },
+  fix: { label: '修复', className: 'text-amber-700 dark:text-amber-300' },
+  notice: { label: '说明', className: 'text-ink-muted dark:text-slate-400' },
 }
 
 export const CHANGELOG: ChangelogEntry[] = [
+  {
+    version: 'v0.9.0',
+    date: '2026-10-05',
+    title: '界面降噪改版 + 管理员公告',
+    items: [
+      {
+        kind: 'feature',
+        text: '「通知」页新增「发送公告」（仅管理员）：填标题与正文发给全站，可选「标记为重要」让弹窗用黄色强调；发出去后能看到每条公告的已读人数，也可以随时撤回',
+      },
+      {
+        kind: 'feature',
+        text: '其他人打开（或刷新）网站时，会弹窗看到还没确认过的公告，点「知道了」之后不再重复弹出；每个人各自记已读，互不影响',
+      },
+      {
+        kind: 'improvement',
+        text: '界面整体降噪：去掉淡彩图标方块与四色胶囊标签，改用发丝分隔线与留白分层；颜色只留给主操作和状态，统计数字改用轻字重排版',
+      },
+      {
+        kind: 'improvement',
+        text: '侧边栏收成紧凑导航：选中态用一条细竖线而不是整块填充，工具入口从八个整宽按钮改成安静的次级列表',
+      },
+      {
+        kind: 'improvement',
+        text: '日历的计划/记录改成「圆点 + 文字」，课表课程块加左侧色条，活跃度热力图换成与品牌同色的单一色阶，回忆页统计改数据带',
+      },
+      {
+        kind: 'fix',
+        text: '修复部分 Tailwind 类名不存在导致样式静默缺失的问题（细粒度透明度、shadow-soft、带透明度的 CSS 变量焦点环）',
+      },
+    ],
+  },
   {
     version: 'v0.8.2',
     date: '2026-10-04',

@@ -62,14 +62,14 @@ export function RecordForm({ defaultDate, initial, plans = EMPTY_PLANS, onClose 
   return (
     <div className="space-y-4">
       {locked && (
-        <div className="flex items-start gap-2 rounded-md border border-amber-300/70 bg-amber-50 px-3 py-2 text-sm text-amber-800 dark:border-amber-400/30 dark:bg-amber-400/10 dark:text-amber-200">
-          <Lock size={14} className="mt-0.5 shrink-0" />
+        <div className="notice-warn">
+          <Lock size={13} strokeWidth={1.75} className="mt-0.5 shrink-0" />
           过去的日期已封存为永久回忆，无法添加或修改记录。
         </div>
       )}
       {fromPlan && (
-        <div className="flex items-start gap-2 rounded-md border border-line bg-surface-soft px-3 py-2 text-sm text-ink-soft dark:border-slate-700 dark:bg-slate-900/40 dark:text-slate-300">
-          <ClipboardCheck size={14} className="mt-0.5 shrink-0" />
+        <div className="notice-info">
+          <ClipboardCheck size={13} strokeWidth={1.75} className="mt-0.5 shrink-0" />
           这条记录来自已完成的计划，标题和用时跟着计划走；要移除它，取消那个计划的勾选即可。
         </div>
       )}
@@ -105,7 +105,7 @@ export function RecordForm({ defaultDate, initial, plans = EMPTY_PLANS, onClose 
       <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
         <div>
           <label className="label flex items-center gap-1">
-            <Pi size={12} /> 用时（分钟）
+            <Pi size={12} strokeWidth={1.75} /> 用时（分钟）
           </label>
           <input
             type="number"
@@ -136,7 +136,7 @@ export function RecordForm({ defaultDate, initial, plans = EMPTY_PLANS, onClose 
       <div className="flex items-center justify-between pt-2">
         {initial && (
           <button
-            className="btn text-rose-600 hover:bg-rose-50 disabled:cursor-not-allowed disabled:text-slate-300 disabled:hover:bg-transparent dark:text-rose-300 dark:hover:bg-rose-500/10 dark:disabled:text-slate-600"
+            className="btn-danger disabled:cursor-not-allowed disabled:text-slate-300 disabled:hover:bg-transparent dark:disabled:text-slate-600"
             disabled={locked || fromPlan}
             title={fromPlan ? '来自计划的记录，请取消计划的勾选来移除' : undefined}
             onClick={async () => {
@@ -148,7 +148,7 @@ export function RecordForm({ defaultDate, initial, plans = EMPTY_PLANS, onClose 
               }
             }}
           >
-            <Trash2 size={15} /> 删除
+            <Trash2 size={14} strokeWidth={1.75} /> 删除
           </button>
         )}
         <div className="flex gap-2">

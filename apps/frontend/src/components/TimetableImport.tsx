@@ -18,7 +18,7 @@ function Preview({ result }: { result: ParseTimetableResult }) {
   return (
     <div className="space-y-3">
       {result.warnings.length > 0 && (
-        <div className="rounded-md border border-amber-300/70 bg-amber-50 px-3 py-2 text-xs text-amber-800 dark:border-amber-400/30 dark:bg-amber-400/10 dark:text-amber-200">
+        <div className="notice-warn">
           <p className="mb-1 font-medium">解析提示</p>
           <ul className="list-disc space-y-0.5 pl-4">
             {result.warnings.slice(0, 6).map((w, i) => (
@@ -200,7 +200,7 @@ export function TimetableImport({ initial, onClose }: { initial?: TimetableSetti
         <div className="flex gap-1 rounded-md border border-line bg-surface-soft p-0.5 dark:border-slate-700 dark:bg-slate-900/50">
           <button
             className={`flex flex-1 items-center justify-center gap-1.5 rounded px-3 py-1.5 text-sm font-medium transition ${
-              tab === 'file' ? 'bg-surface text-brand-ink shadow-sm dark:bg-slate-700 dark:text-teal-100' : 'text-ink-muted dark:text-slate-400'
+              tab === 'file' ? 'bg-surface text-ink shadow-sm dark:bg-slate-700 dark:text-slate-100' : 'text-ink-muted dark:text-slate-400'
             }`}
             onClick={() => switchTab('file')}
           >
@@ -208,7 +208,7 @@ export function TimetableImport({ initial, onClose }: { initial?: TimetableSetti
           </button>
           <button
             className={`flex flex-1 items-center justify-center gap-1.5 rounded px-3 py-1.5 text-sm font-medium transition ${
-              tab === 'wisedu' ? 'bg-surface text-brand-ink shadow-sm dark:bg-slate-700 dark:text-teal-100' : 'text-ink-muted dark:text-slate-400'
+              tab === 'wisedu' ? 'bg-surface text-ink shadow-sm dark:bg-slate-700 dark:text-slate-100' : 'text-ink-muted dark:text-slate-400'
             }`}
             onClick={() => switchTab('wisedu')}
           >

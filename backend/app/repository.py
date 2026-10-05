@@ -799,3 +799,80 @@ def upsert_push_schedule(db: Session, user_id: int, data: schemas.PushScheduleIn
     db.commit()
     db.refresh(schedule)
     return schedule
+
+
+# ── 公告（管理员广播） ───────────────────────────────────────────────
+
+
+def create_announcement(
+    db: Session,
+    *,
+    title: str,
+    body: str,
+    level: str,
+    created_by: int,
+) -> models.Announcement:
+    announcement = models.Announcement(title=title, body=body, level=level, created_by=created_by)
+    db.add(announcement)
+    db.commit()
+    db.refresh(announcement)
+    return announcement
+
+
+def get_announcement(db: Session, announcement_id: int) -> Optional[models.Announcement]:
+    return db.get(models.Announcement, announcement_id)
+
+
+def list_announcements(db: Session, limit: int = 50) -> list[models.Announcement]:
+    return list(
+        db.scalars(
+            select(models.Announcement).order_by(models.Announcement.created_at.desc()).limit(limit)
+        ).all()
+    )
+
+
+def delete_announcement(db: Session, announcement: models.Announcement) -> None:
+    db.delete(announcement)
+    db.commit()
+
+
+def latest_unread_announcement(db: Session, user_id: int) -> Optional[models.Announcement]:
+    """最新一条还没被这个用户确认过的公告；没有就返回 None。"""
+
+    read_ids = select(models.AnnouncementRead.announcement_id).where(
+        models.AnnouncementRead.user_id == user_id
+    )
+    return db.scalar(
+        select(models.Announcement)
+        .where(models.Announcement.id.not_in(read_ids))
+        .order_by(models.Announcement.created_at.desc(), models.Announcement.id.desc())
+        .limit(1)
+    )
+
+
+def mark_announcement_read(db: Session, announcement_id: int, user_id: int) -> None:
+    existing = db.scalar(
+        select(models.AnnouncementRead).where(
+            models.AnnouncementRead.announcement_id == announcement_id,
+            models.AnnouncementRead.user_id == user_id,
+        )
+    )
+    if existing:
+        return
+    db.add(models.AnnouncementRead(announcement_id=announcement_id, user_id=user_id))
+    db.commit()
+
+
+def announcement_read_count(db: Session, announcement_id: int) -> int:
+    return int(
+        db.scalar(
+            select(func.count())
+            .select_from(models.AnnouncementRead)
+            .where(models.AnnouncementRead.announcement_id == announcement_id)
+        )
+        or 0
+    )
+
+
+def count_users(db: Session) -> int:
+    return int(db.scalar(select(func.count()).select_from(models.User)) or 0)

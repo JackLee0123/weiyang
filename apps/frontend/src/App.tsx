@@ -6,6 +6,7 @@ import { NotificationsPanel } from './components/NotificationsPanel'
 import { BackupPanel } from './components/BackupPanel'
 import { DeviceConnectPanel } from './components/DeviceConnectPanel'
 import { PushPrompt } from './components/PushPrompt'
+import { AnnouncementPopup } from './components/AnnouncementPopup'
 import { PlanForm } from './components/PlanForm'
 import { FocusFlightOverlay } from './components/FocusFlightOverlay'
 import { TodayView } from './views/TodayView'
@@ -165,7 +166,9 @@ export default function App() {
           )}
           {view === 'timetable' && <TimetableView />}
           {view === 'list' && <ListView />}
-          {view === 'notifications' && <NotificationsView onBack={() => navigate('today')} />}
+          {view === 'notifications' && (
+            <NotificationsView onBack={() => navigate('today')} isAdmin={user?.is_admin ?? false} />
+          )}
           {view === 'changelog' && <ChangelogView />}
           {view === 'admin' && user?.is_admin && <AdminView meId={user.id} />}
         </div>
@@ -192,6 +195,9 @@ export default function App() {
           <DeviceConnectPanel initialCode={pairCode} />
         </Modal>
       )}
+
+      {/* 管理员公告：打开网站时若有未确认的公告，弹出来一次 */}
+      <AnnouncementPopup />
     </div>
   )
 }

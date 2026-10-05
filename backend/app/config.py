@@ -2,7 +2,7 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
 # 应用版本号：main.py 的 OpenAPI 与 /api/health 都读这里，避免多处各写一份
-APP_VERSION = "0.8.2"
+APP_VERSION = "0.9.0"
 
 
 class Settings(BaseSettings):

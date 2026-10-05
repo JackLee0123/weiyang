@@ -4,6 +4,9 @@ import type {
   AdminScheduleImportPayload,
   AdminScheduleImportResult,
   AdminSchedulePreview,
+  Announcement,
+  AnnouncementAdmin,
+  AnnouncementPayload,
   AuthSession,
   AuthUser,
   Backup,
@@ -205,6 +208,21 @@ export const api = {
 
   fetchUsers() {
     return request<AdminUser[]>('/admin/users')
+  },
+  fetchLatestAnnouncement() {
+    return request<Announcement | null>('/announcements/latest')
+  },
+  acknowledgeAnnouncement(id: number) {
+    return request<void>(`/announcements/${id}/read`, { method: 'POST' })
+  },
+  fetchAnnouncements() {
+    return request<AnnouncementAdmin[]>('/announcements')
+  },
+  createAnnouncement(payload: AnnouncementPayload) {
+    return request<AnnouncementAdmin>('/announcements', { method: 'POST', body: JSON.stringify(payload) })
+  },
+  deleteAnnouncement(id: number) {
+    return request<void>(`/announcements/${id}`, { method: 'DELETE' })
   },
   updateUser(id: number, payload: AdminUserUpdate) {
     return request<AdminUser>(`/admin/users/${id}`, { method: 'PATCH', body: JSON.stringify(payload) })

@@ -663,3 +663,24 @@ class PushScheduleView(BaseModel):
     schedule: Optional[PushScheduleOut] = None
     next_fire: Optional[str] = None
     preview: Optional[str] = None
+
+
+class AnnouncementIn(BaseModel):
+    title: str = Field(min_length=1, max_length=120)
+    body: str = Field(default="", max_length=5000)
+    level: Literal["info", "important"] = "info"
+
+
+class AnnouncementOut(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+    id: int
+    title: str
+    body: str
+    level: str
+    created_at: datetime
+
+
+class AnnouncementAdminOut(AnnouncementOut):
+    created_by_name: Optional[str] = None
+    read_count: int = 0
+    user_count: int = 0

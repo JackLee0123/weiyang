@@ -19,7 +19,7 @@ function Summary({ preview, targetCount }: { preview: AdminSchedulePreview; targ
   ].filter(Boolean)
   return (
     <div className="flex flex-wrap items-center gap-2 text-xs">
-      <span className="rounded-sm bg-brand-soft px-2 py-0.5 font-medium text-brand-ink dark:bg-brand/15 dark:text-teal-200">
+      <span className="rounded-sm text-2xs font-medium text-brand dark:text-teal-300">
         解析出 {preview.rows.length} 条日程
       </span>
       {detected.length > 0 && (
@@ -33,12 +33,12 @@ function Summary({ preview, targetCount }: { preview: AdminSchedulePreview; targ
         </span>
       )}
       {preview.skipped > 0 && (
-        <span className="rounded-sm bg-amber-50 px-2 py-0.5 text-amber-700 dark:bg-amber-500/15 dark:text-amber-300">
+        <span className="rounded-sm text-2xs font-medium text-amber-700 dark:text-amber-300">
           {preview.skipped} 行无法识别，已跳过
         </span>
       )}
       {pastCount > 0 && (
-        <span className="rounded-sm bg-amber-50 px-2 py-0.5 text-amber-700 dark:bg-amber-500/15 dark:text-amber-300">
+        <span className="rounded-sm text-2xs font-medium text-amber-700 dark:text-amber-300">
           其中 {pastCount} 条已过期，导入时会自动跳过
         </span>
       )}
@@ -61,7 +61,7 @@ function ResultPanel({
   rolling: boolean
 }) {
   return (
-    <div className="space-y-2 rounded-md border border-emerald-300/70 bg-emerald-50 px-3 py-2 text-xs text-emerald-900 dark:border-emerald-400/30 dark:bg-emerald-400/10 dark:text-emerald-100">
+    <div className="notice-ok space-y-1">
       <p className="flex items-center gap-1.5 font-medium">
         <Check size={14} /> 已写入 {result.created} 条日程
         {result.skipped_duplicate > 0 && <span className="font-normal">· 跳过重复 {result.skipped_duplicate} 条</span>}
@@ -186,9 +186,9 @@ export function AdminScheduleImport({ meId, users }: { meId: number; users: Admi
   }
 
   return (
-    <section className="space-y-4 rounded-lg border border-line bg-surface p-4 shadow-soft dark:border-slate-700 dark:bg-slate-800">
+    <section className="space-y-4 panel p-4">
       <header className="flex flex-wrap items-center gap-2">
-        <div className="flex h-7 w-7 items-center justify-center rounded-md bg-brand-soft text-brand-ink dark:bg-brand/15 dark:text-teal-200">
+        <div className="flex h-7 w-7 items-center justify-center text-ink-faint dark:text-slate-500">
           <FileSpreadsheet size={15} />
         </div>
         <h2 className="section-title">批量导入日程</h2>
@@ -235,7 +235,7 @@ export function AdminScheduleImport({ meId, users }: { meId: number; users: Admi
           <Summary preview={parsed} targetCount={targetCount} />
 
           {parsed.warnings.length > 0 && (
-            <div className="rounded-md border border-amber-300/70 bg-amber-50 px-3 py-2 text-xs text-amber-800 dark:border-amber-400/30 dark:bg-amber-400/10 dark:text-amber-200">
+            <div className="notice-warn">
               <p className="mb-1 flex items-center gap-1 font-medium">
                 <AlertTriangle size={13} /> 解析提示
               </p>

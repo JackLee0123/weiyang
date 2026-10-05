@@ -107,7 +107,7 @@ export function BackupPanel({ onClose }: { onClose: () => void }) {
       </div>
 
       {pending && (
-        <div className="rounded-md border border-amber-300/70 bg-amber-50 p-3 dark:border-amber-400/30 dark:bg-amber-400/10">
+        <div className="notice-warn">
           <p className="flex items-start gap-2 text-sm text-amber-800 dark:text-amber-200">
             <TriangleAlert size={15} className="mt-0.5 shrink-0" />
             <span>

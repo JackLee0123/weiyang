@@ -40,30 +40,30 @@ export function CalendarView({ onOpenDay }: { onOpenDay: (date: string) => void 
 
   return (
     <div className="space-y-5">
-      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+      <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
         <div>
-          <h1 className="text-xl font-semibold text-ink dark:text-slate-100">{format(month, 'yyyy年M月')}</h1>
-          <p className="mt-1 text-sm text-ink-muted dark:text-slate-400">点击日期查看当天计划与记录</p>
+          <h1 className="tnum text-3xl font-light tracking-title text-ink dark:text-slate-100">{format(month, 'yyyy年M月')}</h1>
+          <p className="mt-1 text-xs text-ink-muted dark:text-slate-400">点击日期查看当天计划与记录</p>
         </div>
-        <div className="flex items-center gap-1 rounded-md border border-line bg-surface p-0.5 shadow-sm dark:border-slate-700 dark:bg-slate-800">
+        <div className="flex items-center gap-0.5">
           <button className="btn-ghost p-1.5" onClick={() => setMonth(prevMonth(month))} aria-label="上个月">
-            <ChevronLeft size={16} />
+            <ChevronLeft size={16} strokeWidth={1.75} />
           </button>
           <button className="btn-ghost p-1.5" onClick={() => setMonth(nextMonth(month))} aria-label="下个月">
-            <ChevronRight size={16} />
+            <ChevronRight size={16} strokeWidth={1.75} />
           </button>
-          <button className="btn-ghost px-2 text-xs" onClick={() => setMonth(new Date())}>
+          <button className="btn-quiet px-2" onClick={() => setMonth(new Date())}>
             回今天
           </button>
         </div>
       </div>
 
       <div className="panel overflow-hidden">
-        <div className="grid grid-cols-7 border-b border-line dark:border-slate-700">
+        <div className="grid grid-cols-7 border-b border-line dark:border-slate-800">
           {WEEKDAYS.map((w, i) => (
             <div
               key={w}
-              className={`py-2 text-center text-xs font-medium ${
+              className={`py-2.5 text-center text-2xs font-medium tracking-label ${
                 i > 4 ? 'text-ink-faint dark:text-slate-500' : 'text-ink-muted dark:text-slate-400'
               }`}
             >
@@ -90,9 +90,9 @@ export function CalendarView({ onOpenDay }: { onOpenDay: (date: string) => void 
               >
                 <div className="flex items-center justify-between">
                   <span
-                    className={`flex h-6 w-6 items-center justify-center rounded-full text-xs font-medium ${
+                    className={`tnum flex h-6 items-center justify-center text-xs ${
                       today
-                        ? 'bg-brand text-white'
+                        ? 'font-medium text-brand dark:text-teal-300'
                         : inMonth
                           ? 'text-ink dark:text-slate-200'
                           : 'text-ink-faint dark:text-slate-600'
@@ -101,21 +101,20 @@ export function CalendarView({ onOpenDay }: { onOpenDay: (date: string) => void 
                     {format(day, 'd')}
                   </span>
                   {(plans.length || records.length) > 0 && (
-                    <span className="text-[10px] text-ink-faint dark:text-slate-500">{plans.length + records.length} 项</span>
+                    <span className="tnum text-[10px] text-ink-faint dark:text-slate-500">{plans.length + records.length}</span>
                   )}
                 </div>
-                <div className="mt-1 space-y-1">
+                <div className="mt-1 space-y-0.5">
                   {plans.slice(0, 2).map((p) => (
-                    <div
-                      key={p.id}
-                      className="truncate rounded-sm bg-brand-soft px-1 py-0.5 text-[10px] text-brand-ink dark:bg-brand/15 dark:text-teal-200"
-                    >
-                      {p.title}
+                    <div key={p.id} className="flex items-center gap-1 text-[10px] leading-4 text-ink-soft dark:text-slate-300">
+                      <span className="h-1 w-1 shrink-0 rounded-full bg-brand dark:bg-teal-300" />
+                      <span className="truncate">{p.title}</span>
                     </div>
                   ))}
                   {records.slice(0, 1).map((r) => (
-                    <div key={r.id} className="truncate rounded-sm bg-blue-50 px-1 py-0.5 text-[10px] text-blue-600 dark:bg-blue-500/15 dark:text-blue-300">
-                      {r.title}
+                    <div key={r.id} className="flex items-center gap-1 text-[10px] leading-4 text-ink-muted dark:text-slate-400">
+                      <span className="h-1 w-1 shrink-0 rounded-full bg-ink-faint dark:bg-slate-500" />
+                      <span className="truncate">{r.title}</span>
                     </div>
                   ))}
                 </div>
@@ -125,15 +124,15 @@ export function CalendarView({ onOpenDay }: { onOpenDay: (date: string) => void 
         </div>
       </div>
 
-      <div className="flex items-center gap-4 text-xs text-ink-muted dark:text-slate-400">
+      <div className="flex items-center gap-4 text-2xs text-ink-muted dark:text-slate-400">
         <span className="flex items-center gap-1.5">
-          <span className="h-2.5 w-2.5 rounded-sm bg-brand-soft dark:bg-brand/20" /> 计划
+          <span className="h-1.5 w-1.5 rounded-full bg-brand dark:bg-teal-300" /> 计划
         </span>
         <span className="flex items-center gap-1.5">
-          <span className="h-2.5 w-2.5 rounded-sm bg-blue-50 dark:bg-blue-500/20" /> 记录
+          <span className="h-1.5 w-1.5 rounded-full bg-ink-faint dark:bg-slate-500" /> 记录
         </span>
-        <button className="ml-auto flex items-center gap-1 text-ink-muted hover:text-brand dark:text-slate-400 dark:hover:text-brand" onClick={() => onOpenDay(todayISO())}>
-          <CalendarPlus size={14} /> 去今天
+        <button className="ml-auto flex items-center gap-1 text-ink-muted transition-colors hover:text-brand dark:text-slate-400 dark:hover:text-teal-300" onClick={() => onOpenDay(todayISO())}>
+          <CalendarPlus size={13} strokeWidth={1.75} /> 去今天
         </button>
       </div>
     </div>

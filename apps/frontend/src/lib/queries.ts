@@ -3,6 +3,7 @@ import { api } from './api'
 import type {
   AdminScheduleImportPayload,
   AdminUserUpdate,
+  AnnouncementPayload,
   CourseDraft,
   HeatmapDay,
   PeriodTime,
@@ -140,4 +141,42 @@ export function useTimetableMutations() {
     onSuccess: refresh,
   })
   return { save, remove, generate, updateSettings }
+}
+
+/** 当前用户还没确认过的最新公告（用于打开网站时的弹窗）。 */
+export function useUnreadAnnouncement(enabled = true) {
+  return useQuery({
+    queryKey: ['announcements', 'latest'],
+    queryFn: () => api.fetchLatestAnnouncement(),
+    enabled,
+    staleTime: 0,
+    refetchOnWindowFocus: false,
+  })
+}
+
+/** 管理员视角的公告列表（含已读人数）。 */
+export function useAnnouncements(enabled: boolean) {
+  return useQuery({
+    queryKey: ['announcements', 'list'],
+    queryFn: () => api.fetchAnnouncements(),
+    enabled,
+  })
+}
+
+export function useAnnouncementMutations() {
+  const qc = useQueryClient()
+  const refreshList = () => qc.invalidateQueries({ queryKey: ['announcements', 'list'] })
+  const create = useMutation({
+    mutationFn: (payload: AnnouncementPayload) => api.createAnnouncement(payload),
+    onSuccess: refreshList,
+  })
+  const remove = useMutation({ mutationFn: (id: number) => api.deleteAnnouncement(id), onSuccess: refreshList })
+  const acknowledge = useMutation({
+    mutationFn: (id: number) => api.acknowledgeAnnouncement(id),
+    onSuccess: () => {
+      qc.setQueryData(['announcements', 'latest'], null)
+      void refreshList()
+    },
+  })
+  return { create, remove, acknowledge }
 }

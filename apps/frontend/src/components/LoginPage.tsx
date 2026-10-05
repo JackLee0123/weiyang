@@ -193,12 +193,10 @@ export function LoginPage({ theme, onToggleTheme, onLogin }: LoginPageProps) {
         {theme === 'dark' ? <Sun size={18} /> : <Moon size={18} />}
       </button>
 
-      <div className="w-full max-w-sm rounded-lg border border-line bg-surface p-6 shadow-soft dark:border-slate-700 dark:bg-slate-900">
+      <div className="w-full max-w-sm rounded-card border border-line bg-surface p-6 dark:border-slate-800 dark:bg-slate-900">
         <div className="flex flex-col items-center text-center">
-          <div className="flex h-12 w-12 items-center justify-center rounded-md bg-brand text-white shadow-sm">
-            <BrandMark size={26} />
-          </div>
-          <h1 className="mt-4 text-xl font-semibold text-ink dark:text-slate-100">{title}</h1>
+          <BrandMark size={30} className="text-brand dark:text-teal-300" />
+          <h1 className="mt-4 text-lg font-medium tracking-title text-ink dark:text-slate-100">{title}</h1>
           <p className="mt-1 text-sm text-ink-muted dark:text-slate-400">{subtitle}</p>
         </div>
 
@@ -358,13 +356,13 @@ export function LoginPage({ theme, onToggleTheme, onLogin }: LoginPageProps) {
           )}
 
           {error && (
-            <p className="rounded-md bg-rose-50 px-3 py-2 text-sm text-rose-600 dark:bg-rose-500/10 dark:text-rose-300">
+            <p className="notice-err">
               {error}
             </p>
           )}
 
           {info && (
-            <p className="rounded-md bg-teal-50 px-3 py-2 text-sm text-teal-700 dark:bg-teal-500/10 dark:text-teal-200">
+            <p className="notice-ok">
               {info}
             </p>
           )}

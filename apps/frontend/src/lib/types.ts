@@ -364,6 +364,27 @@ export interface PushNotification {
   ts: number
 }
 
+/** 管理员广播的公告：每个人下次打开网站时弹一次，确认后不再弹。 */
+export interface Announcement {
+  id: number
+  title: string
+  body: string
+  level: string
+  created_at: string
+}
+
+export interface AnnouncementAdmin extends Announcement {
+  created_by_name?: string | null
+  read_count: number
+  user_count: number
+}
+
+export interface AnnouncementPayload {
+  title: string
+  body?: string
+  level?: 'info' | 'important'
+}
+
 /** 手环扫码连接的状态机：pending → approved → claimed。 */
 export type DeviceHandshakeStatus = 'pending' | 'approved' | 'claimed' | 'expired'
 

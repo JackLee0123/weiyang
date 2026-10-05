@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react'
 import { parseISO, format } from 'date-fns'
-import { CheckSquare, ChevronLeft, ChevronRight, ClipboardList, Lock, Plus } from 'lucide-react'
+import { ChevronLeft, ChevronRight, Lock, Plus } from 'lucide-react'
 import { PlanItem } from '../components/PlanItem'
 import { RecordItem } from '../components/RecordItem'
 import { FocusPanel } from '../components/FocusPanel'
@@ -35,43 +35,49 @@ export function TodayView({ date, onChangeDate }: { date: string; onChangeDate: 
     onChangeDate(format(next, 'yyyy-MM-dd'))
   }
 
+  const weekday = ['周日', '周一', '周二', '周三', '周四', '周五', '周六'][parsed.getDay()]
+
   return (
-    <div className="space-y-5">
-      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-        <div className="flex items-center gap-3">
-          <div className="flex items-center gap-1 rounded-md border border-line bg-surface p-0.5 shadow-sm dark:border-slate-700 dark:bg-slate-800">
+    <div className="space-y-7">
+      <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
+        <div className="flex items-end gap-3">
+          <div className="flex items-center gap-0.5 pb-1">
             <button className="btn-ghost p-1.5" onClick={() => shiftDay(-1)} aria-label="前一天">
-              <ChevronLeft size={16} />
+              <ChevronLeft size={16} strokeWidth={1.75} />
             </button>
             <button className="btn-ghost p-1.5" onClick={() => shiftDay(1)} aria-label="后一天">
-              <ChevronRight size={16} />
+              <ChevronRight size={16} strokeWidth={1.75} />
             </button>
-            <button className="btn-ghost px-2 text-xs" onClick={() => onChangeDate(todayISO())}>
+            <button className="btn-quiet px-2" onClick={() => onChangeDate(todayISO())}>
               今天
             </button>
           </div>
+          <div className="h-9 w-px bg-line dark:bg-slate-800" />
           <div>
-            <h1 className="flex items-center gap-2 text-xl font-semibold text-ink dark:text-slate-100">
-              {format(parsed, 'M月d日')}
-              {isToday && <span className="rounded-sm bg-brand-soft px-2 py-0.5 text-xs font-medium text-brand-ink dark:bg-brand/15 dark:text-teal-200">今天</span>}
+            <h1 className="flex items-baseline gap-2.5 tracking-title text-ink dark:text-slate-100">
+              <span className="tnum text-3xl font-light leading-9">{format(parsed, 'M月d日')}</span>
+              <span className="text-sm text-ink-faint dark:text-slate-500">
+                {weekday}
+                {isToday && ' · 今天'}
+              </span>
             </h1>
-            <p className="text-sm text-ink-muted dark:text-slate-400">
+            <p className="mt-1 text-xs text-ink-muted dark:text-slate-400">
               今天记录 {records.filter((r) => r.is_completed).length} 段航程
             </p>
           </div>
         </div>
         {locked ? (
-          <span className="flex items-center gap-1.5 rounded-md border border-line bg-surface px-3 py-1.5 text-xs font-medium text-ink-muted dark:border-slate-700 dark:bg-slate-800 dark:text-slate-400">
-            <Lock size={14} /> 这一天已封存
+          <span className="chip w-fit px-2 py-1">
+            <Lock size={12} strokeWidth={1.75} /> 这一天已封存
           </span>
         ) : (
           <div className="flex gap-2">
             <button className="btn-record" onClick={() => setModal({ type: 'record' })}>
-              <Plus size={15} />
+              <Plus size={14} strokeWidth={2} />
               记一笔
             </button>
             <button className="btn-primary" onClick={() => setModal({ type: 'plan' })}>
-              <Plus size={15} />
+              <Plus size={14} strokeWidth={2} />
               新建计划
             </button>
           </div>
@@ -80,16 +86,13 @@ export function TodayView({ date, onChangeDate }: { date: string; onChangeDate: 
 
       {statsQ.data && <StatsPanel stats={statsQ.data} />}
 
-      <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
+      <div className="grid grid-cols-1 gap-x-12 gap-y-8 lg:grid-cols-2">
         <section className="min-w-0">
-          <header className="flex items-center gap-2 border-b border-line pb-2.5 dark:border-slate-700">
-            <div className="flex h-7 w-7 items-center justify-center rounded-md bg-brand-soft text-brand-ink dark:bg-brand/15 dark:text-teal-200">
-              <ClipboardList size={15} />
-            </div>
-            <h2 className="section-title">当日计划</h2>
-            <span className="ml-auto text-xs text-ink-muted dark:text-slate-400">{plans.length} 项</span>
+          <header className="flex items-baseline justify-between gap-2 border-b border-line pb-2.5 dark:border-slate-800">
+            <h2 className="eyebrow">当日计划</h2>
+            <span className="tnum text-2xs text-ink-faint dark:text-slate-500">{plans.length} 项</span>
           </header>
-          <div className="mt-1">
+          <div className="mt-0.5">
             {plans.length === 0 ? (
               <EmptyState title="这一天还没有计划" hint="提前安排好要做的事" />
             ) : (
@@ -99,14 +102,11 @@ export function TodayView({ date, onChangeDate }: { date: string; onChangeDate: 
         </section>
 
         <section className="min-w-0">
-          <header className="flex items-center gap-2 border-b border-line pb-2.5 dark:border-slate-700">
-            <div className="flex h-7 w-7 items-center justify-center rounded-md bg-blue-50 text-blue-600 dark:bg-blue-500/15 dark:text-blue-300">
-              <CheckSquare size={15} />
-            </div>
-            <h2 className="section-title">当天记录</h2>
-            <span className="ml-auto text-xs text-ink-muted dark:text-slate-400">{records.length} 条</span>
+          <header className="flex items-baseline justify-between gap-2 border-b border-line pb-2.5 dark:border-slate-800">
+            <h2 className="eyebrow">当天记录</h2>
+            <span className="tnum text-2xs text-ink-faint dark:text-slate-500">{records.length} 条</span>
           </header>
-          <div className="mt-1">
+          <div className="mt-0.5">
             {records.length === 0 ? (
               <EmptyState title="还没有记录" hint="记录今天实际完成了什么" />
             ) : (

@@ -12,7 +12,22 @@ from .database import Base, SessionLocal, engine
 from . import repository
 from .services.security import hash_password
 from .services.push_schedule import push_scheduler_loop
-from .routers import admin, auth, backup, captcha, devices, feedback, health, plans, push, records, reports, stats, timetable
+from .routers import (
+    admin,
+    announcements,
+    auth,
+    backup,
+    captcha,
+    devices,
+    feedback,
+    health,
+    plans,
+    push,
+    records,
+    reports,
+    stats,
+    timetable,
+)
 
 
 def _bootstrap_super_admin() -> None:
@@ -84,6 +99,7 @@ for router in (
     timetable.router,
     push.router,
     devices.router,
+    announcements.router,
 ):
     app.include_router(router)
 

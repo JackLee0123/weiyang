@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { addDays } from 'date-fns'
-import { CalendarClock, PlaneLanding, RotateCcw, Route } from 'lucide-react'
+import { CalendarClock, PlaneLanding, RotateCcw } from 'lucide-react'
 import { Modal } from '../components/Modal'
 import { EmptyState } from '../components/EmptyState'
 import { PriorityBadge, StatusBadge } from '../components/badges'
@@ -45,17 +45,14 @@ export function WeiyangView() {
   }
 
   if (unfinishedQ.isLoading) {
-    return <div className="panel px-4 py-10 text-center text-sm text-ink-muted dark:text-slate-400">加载中…</div>
+    return <p className="py-10 text-center text-sm text-ink-muted dark:text-slate-400">加载中…</p>
   }
 
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="flex items-center gap-2 text-xl font-semibold text-ink dark:text-slate-100">
-          <Route size={18} className="text-brand dark:text-teal-300" />
-          未央
-        </h1>
-        <p className="mt-1 text-sm text-ink-muted dark:text-slate-400">
+        <h1 className="text-3xl font-light tracking-title text-ink dark:text-slate-100">未央</h1>
+        <p className="mt-1 text-xs text-ink-muted dark:text-slate-400">
           未完成的不是负债，是仍在航线上的部分。
         </p>
       </div>
@@ -65,43 +62,41 @@ export function WeiyangView() {
       ) : (
         <>
           <section className="min-w-0">
-            <header className="flex items-baseline gap-2 border-b border-line pb-2.5 dark:border-slate-700">
-              <h2 className="text-sm font-semibold text-ink dark:text-slate-100">今日仍飞来</h2>
-              <span className="ml-auto text-xs text-ink-muted dark:text-slate-400">{todayPlans.length} 项</span>
+            <header className="flex items-baseline gap-2 border-b border-line pb-2.5 dark:border-slate-800">
+              <h2 className="eyebrow">今日仍飞来</h2>
+              <span className="tnum ml-auto text-2xs text-ink-faint dark:text-slate-500">{todayPlans.length} 项</span>
             </header>
-            <div className="mt-1">
+            <div className="mt-0.5">
               {todayPlans.length === 0 ? (
                 <EmptyState title="今天没有待飞行的计划" hint="起飞前可以为今天设定航向" />
               ) : (
                 todayPlans.map((plan) => (
                   <div
                     key={plan.id}
-                    className="group flex flex-wrap items-center gap-3 border-b border-line-soft px-3 py-3 transition last:border-0 hover:bg-surface-soft dark:border-slate-700/70 dark:hover:bg-slate-700/40"
+                    className="group -mx-2 flex flex-wrap items-center gap-3 rounded-md border-b border-line-soft px-2 py-3 transition-colors last:border-0 hover:bg-surface-soft/60 dark:border-slate-800 dark:hover:bg-slate-800/40"
                   >
                     <div className="min-w-0 flex-1">
-                      <p className="truncate text-sm font-medium text-ink dark:text-slate-100">{plan.title}</p>
-                      <p className="mt-0.5 text-xs text-ink-muted dark:text-slate-500">
+                      <p className="truncate text-sm text-ink dark:text-slate-100">{plan.title}</p>
+                      <p className="mt-0.5 text-2xs text-ink-faint dark:text-slate-500">
                         {plan.start_time ? `${plan.start_time}${plan.end_time ? ' - ' + plan.end_time : ''}` : '起飞前'}
+                        {plan.category && ` · ${plan.category}`}
                       </p>
                     </div>
                     <div className="hidden items-center gap-1.5 sm:flex">
-                      <span className="rounded-sm bg-surface-soft px-2 py-0.5 text-xs text-ink-muted dark:bg-slate-700/70 dark:text-slate-300">
-                        {plan.category}
-                      </span>
                       <PriorityBadge priority={plan.priority} />
                       <StatusBadge status={plan.status} />
                     </div>
                     <div className="flex items-center gap-1.5">
-                      <button className="btn-ghost px-2 py-1.5 text-xs" onClick={() => update.mutateAsync({ id: plan.id, payload: { status: 'done' } })}>
-                        <PlaneLanding size={14} />
+                      <button className="btn-quiet px-2 py-1.5" onClick={() => update.mutateAsync({ id: plan.id, payload: { status: 'done' } })}>
+                        <PlaneLanding size={13} strokeWidth={1.75} />
                         完成抵达
                       </button>
-                      <button className="btn-ghost px-2 py-1.5 text-xs" onClick={() => openCarry(plan)}>
-                        <CalendarClock size={14} />
+                      <button className="btn-quiet px-2 py-1.5" onClick={() => openCarry(plan)}>
+                        <CalendarClock size={13} strokeWidth={1.75} />
                         顺延
                       </button>
-                      <button className="btn-ghost px-2 py-1.5 text-xs" onClick={() => update.mutateAsync({ id: plan.id, payload: { status: 'cancelled' } })}>
-                        <RotateCcw size={14} />
+                      <button className="btn-quiet px-2 py-1.5" onClick={() => update.mutateAsync({ id: plan.id, payload: { status: 'cancelled' } })}>
+                        <RotateCcw size={13} strokeWidth={1.75} />
                         改道
                       </button>
                     </div>
@@ -112,33 +107,30 @@ export function WeiyangView() {
           </section>
 
           <section className="min-w-0">
-            <header className="flex items-baseline gap-2 border-b border-line pb-2.5 dark:border-slate-700">
-              <h2 className="text-sm font-semibold text-ink dark:text-slate-100">已在途 · 未央</h2>
-              <span className="ml-auto text-xs text-ink-muted dark:text-slate-400">{enRoute.length} 项</span>
+            <header className="flex items-baseline gap-2 border-b border-line pb-2.5 dark:border-slate-800">
+              <h2 className="eyebrow">已在途 · 未央</h2>
+              <span className="tnum ml-auto text-2xs text-ink-faint dark:text-slate-500">{enRoute.length} 项</span>
             </header>
-            <p className="mt-2 text-xs text-ink-muted dark:text-slate-500">这些是封存的回忆，不催促、也不算失败。</p>
-            <div className="mt-1">
+            <p className="mt-2 text-2xs text-ink-faint dark:text-slate-500">这些是封存的回忆，不催促、也不算失败。</p>
+            <div className="mt-0.5">
               {enRoute.length === 0 ? (
                 <EmptyState title="没有封存的航段" hint="过去未完成的计划会安静地在这里停留" />
               ) : (
                 enRoute.map((plan) => (
                   <div
                     key={plan.id}
-                    className="flex flex-wrap items-center gap-3 border-b border-line-soft px-3 py-3 transition last:border-0 hover:bg-surface-soft dark:border-slate-700/70 dark:hover:bg-slate-700/40"
+                    className="flex flex-wrap items-center gap-3 rounded-md border-b border-line-soft px-2 py-3 transition-colors last:border-0 hover:bg-surface-soft/60 sm:-mx-2 dark:border-slate-800 dark:hover:bg-slate-800/40"
                   >
                     <div className="min-w-0 flex-1">
-                      <p className="truncate text-sm font-medium text-ink dark:text-slate-100">{plan.title}</p>
-                      <p className="mt-0.5 text-xs text-ink-muted dark:text-slate-500">{plan.date}</p>
+                      <p className="truncate text-sm text-ink dark:text-slate-100">{plan.title}</p>
+                      <p className="tnum mt-0.5 text-2xs text-ink-faint dark:text-slate-500">{plan.date}</p>
                     </div>
                     <div className="hidden items-center gap-1.5 sm:flex">
-                      <span className="rounded-sm bg-surface-soft px-2 py-0.5 text-xs text-ink-muted dark:bg-slate-700/70 dark:text-slate-300">
-                        {plan.category}
-                      </span>
                       <PriorityBadge priority={plan.priority} />
                       <StatusBadge status={plan.status} />
                     </div>
-                    <button className="btn-ghost px-2 py-1.5 text-xs" onClick={() => openCarry(plan)}>
-                      <CalendarClock size={14} />
+                    <button className="btn-quiet px-2 py-1.5" onClick={() => openCarry(plan)}>
+                      <CalendarClock size={13} strokeWidth={1.75} />
                       顺延为新航段
                     </button>
                   </div>

@@ -1,58 +1,38 @@
-import { BarChart3, CheckCircle2, Clock3, Flame, TrendingUp } from 'lucide-react'
 import type { StatsOverview } from '../lib/types'
 import { formatMinutes } from '../lib/format'
 
+/**
+ * 本周概览：不用四个彩色图标卡片，改成一条带发丝分隔线的数据带。
+ * 数字用轻字重 + 等宽字形，标签用小字——靠排版层级而不是色块来区分。
+ */
 export function StatsPanel({ stats }: { stats: StatsOverview }) {
   const items = [
-    {
-      label: '连续记录',
-      value: `${stats.consecutive_recording_days} 天`,
-      icon: Flame,
-      tone: 'text-amber-600 dark:text-amber-400',
-      bg: 'bg-amber-50 dark:bg-amber-500/10',
-    },
-    {
-      label: '记录用时',
-      value: formatMinutes(stats.recorded_minutes),
-      icon: TrendingUp,
-      tone: 'text-brand dark:text-teal-300',
-      bg: 'bg-brand-soft dark:bg-brand/10',
-    },
-    {
-      label: '计划用时',
-      value: formatMinutes(stats.planned_minutes),
-      icon: Clock3,
-      tone: 'text-blue-600 dark:text-blue-400',
-      bg: 'bg-blue-50 dark:bg-blue-500/10',
-    },
-    {
-      label: '计划完成率',
-      value: `${Math.round(stats.completion_rate * 100)}%`,
-      icon: CheckCircle2,
-      tone: 'text-emerald-600 dark:text-emerald-400',
-      bg: 'bg-emerald-50 dark:bg-emerald-500/10',
-    },
+    { label: '连续记录', value: `${stats.consecutive_recording_days} 天` },
+    { label: '记录用时', value: formatMinutes(stats.recorded_minutes) },
+    { label: '计划用时', value: formatMinutes(stats.planned_minutes) },
+    { label: '计划完成率', value: `${Math.round(stats.completion_rate * 100)}%` },
   ]
+  const range = `${stats.start.slice(5).replace('-', '.')} — ${stats.end.slice(5).replace('-', '.')}`
 
   return (
-    <div className="space-y-3">
-      <div className="flex items-center gap-2">
-        <BarChart3 size={15} className="text-ink-muted dark:text-slate-400" />
-        <h2 className="section-title">本周概览</h2>
+    <section>
+      <div className="flex items-baseline justify-between gap-3">
+        <h2 className="eyebrow">本周概览</h2>
+        <span className="tnum text-2xs text-ink-faint dark:text-slate-500">{range}</span>
       </div>
-      <div className="grid grid-cols-2 gap-3 xl:grid-cols-4">
+      <div className="mt-2.5 grid grid-cols-1 divide-y divide-line border-y border-line dark:divide-slate-800 dark:border-slate-800 sm:grid-cols-4 sm:divide-x sm:divide-y-0">
         {items.map((item) => (
-          <div key={item.label} className="panel flex items-center gap-3 px-4 py-3">
-            <div className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-md ${item.bg}`}>
-              <item.icon size={17} className={item.tone} />
-            </div>
-            <div className="min-w-0">
-              <p className="truncate text-xs text-ink-muted dark:text-slate-400">{item.label}</p>
-              <p className="mt-1 truncate text-lg font-semibold text-ink dark:text-slate-100">{item.value}</p>
-            </div>
+          <div
+            key={item.label}
+            className="flex items-baseline justify-between gap-4 py-3 sm:block sm:px-4 sm:py-3.5 sm:first:pl-0 sm:last:pr-0"
+          >
+            <p className="text-xs text-ink-muted dark:text-slate-400">{item.label}</p>
+            <p className="tnum text-[22px] font-light leading-7 tracking-title text-ink dark:text-slate-100 sm:mt-1.5">
+              {item.value}
+            </p>
           </div>
         ))}
       </div>
-    </div>
+    </section>
   )
 }

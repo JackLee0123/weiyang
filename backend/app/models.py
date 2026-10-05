@@ -3,7 +3,7 @@ from __future__ import annotations
 from datetime import datetime, timezone
 from typing import Optional
 
-from sqlalchemy import Boolean, DateTime, Float, ForeignKey, Integer, JSON, String, Text
+from sqlalchemy import Boolean, DateTime, Float, ForeignKey, Integer, JSON, String, Text, UniqueConstraint
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from .database import Base
@@ -199,3 +199,49 @@ class TimetableSettings(Base):
     week1_date: Mapped[Optional[str]] = mapped_column(String(10), nullable=True)
     period_times: Mapped[Optional[dict]] = mapped_column(JSON, nullable=True)
     updated_at: Mapped[datetime] = mapped_column(DateTime, default=now_utc, onupdate=now_utc, nullable=False)
+
+
+class Announcement(Base):
+    """管理员广播的公告。
+
+    管理员写一条，所有用户在下次打开网站时弹窗看到一次；
+    每个用户各自记一条已读（AnnouncementRead），互不影响。
+    """
+
+    __tablename__ = "announcements"
+    __table_args__ = {"mysql_charset": "utf8mb4"}
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+    title: Mapped[str] = mapped_column(String(120), nullable=False)
+    body: Mapped[str] = mapped_column(Text, default="", nullable=False)
+    # info：普通通知；important：需要留意（弹窗用强调色边框）
+    level: Mapped[str] = mapped_column(String(12), default="info", server_default="info", nullable=False)
+    created_by: Mapped[Optional[int]] = mapped_column(
+        ForeignKey("users.id", ondelete="SET NULL"), nullable=True
+    )
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=now_utc, nullable=False)
+
+    reads: Mapped[list["AnnouncementRead"]] = relationship(
+        back_populates="announcement", cascade="all, delete-orphan"
+    )
+
+
+class AnnouncementRead(Base):
+    """某个用户已经看过某条公告。"""
+
+    __tablename__ = "announcement_reads"
+    __table_args__ = (
+        UniqueConstraint("announcement_id", "user_id", name="uq_announcement_read"),
+        {"mysql_charset": "utf8mb4"},
+    )
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+    announcement_id: Mapped[int] = mapped_column(
+        ForeignKey("announcements.id", ondelete="CASCADE"), index=True, nullable=False
+    )
+    user_id: Mapped[int] = mapped_column(
+        ForeignKey("users.id", ondelete="CASCADE"), index=True, nullable=False
+    )
+    read_at: Mapped[datetime] = mapped_column(DateTime, default=now_utc, nullable=False)
+
+    announcement: Mapped[Announcement] = relationship(back_populates="reads")

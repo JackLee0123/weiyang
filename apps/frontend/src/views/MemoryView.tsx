@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { addDays, addMonths, format, parseISO, subDays, subMonths } from 'date-fns'
-import { BookOpen, ChevronLeft, ChevronRight, Flame, MapPin } from 'lucide-react'
+import { ChevronLeft, ChevronRight, Flame, MapPin } from 'lucide-react'
 import { useMemoryReport } from '../lib/queries'
 import { monthRange, weekRange } from '../lib/date'
 import { formatMinutes } from '../lib/format'
@@ -49,21 +49,20 @@ export function MemoryView() {
 
   return (
     <div className="space-y-5">
-      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+      <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
         <div>
-          <h1 className="flex items-center gap-2 text-xl font-semibold text-ink dark:text-slate-100">
-            <BookOpen size={18} className="text-brand dark:text-teal-300" />
-            回忆
-          </h1>
-          <p className="mt-1 text-sm text-ink-muted dark:text-slate-400">把一段时光，还原成一段航程。</p>
+          <h1 className="text-3xl font-light tracking-title text-ink dark:text-slate-100">回忆</h1>
+          <p className="mt-1 text-xs text-ink-muted dark:text-slate-400">把一段时光，还原成一段航程。</p>
         </div>
-        <div className="flex items-center gap-2">
-          <div className="flex overflow-hidden rounded-md border border-line dark:border-slate-600">
+        <div className="flex flex-wrap items-center gap-2">
+          <div className="flex items-center gap-1">
             {(['week', 'month'] as Period[]).map((p) => (
               <button
                 key={p}
-                className={`px-3 py-1.5 text-sm font-medium transition ${
-                  period === p ? 'bg-brand text-white' : 'bg-surface text-ink-soft hover:bg-surface-soft dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700'
+                className={`rounded-md px-2.5 py-1.5 text-sm transition-colors ${
+                  period === p
+                    ? 'bg-surface-soft font-medium text-ink dark:bg-slate-800 dark:text-slate-100'
+                    : 'text-ink-muted hover:bg-surface-soft/60 hover:text-ink dark:text-slate-400 dark:hover:bg-slate-800/50 dark:hover:text-slate-200'
                 }`}
                 onClick={() => setPeriod(p)}
               >
@@ -71,17 +70,17 @@ export function MemoryView() {
               </button>
             ))}
           </div>
-          <div className="flex items-center gap-1 rounded-md border border-line bg-surface p-0.5 shadow-sm dark:border-slate-700 dark:bg-slate-800">
+          <div className="flex items-center gap-0.5">
             <button className="btn-ghost p-1.5" onClick={() => shift(-1)} aria-label="上一期">
-              <ChevronLeft size={16} />
+              <ChevronLeft size={16} strokeWidth={1.75} />
             </button>
-            <span className="min-w-[92px] text-center text-xs font-medium text-ink dark:text-slate-100">{label}</span>
+            <span className="tnum min-w-[92px] text-center text-xs text-ink dark:text-slate-100">{label}</span>
             <button className="btn-ghost p-1.5" onClick={() => shift(1)} aria-label="下一期">
-              <ChevronRight size={16} />
+              <ChevronRight size={16} strokeWidth={1.75} />
             </button>
           </div>
           {!isCurrent && (
-            <button className="btn-ghost px-2 text-xs" onClick={() => setAnchor(new Date())}>
+            <button className="btn-quiet px-2" onClick={() => setAnchor(new Date())}>
               回到本期
             </button>
           )}
@@ -92,37 +91,37 @@ export function MemoryView() {
         <EmptyState title="这段时间还没有回忆" hint="记录当天内容或完成计划后，这里就会生长出航程" />
       ) : (
         <>
-          <p className="text-sm leading-6 text-ink-soft dark:text-slate-300">
-            这段时光里，你记录了 <span className="font-semibold text-ink dark:text-slate-100">{report.records_count}</span> 段航程，飞了{' '}
-            <span className="font-semibold text-ink dark:text-slate-100">{formatMinutes(report.recorded_minutes)}</span>。
+          <p className="text-sm leading-7 text-ink-soft dark:text-slate-300">
+            这段时光里，你记录了 <span className="tnum font-medium text-ink dark:text-slate-100">{report.records_count}</span> 段航程，飞了{' '}
+            <span className="tnum font-medium text-ink dark:text-slate-100">{formatMinutes(report.recorded_minutes)}</span>。
             {report.top_categories.length > 0 && (
               <>
                 {' '}主要飞的是：<span className="font-medium text-brand dark:text-teal-300">{report.top_categories.join('、')}</span>
               </>
             )}
-            。有 <span className="font-semibold text-ink dark:text-slate-100">{report.active_days}</span> 天留下足迹，连续{' '}
-            <span className="font-semibold text-ink dark:text-slate-100">{report.consecutive_recording_days}</span> 天在线。
+            。有 <span className="tnum font-medium text-ink dark:text-slate-100">{report.active_days}</span> 天留下足迹，连续{' '}
+            <span className="tnum font-medium text-ink dark:text-slate-100">{report.consecutive_recording_days}</span> 天在线。
           </p>
 
-          <div className="grid grid-cols-2 gap-3 xl:grid-cols-4">
+          <div className="grid grid-cols-1 divide-y divide-line border-y border-line dark:divide-slate-800 dark:border-slate-800 sm:grid-cols-4 sm:divide-x sm:divide-y-0">
             {[
               { label: '记录航段', value: `${report.records_count} 段` },
               { label: '飞行时长', value: formatMinutes(report.recorded_minutes) },
               { label: '在线天数', value: `${report.active_days} 天` },
               { label: '连续记录', value: `${report.consecutive_recording_days} 天` },
             ].map((item) => (
-              <div key={item.label} className="panel px-4 py-3">
-                <p className="truncate text-xs text-ink-muted dark:text-slate-400">{item.label}</p>
-                <p className="mt-1 truncate text-lg font-semibold text-ink dark:text-slate-100">{item.value}</p>
+              <div key={item.label} className="flex items-baseline justify-between gap-4 py-3 sm:block sm:px-4 sm:py-3.5 sm:first:pl-0 sm:last:pr-0">
+                <p className="text-xs text-ink-muted dark:text-slate-400">{item.label}</p>
+                <p className="tnum text-[22px] font-light leading-7 tracking-title text-ink dark:text-slate-100 sm:mt-1.5">{item.value}</p>
               </div>
             ))}
           </div>
 
           <div className="grid gap-5 lg:grid-cols-2">
             <section className="panel p-4">
-              <header className="flex items-baseline gap-2 border-b border-line pb-2.5 dark:border-slate-700">
-                <h2 className="section-title">计划概览</h2>
-                <span className="ml-auto text-xs text-ink-muted dark:text-slate-400">{report.total_plans} 项</span>
+              <header className="flex items-baseline gap-2 border-b border-line pb-2.5 dark:border-slate-700/60">
+                <h2 className="eyebrow">计划概览</h2>
+                <span className="tnum ml-auto text-2xs text-ink-faint dark:text-slate-500">{report.total_plans} 项</span>
               </header>
               <div className="mt-3 grid grid-cols-2 gap-3">
                 {[
@@ -132,17 +131,17 @@ export function MemoryView() {
                   { label: '完成率', value: `${Math.round(report.completion_rate * 100)}%` },
                 ].map((item) => (
                   <div key={item.label}>
-                    <p className="text-xs text-ink-muted dark:text-slate-400">{item.label}</p>
-                    <p className="mt-0.5 text-lg font-semibold text-ink dark:text-slate-100">{item.value}</p>
+                    <p className="text-2xs text-ink-muted dark:text-slate-400">{item.label}</p>
+                    <p className="tnum mt-0.5 text-lg font-light text-ink dark:text-slate-100">{item.value}</p>
                   </div>
                 ))}
               </div>
             </section>
 
             <section className="panel p-4">
-              <header className="flex items-baseline gap-2 border-b border-line pb-2.5 dark:border-slate-700">
-                <h2 className="section-title">类别分布</h2>
-                <span className="ml-auto text-xs text-ink-muted dark:text-slate-400">{totalRecords} 条记录</span>
+              <header className="flex items-baseline gap-2 border-b border-line pb-2.5 dark:border-slate-700/60">
+                <h2 className="eyebrow">类别分布</h2>
+                <span className="tnum ml-auto text-2xs text-ink-faint dark:text-slate-500">{totalRecords} 条记录</span>
               </header>
               <div className="mt-3 space-y-2.5">
                 {Object.entries(report.by_category).length === 0 ? (
@@ -156,9 +155,9 @@ export function MemoryView() {
                           <span className="text-ink-soft dark:text-slate-300">{category}</span>
                           <span className="text-xs text-ink-muted dark:text-slate-500">{count} 条</span>
                         </div>
-                        <div className="mt-1 h-1.5 overflow-hidden rounded-full bg-surface-soft dark:bg-slate-700/60">
+                        <div className="mt-1.5 h-1 overflow-hidden rounded-full bg-surface-soft dark:bg-slate-700/50">
                           <div
-                            className="h-full rounded-full bg-brand dark:bg-teal-400"
+                            className="h-full rounded-full bg-brand/80 dark:bg-teal-300/80"
                             style={{ width: maxCategory ? `${(count / maxCategory) * 100}%` : '0%' }}
                           />
                         </div>
@@ -171,9 +170,9 @@ export function MemoryView() {
 
           <div className="grid gap-5 lg:grid-cols-2">
             <section className="panel p-4">
-              <header className="flex items-baseline gap-2 border-b border-line pb-2.5 dark:border-slate-700">
-                <h2 className="section-title">未央 · 仍未抵达</h2>
-                <span className="ml-auto text-xs text-ink-muted dark:text-slate-400">{report.unfinished.length} 项</span>
+              <header className="flex items-baseline gap-2 border-b border-line pb-2.5 dark:border-slate-700/60">
+                <h2 className="eyebrow">未央 · 仍未抵达</h2>
+                <span className="tnum ml-auto text-2xs text-ink-faint dark:text-slate-500">{report.unfinished.length} 项</span>
               </header>
               <div className="mt-3">
                 {report.unfinished.length === 0 ? (
@@ -181,8 +180,8 @@ export function MemoryView() {
                 ) : (
                   <ul className="space-y-2">
                     {report.unfinished.map((plan) => (
-                      <li key={plan.id} className="flex items-center gap-2 text-sm">
-                        <span className="rounded-sm bg-surface-soft px-1.5 py-0.5 text-xs text-ink-muted dark:bg-slate-700/70 dark:text-slate-400">
+                      <li key={plan.id} className="flex items-center gap-2.5 text-sm">
+                        <span className="tnum shrink-0 text-2xs text-ink-faint dark:text-slate-500">
                           {plan.date.slice(5)}
                         </span>
                         <span className="truncate text-ink-soft dark:text-slate-300">{plan.title}</span>
@@ -195,12 +194,12 @@ export function MemoryView() {
 
             <section className="panel flex flex-col justify-center p-4">
               <div className="flex items-center gap-2 text-ink-muted dark:text-slate-400">
-                <Flame size={15} className="text-amber-500" />
-                <span className="text-xs">足迹最多的一天</span>
+                <Flame size={14} strokeWidth={1.75} className="text-ink-faint dark:text-slate-500" />
+                <span className="eyebrow">足迹最多的一天</span>
               </div>
               <div className="mt-2 flex items-center gap-2">
-                <MapPin size={18} className="text-brand dark:text-teal-300" />
-                <span className="text-lg font-semibold text-ink dark:text-slate-100">
+                <MapPin size={16} strokeWidth={1.75} className="text-brand dark:text-teal-300" />
+                <span className="tnum text-lg font-light text-ink dark:text-slate-100">
                   {report.busiest_day ? fmtDay(report.busiest_day) : '暂无'}
                 </span>
               </div>

@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react'
 import { format } from 'date-fns'
-import { ChevronLeft, ChevronRight, Flame, MapPin } from 'lucide-react'
+import { ChevronLeft, ChevronRight, MapPin } from 'lucide-react'
 import { useHeatmap } from '../lib/queries'
 import { activityLevel, buildCalendarWeeks, buildYearRange, LEVEL_CLASS, scoreOf } from '../lib/heatmap'
 import { toISO } from '../lib/date'
@@ -48,17 +48,16 @@ export function HeatmapView({ onOpenDay }: { onOpenDay: (date: string) => void }
 
   return (
     <div className="space-y-5">
-      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
         <div>
-          <h1 className="flex items-center gap-2 text-xl font-semibold text-ink dark:text-slate-100">
-            <Flame size={18} className="text-brand dark:text-teal-300" />
-            活跃度
-          </h1>
-          <p className="mt-1 text-sm text-ink-muted dark:text-slate-400">{year} 年 · 有 {activeDays} 天记录</p>
+          <h1 className="text-3xl font-light tracking-title text-ink dark:text-slate-100">活跃度</h1>
+          <p className="mt-1 text-xs text-ink-muted dark:text-slate-400">
+            <span className="tnum">{year}</span> 年 · 有 <span className="tnum">{activeDays}</span> 天记录
+          </p>
         </div>
-        <div className="rounded-md border border-line bg-surface px-3 py-1.5 text-xs text-ink-muted shadow-sm dark:border-slate-700 dark:bg-slate-800 dark:text-slate-400">
+        <p className="text-2xs text-ink-faint dark:text-slate-500">
           颜色越深，那天你越在场（记录与完成都算）
-        </div>
+        </p>
       </div>
 
       {heatQ.isLoading ? (
@@ -108,13 +107,13 @@ export function HeatmapView({ onOpenDay }: { onOpenDay: (date: string) => void }
           </div>
 
           {activeDays === 0 && (
-            <div className="mt-4 flex items-center gap-2 rounded-md bg-surface-soft px-3 py-2 text-xs text-ink-muted dark:bg-slate-700/40 dark:text-slate-300">
-              <MapPin size={13} />
+            <div className="mt-4 flex items-center gap-2 text-2xs text-ink-muted dark:text-slate-400">
+              <MapPin size={13} strokeWidth={1.75} className="text-ink-faint dark:text-slate-500" />
               这一年还没有活跃数据，记录当天内容或完成计划后，这里就会出现热度。
             </div>
           )}
 
-          <div className="mt-4 flex items-center gap-2 text-xs text-ink-muted dark:text-slate-400">
+          <div className="mt-4 flex items-center gap-2 text-2xs text-ink-muted dark:text-slate-400">
             <span>少</span>
             {LEVEL_CLASS.map((cls) => (
               <span key={cls} className={`h-3 w-3 rounded-[2px] ${cls}`} />
@@ -122,16 +121,16 @@ export function HeatmapView({ onOpenDay }: { onOpenDay: (date: string) => void }
             <span>多</span>
           </div>
 
-          <div className="mt-4 flex items-center justify-center gap-2 border-t border-line-soft pt-3 dark:border-slate-700">
+          <div className="mt-4 flex items-center justify-center gap-2 border-t border-line-soft pt-3 dark:border-slate-800">
             <button className="btn-ghost p-1.5" onClick={() => setYear((y) => y - 1)} aria-label="上一年">
-              <ChevronLeft size={15} />
+              <ChevronLeft size={15} strokeWidth={1.75} />
             </button>
-            <span className="min-w-[64px] text-center text-sm font-medium text-ink dark:text-slate-100">{year} 年</span>
+            <span className="tnum min-w-[64px] text-center text-sm text-ink dark:text-slate-100">{year} 年</span>
             <button className="btn-ghost p-1.5" onClick={() => setYear((y) => y + 1)} aria-label="下一年">
-              <ChevronRight size={15} />
+              <ChevronRight size={15} strokeWidth={1.75} />
             </button>
             {year !== new Date().getFullYear() && (
-              <button className="btn-ghost px-2 text-xs" onClick={() => setYear(new Date().getFullYear())}>
+              <button className="btn-quiet px-2" onClick={() => setYear(new Date().getFullYear())}>
                 回到今年
               </button>
             )}

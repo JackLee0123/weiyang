@@ -1,6 +1,6 @@
 import { useMemo } from 'react'
 import { format, parseISO } from 'date-fns'
-import { PieChart, Timer } from 'lucide-react'
+import { PieChart } from 'lucide-react'
 import { summarizeFocus, type FocusSlice } from '../lib/focus'
 import { formatMinutes, minutesParts } from '../lib/format'
 import type { RecordEntry } from '../lib/types'
@@ -70,27 +70,24 @@ export function FocusPanel({
 
   return (
     <section className="min-w-0 space-y-3">
-      <header className="flex items-center gap-2">
-        <div className="flex h-7 w-7 items-center justify-center rounded-md bg-brand-soft text-brand-ink dark:bg-brand/15 dark:text-teal-200">
-          <Timer size={15} />
-        </div>
-        <h2 className="section-title">当日专注</h2>
-        <span className="ml-auto text-xs text-ink-muted dark:text-slate-400">{dateLabel}</span>
+      <header className="flex items-baseline justify-between gap-3 border-b border-line pb-2.5 dark:border-slate-800">
+        <h2 className="eyebrow">当日专注</h2>
+        <span className="tnum text-2xs text-ink-faint dark:text-slate-500">{dateLabel}</span>
       </header>
 
       <div className="grid grid-cols-1 gap-3 lg:grid-cols-3">
         <div className="panel flex flex-col justify-between gap-5 px-4 py-4 lg:col-span-1">
           <div>
-            <p className="text-xs text-ink-muted dark:text-slate-400">次数</p>
+            <p className="eyebrow">次数</p>
             <p className="mt-1 flex items-baseline gap-1">
-              <span className="text-3xl font-semibold text-ink dark:text-slate-100">{summary.count}</span>
+              <span className="tnum text-3xl font-light text-ink dark:text-slate-100">{summary.count}</span>
               <span className="text-xs text-ink-muted dark:text-slate-400">次</span>
             </p>
           </div>
           <div>
-            <p className="text-xs text-ink-muted dark:text-slate-400">时长</p>
+            <p className="eyebrow">时长</p>
             <p className="mt-1 flex items-baseline gap-1">
-              <span className="text-3xl font-semibold text-brand dark:text-teal-300">{duration.value}</span>
+              <span className="tnum text-3xl font-light text-brand dark:text-teal-300">{duration.value}</span>
               <span className="text-xs text-ink-muted dark:text-slate-400">{duration.unit}</span>
             </p>
           </div>

@@ -273,7 +273,7 @@ export function FocusFlightOverlay({ onClose }: { onClose: () => void }) {
             </div>
 
             {confirmAbort ? (
-              <div className="w-full max-w-md rounded-lg border border-line bg-surface p-4 shadow-soft dark:border-slate-700 dark:bg-slate-800">
+              <div className="w-full max-w-md panel p-4">
                 <p className="text-sm font-medium text-ink dark:text-slate-100">确定要放弃这趟航班吗？</p>
                 <p className="mt-1 text-xs text-ink-muted dark:text-slate-400">
                   可记录本次已专注的 {customMinutes} 分钟，或直接放弃。

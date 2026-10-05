@@ -5,10 +5,10 @@ export type Level = 0 | 1 | 2 | 3 | 4
 
 export const LEVEL_CLASS = [
   'bg-slate-100 dark:bg-slate-700/50',
-  'bg-emerald-100 dark:bg-emerald-400/20',
-  'bg-emerald-300 dark:bg-emerald-400/50',
-  'bg-emerald-500 dark:bg-emerald-400',
-  'bg-emerald-700 dark:bg-emerald-300',
+  'bg-teal-100 dark:bg-teal-400/20',
+  'bg-teal-300 dark:bg-teal-400/45',
+  'bg-teal-500 dark:bg-teal-300/80',
+  'bg-teal-700 dark:bg-teal-300',
 ]
 
 // 固定分档：0 / 1 / 2 / 3-4 / 5+

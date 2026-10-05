@@ -64,40 +64,41 @@ export function ListView() {
 
   return (
     <div className="space-y-5">
-      <div className="flex flex-wrap items-center justify-between gap-3">
+      <div className="flex flex-wrap items-end justify-between gap-3">
         <div>
-          <h1 className="text-xl font-semibold text-ink dark:text-slate-100">全部计划与记录</h1>
-          <p className="mt-1 text-sm text-ink-muted dark:text-slate-400">搜索、筛选并回顾计划与实际记录</p>
+          <h1 className="text-3xl font-light tracking-title text-ink dark:text-slate-100">全部</h1>
+          <p className="mt-1 text-xs text-ink-muted dark:text-slate-400">搜索、筛选并回顾计划与实际记录</p>
         </div>
         <div className="flex gap-2">
           <button className="btn-record" onClick={() => setModal({ type: 'record' })}>
-            <Plus size={15} />
+            <Plus size={14} strokeWidth={2} />
             新增记录
           </button>
           <button className="btn-primary" onClick={() => setModal({ type: 'plan' })}>
+            <Plus size={14} strokeWidth={2} />
             新建计划
           </button>
         </div>
       </div>
 
-      <div className="panel flex flex-wrap items-center gap-2 p-2">
-        <div className="flex min-w-[180px] flex-1 items-center gap-2 rounded-md bg-surface-soft px-2.5 dark:bg-slate-900/60">
-          <Search size={15} className="text-ink-faint dark:text-slate-500" />
+      <div className="flex flex-wrap items-center gap-2 border-b border-line pb-3 dark:border-slate-800">
+        <div className="flex min-w-[180px] flex-1 items-center gap-2 px-1">
+          <Search size={14} strokeWidth={1.75} className="text-ink-faint dark:text-slate-500" />
           <input
-            className="w-full bg-transparent py-2 text-sm text-ink outline-none placeholder:text-ink-faint dark:text-slate-200 dark:placeholder:text-slate-500"
+            className="w-full bg-transparent py-1.5 text-sm text-ink outline-none placeholder:text-ink-faint dark:text-slate-200 dark:placeholder:text-slate-500"
             placeholder="搜索标题或内容"
             value={q}
             onChange={(e) => setQ(e.target.value)}
           />
         </div>
-        <div className="flex overflow-hidden rounded-md border border-line dark:border-slate-600">
+        <div className="flex items-center gap-1">
           {(['all', 'plans', 'records'] as Tab[]).map((t) => (
             <button
               key={t}
-              className={`px-3 py-2 text-sm font-medium transition ${
+              className={`rounded-md px-2.5 py-1.5 text-sm transition-colors ${
                 tab === t
-                  ? 'bg-brand text-white'
-                  : 'bg-surface text-ink-soft hover:bg-surface-soft dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700'
+                  ? 'bg-surface-soft font-medium text-ink dark:bg-slate-800 dark:text-slate-100'
+                  : 'text-ink-muted hover:bg-surface-soft/60 hover:text-ink dark:text-slate-400 dark:hover:bg-slate-800/50 dark:hover:text-slate-200'
               }`}
               onClick={() => setTab(t)}
             >
@@ -131,14 +132,14 @@ export function ListView() {
         <div className="space-y-5">
           {groups.map(([date, g]) => (
             <section key={date} className="min-w-0">
-              <header className="flex items-baseline gap-2 border-b border-line pb-2.5 dark:border-slate-700">
-                <h2 className="text-sm font-semibold text-ink dark:text-slate-100">{date.slice(5)}</h2>
-                <span className="text-xs text-ink-faint dark:text-slate-500">{date.slice(0, 4)}</span>
-                <span className="ml-auto text-xs text-ink-muted dark:text-slate-400">
+              <header className="flex items-baseline gap-2 border-b border-line pb-2.5 dark:border-slate-800">
+                <h2 className="tnum text-sm font-medium tracking-title text-ink dark:text-slate-100">{date.slice(5)}</h2>
+                <span className="tnum text-2xs text-ink-faint dark:text-slate-500">{date.slice(0, 4)}</span>
+                <span className="tnum ml-auto text-2xs text-ink-faint dark:text-slate-500">
                   {g.plans.length + g.records.length} 项
                 </span>
               </header>
-              <div className="mt-1">
+              <div className="mt-0.5">
                 {g.plans.map((p) => (
                   <PlanItem key={p.id} plan={p} onEdit={(plan) => setModal({ type: 'plan', initial: plan })} />
                 ))}

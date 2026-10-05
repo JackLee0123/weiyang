@@ -2,40 +2,51 @@
 @tailwind components;
 @tailwind utilities;
 
+/* ─────────────────────────────────────────────
+   Design tokens — Light
+   纸感暖中性底色 + 纯白表面 + 近黑墨色；
+   颜色只留给主操作与状态，其余靠线与留白分层。
+   ───────────────────────────────────────────── */
 :root {
   color-scheme: light;
-  --app-bg: #f6f8fa;
+  --app-bg: #f6f6f4;
   --surface: #ffffff;
-  --surface-muted: #f6f8fa;
-  --surface-soft: #f1f5f9;
-  --text: #0f172a;
-  --text-soft: #475569;
-  --text-muted: #64748b;
-  --text-faint: #94a3b8;
-  --line: #e2e8f0;
-  --line-soft: #eef2f6;
-  --brand: #0f766e;
-  --brand-deep: #115e59;
-  --brand-soft: #ccfbf1;
-  --brand-ink: #134e4a;
+  --surface-muted: #f6f6f4;
+  --surface-soft: #efefec;
+  --text: #1a1a17;
+  --text-soft: #55554e;
+  --text-muted: #7d7d74;
+  --text-faint: #a8a8a0;
+  --line: #e6e6e1;
+  --line-soft: #efefeb;
+  --line-strong: #d2d2cb;
+  --brand: #15564d;
+  --brand-deep: #0e423b;
+  --brand-soft: #e7edea;
+  --brand-ink: #123f39;
 }
 
+/* ─────────────────────────────────────────────
+   Design tokens — Dark
+   近黑的暖灰，而不是偏蓝的slate，避免"科技蓝"味。
+   ───────────────────────────────────────────── */
 .dark {
   color-scheme: dark;
-  --app-bg: #0f172a;
-  --surface: #1e293b;
-  --surface-muted: #172033;
-  --surface-soft: #253247;
-  --text: #e2e8f0;
-  --text-soft: #cbd5e1;
-  --text-muted: #94a3b8;
-  --text-faint: #64748b;
-  --line: #334155;
-  --line-soft: #293548;
-  --brand: #2dd4bf;
-  --brand-deep: #5eead4;
-  --brand-soft: #134e4a;
-  --brand-ink: #ccfbf1;
+  --app-bg: #171714;
+  --surface: #22221e;
+  --surface-muted: #1c1c19;
+  --surface-soft: #2a2a26;
+  --text: #f0f0ec;
+  --text-soft: #c9c9c2;
+  --text-muted: #8f8f86;
+  --text-faint: #6c6c64;
+  --line: #33332e;
+  --line-soft: #2a2a26;
+  --line-strong: #3f3f39;
+  --brand: #7fb3aa;
+  --brand-deep: #a9c8c1;
+  --brand-soft: #16302c;
+  --brand-ink: #d2e0dc;
 }
 
 html,
@@ -46,59 +57,117 @@ body,
 
 body {
   margin: 0;
-  font-family: 'Inter', 'PingFang SC', 'Microsoft YaHei', system-ui, sans-serif;
+  font-family: 'Inter', 'PingFang SC', 'Microsoft YaHei', 'Noto Sans SC', system-ui, sans-serif;
+  font-size: 14px;
+  line-height: 22px;
   background: var(--app-bg);
   color: var(--text);
   -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+::selection {
+  background: rgb(21 86 77 / 0.14);
+}
+.dark ::selection {
+  background: rgb(127 179 170 / 0.24);
+}
+
+/* 数字用等宽字形，列表与统计不会跳动 */
+.tnum {
+  font-variant-numeric: tabular-nums lining-nums;
 }
 
 * {
   scrollbar-width: thin;
-  scrollbar-color: var(--line-strong, #cbd5e1) transparent;
+  scrollbar-color: var(--line-strong) transparent;
 }
 
 *::-webkit-scrollbar {
-  width: 8px;
-  height: 8px;
+  width: 6px;
+  height: 6px;
+}
+*::-webkit-scrollbar-track {
+  background: transparent;
 }
 *::-webkit-scrollbar-thumb {
-  background: var(--line-strong, #cbd5e1);
-  border-radius: 8px;
+  background: var(--line-strong);
+  border-radius: 999px;
+}
+*::-webkit-scrollbar-thumb:hover {
+  background: var(--text-faint);
 }
 
 .dark *::-webkit-scrollbar-thumb {
-  background: #475569;
+  background: #3a3a36;
 }
 
 input[type='time']::-webkit-calendar-picker-indicator {
-  opacity: 0.5;
+  opacity: 0.4;
 }
 
 @layer components {
+  /* ── 按钮 ───────────────────────────
+     全局只有一个"实心"按钮（主操作）；「记一笔」改成描边次级样式，
+     不再用第二个高饱和彩色按钮抢注意力。 */
   .btn {
-    @apply inline-flex items-center justify-center gap-2 rounded-md px-3 py-2 text-sm font-medium transition-colors duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand focus-visible:ring-offset-2 focus-visible:ring-offset-white disabled:cursor-not-allowed disabled:opacity-45 dark:focus-visible:ring-offset-slate-900;
+    @apply inline-flex items-center justify-center gap-1.5 rounded-btn px-3 py-[7px] text-sm font-medium transition-colors duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand/25 focus-visible:ring-offset-2 focus-visible:ring-offset-white disabled:cursor-not-allowed disabled:opacity-40 dark:focus-visible:ring-offset-slate-900;
   }
   .btn-primary {
-    @apply btn bg-brand text-white shadow-sm hover:bg-brand-deep active:bg-brand-deep disabled:hover:bg-brand;
+    @apply btn bg-brand text-white hover:bg-brand-deep active:bg-brand-deep disabled:hover:bg-brand dark:bg-teal-500 dark:hover:bg-teal-400 dark:active:bg-teal-400;
   }
-  /* 记录类操作（记一笔）：与「新建计划」同级别的实心按钮，用蓝色区分 */
   .btn-record {
-    @apply btn bg-blue-600 text-white shadow-sm hover:bg-blue-700 active:bg-blue-700 disabled:hover:bg-blue-600 dark:bg-blue-500 dark:hover:bg-blue-600 dark:active:bg-blue-600 dark:disabled:hover:bg-blue-500;
+    @apply btn border border-line-strong bg-surface text-ink hover:border-ink-faint hover:bg-surface-soft dark:border-slate-600 dark:bg-slate-800 dark:text-slate-100 dark:hover:border-slate-500 dark:hover:bg-slate-700;
   }
   .btn-ghost {
-    @apply btn border border-transparent text-ink-soft hover:bg-surface-soft hover:text-ink dark:text-slate-300 dark:hover:bg-white/10 dark:hover:text-white;
+    @apply btn border border-transparent text-ink-soft hover:bg-surface-soft hover:text-ink dark:text-slate-300 dark:hover:bg-slate-700/50 dark:hover:text-slate-100;
   }
+  .btn-quiet {
+    @apply btn px-2 text-xs text-ink-muted hover:bg-surface-soft hover:text-ink dark:text-slate-400 dark:hover:bg-slate-700/50 dark:hover:text-slate-100;
+  }
+  /* 破坏性操作：安静的红色文字按钮，不做成第二个实心按钮 */
+  .btn-danger {
+    @apply btn border border-transparent text-rose-600 hover:bg-rose-50 dark:text-rose-300 dark:hover:bg-rose-500/10;
+  }
+
+  /* 提示条：左侧一条强调线，替代整块圆角淡彩底 */
+  .notice {
+    @apply flex items-start gap-2 border-l-2 px-3 py-2 text-xs leading-5;
+  }
+  .notice-warn {
+    @apply notice border-amber-400 bg-amber-50/60 text-amber-800 dark:border-amber-300/60 dark:bg-amber-400/10 dark:text-amber-200;
+  }
+  .notice-info {
+    @apply notice border-line-strong bg-surface-soft/60 text-ink-soft dark:border-slate-600 dark:bg-slate-800/50 dark:text-slate-300;
+  }
+  .notice-ok {
+    @apply notice border-teal-400 bg-teal-50/60 text-teal-800 dark:border-teal-300/60 dark:bg-teal-500/10 dark:text-teal-200;
+  }
+  .notice-err {
+    @apply notice border-rose-400 bg-rose-50/60 text-rose-700 dark:border-rose-300/60 dark:bg-rose-500/10 dark:text-rose-300;
+  }
+
+  /* ── 表单 ─────────────────────────── */
   .field {
-    @apply w-full rounded-md border border-line bg-surface px-3 py-2 text-sm text-ink shadow-sm transition-colors placeholder:text-ink-faint focus:border-brand focus:outline-none focus:ring-2 focus:ring-brand/20 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-100 dark:placeholder:text-slate-500;
+    @apply w-full rounded-input border border-line bg-surface px-3 py-[7px] text-sm text-ink transition-colors placeholder:text-ink-faint hover:border-line-strong focus:border-brand/60 focus:outline-none focus:ring-2 focus:ring-brand/12 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100 dark:placeholder:text-slate-500;
   }
   .label {
     @apply mb-1.5 block text-xs font-medium text-ink-muted dark:text-slate-400;
   }
+
+  /* ── 容器与文字 ───────────────────── */
   .panel {
-    @apply rounded-lg border border-line bg-surface shadow-panel dark:border-slate-700 dark:bg-slate-800;
+    @apply rounded-card border border-line bg-surface dark:border-slate-700 dark:bg-slate-800;
   }
   .section-title {
-    @apply text-sm font-semibold text-ink dark:text-slate-100;
+    @apply text-sm font-semibold tracking-title text-ink dark:text-slate-100;
+  }
+  /* 小节标签：小字 + 字距，替代原来的淡彩图标方块 */
+  .eyebrow {
+    @apply text-xs font-medium tracking-label text-ink-muted dark:text-slate-400;
+  }
+  .chip {
+    @apply inline-flex items-center gap-1 rounded-sm border border-line px-1.5 py-0.5 text-2xs text-ink-muted dark:border-slate-700 dark:text-slate-400;
   }
 }
 
@@ -143,8 +212,8 @@ input[type='time']::-webkit-calendar-picker-indicator {
   --map-coast: #9fb3a2;
   --map-grid: rgba(100, 116, 139, 0.14);
   --map-route-remain: #9fb6c7;
-  --map-route-flown: #0f766e;
-  --map-pin: #0f766e;
+  --map-route-flown: #15564d;
+  --map-pin: #15564d;
   --map-text: #334155;
 }
 
@@ -154,7 +223,7 @@ input[type='time']::-webkit-calendar-picker-indicator {
   --map-coast: #2e4058;
   --map-grid: rgba(148, 163, 184, 0.12);
   --map-route-remain: #33506b;
-  --map-route-flown: #2dd4bf;
-  --map-pin: #2dd4bf;
+  --map-route-flown: #7fb3aa;
+  --map-pin: #7fb3aa;
   --map-text: #cbd5e1;
 }

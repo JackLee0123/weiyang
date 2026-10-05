@@ -70,7 +70,7 @@ export function FeedbackForm() {
     <section className="panel p-4 sm:p-5">
       <div className="flex items-center gap-2">
         <MessageSquareText size={17} className="text-brand dark:text-teal-300" />
-        <h2 className="text-base font-semibold text-ink dark:text-slate-100">问题反馈</h2>
+        <h2 className="text-sm font-medium tracking-title text-ink dark:text-slate-100">问题反馈</h2>
       </div>
       <p className="mt-1 text-sm text-ink-muted dark:text-slate-400">
         描述你遇到的问题或想法，可以附上截图，我们会直接收到并尽快改进。
@@ -151,8 +151,8 @@ export function FeedbackForm() {
           <p
             className={`rounded-md px-3 py-2 text-sm ${
               message.type === 'ok'
-                ? 'bg-teal-50 text-teal-700 dark:bg-teal-500/10 dark:text-teal-200'
-                : 'bg-rose-50 text-rose-600 dark:bg-rose-500/10 dark:text-rose-300'
+                ? 'text-teal-700 dark:text-teal-300'
+                : 'text-rose-600 dark:text-rose-300'
             }`}
           >
             {message.text}

@@ -82,8 +82,8 @@ export function PlanForm({ defaultDate, initial, onClose }: Props) {
   return (
     <div className="space-y-4">
       {locked && (
-        <div className="flex items-start gap-2 rounded-md border border-amber-300/70 bg-amber-50 px-3 py-2 text-sm text-amber-800 dark:border-amber-400/30 dark:bg-amber-400/10 dark:text-amber-200">
-          <Lock size={14} className="mt-0.5 shrink-0" />
+        <div className="notice-warn">
+          <Lock size={13} strokeWidth={1.75} className="mt-0.5 shrink-0" />
           过去的日期已封存为永久回忆，无法添加或修改计划。
         </div>
       )}
@@ -125,13 +125,13 @@ export function PlanForm({ defaultDate, initial, onClose }: Props) {
       <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
         <div>
           <label className="label flex items-center gap-1">
-            <Clock size={12} /> 开始
+            <Clock size={12} strokeWidth={1.75} /> 开始
           </label>
           <input type="time" className="field" value={form.start_time || ''} onChange={(e) => set('start_time', e.target.value)} />
         </div>
         <div>
           <label className="label flex items-center gap-1">
-            <Clock size={12} /> 结束
+            <Clock size={12} strokeWidth={1.75} /> 结束
           </label>
           <input type="time" className="field" value={form.end_time || ''} onChange={(e) => set('end_time', e.target.value)} />
         </div>
@@ -142,7 +142,7 @@ export function PlanForm({ defaultDate, initial, onClose }: Props) {
       <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
         <div>
           <label className="label flex items-center gap-1">
-            <Flag size={12} /> 优先级
+            <Flag size={12} strokeWidth={1.75} /> 优先级
           </label>
           <select className="field" value={form.priority} onChange={(e) => set('priority', e.target.value as Priority)}>
             {PRIORITY_OPTIONS.map((o) => (
@@ -154,7 +154,7 @@ export function PlanForm({ defaultDate, initial, onClose }: Props) {
         </div>
         <div>
           <label className="label flex items-center gap-1">
-            <Calendar size={12} /> 状态
+            <Calendar size={12} strokeWidth={1.75} /> 状态
           </label>
           <select className="field" value={form.status} onChange={(e) => set('status', e.target.value as PlanStatus)}>
             {STATUS_OPTIONS.map((o) => (
@@ -169,7 +169,7 @@ export function PlanForm({ defaultDate, initial, onClose }: Props) {
       <div className="flex items-center justify-between pt-2">
         {initial && (
           <button
-            className="btn text-rose-600 hover:bg-rose-50 disabled:cursor-not-allowed disabled:text-slate-300 disabled:hover:bg-transparent dark:text-rose-300 dark:hover:bg-rose-500/10 dark:disabled:text-slate-600"
+            className="btn-danger disabled:cursor-not-allowed disabled:text-slate-300 disabled:hover:bg-transparent dark:disabled:text-slate-600"
             disabled={locked}
             onClick={async () => {
               try {
@@ -180,7 +180,7 @@ export function PlanForm({ defaultDate, initial, onClose }: Props) {
               }
             }}
           >
-            <Trash2 size={15} /> 删除
+            <Trash2 size={14} strokeWidth={1.75} /> 删除
           </button>
         )}
         <div className="flex gap-2">

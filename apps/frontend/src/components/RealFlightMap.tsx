@@ -85,8 +85,8 @@ export function RealFlightMap({
         const points = greatCirclePoints(route.from, route.to, 80)
         pointsRef.current = points
         const dark = document.documentElement.classList.contains('dark')
-        const brand = dark ? '#2dd4bf' : '#0f766e'
-        const destColor = '#ea580c'
+  const brand = dark ? '#7fb3aa' : '#15564d'
+  const destColor = '#9c732f'
 
         map = new amap.Map(containerRef.current, {
           viewMode: '3D',
@@ -111,7 +111,7 @@ export function RealFlightMap({
         })
         const remaining = new amap.Polyline({
           path: points,
-          strokeColor: dark ? '#475569' : '#94a3b8',
+      strokeColor: dark ? '#3f3f39' : '#d2d2cb',
           strokeWeight: 4,
           strokeStyle: 'dashed',
           strokeDasharray: [8, 12],
