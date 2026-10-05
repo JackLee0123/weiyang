@@ -6,6 +6,7 @@ import os
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
+from starlette.exceptions import HTTPException as StarletteHTTPException
 
 from .config import APP_VERSION, settings
 from .database import Base, SessionLocal, engine
@@ -72,7 +73,14 @@ class SPAStaticFiles(StaticFiles):
     """前端口径回退：未命中真实文件时返回 index.html，支持 /notifications 等深链接。"""
 
     async def get_response(self, path: str, scope):
-        response = await super().get_response(path, scope)
+        try:
+            response = await super().get_response(path, scope)
+        except StarletteHTTPException as exc:
+            # Starlette 1.x 找不到文件时是抛 404 异常（而不是返回 404 响应），
+            # 所以这里必须捕获，否则 /notifications 这类前端路由会直接 404。
+            if exc.status_code != 404:
+                raise
+            return await super().get_response("index.html", scope)
         if response.status_code == 404:
             response = await super().get_response("index.html", scope)
         return response

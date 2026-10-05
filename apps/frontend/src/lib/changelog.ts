@@ -12,7 +12,7 @@ export interface ChangelogEntry {
   items: ChangelogItem[]
 }
 
-export const CURRENT_VERSION = 'v0.9.0'
+export const CURRENT_VERSION = 'v0.9.1'
 
 export const CHANGELOG_KIND_META: Record<ChangelogKind, { label: string; className: string }> = {
   feature: { label: '新增', className: 'text-teal-700 dark:text-teal-300' },
@@ -22,6 +22,17 @@ export const CHANGELOG_KIND_META: Record<ChangelogKind, { label: string; classNa
 }
 
 export const CHANGELOG: ChangelogEntry[] = [
+  {
+    version: 'v0.9.1',
+    date: '2026-10-05',
+    title: '修复推送通知打开的页面 404',
+    items: [
+      {
+        kind: 'fix',
+        text: '修复点开推送通知后跳到 /notifications 出现 404 的问题：前端路由回退逻辑在 Starlette 1.x 下失效（找不到文件时是抛异常而不是返回 404），现在 /notifications、/list 这类深链接都能正常回到应用',
+      },
+    ],
+  },
   {
     version: 'v0.9.0',
     date: '2026-10-05',
