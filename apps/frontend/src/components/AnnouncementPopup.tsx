@@ -41,7 +41,7 @@ export function AnnouncementPopup() {
 
   return (
     <div
-      className="fixed inset-0 z-[60] flex items-center justify-center bg-slate-950/40 p-4 backdrop-blur-sm"
+      className="fixed inset-0 z-[60] flex items-center justify-center bg-ink/[0.34] p-4"
       role="presentation"
       onMouseDown={close}
     >

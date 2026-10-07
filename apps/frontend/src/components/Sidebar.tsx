@@ -153,7 +153,7 @@ export function Sidebar({
 
   return (
     <>
-      <header className="sticky top-0 z-30 flex h-12 items-center gap-2.5 border-b border-line bg-surface/90 px-3.5 backdrop-blur-md dark:border-slate-800 dark:bg-slate-900/90 md:hidden">
+      <header className="sticky top-0 z-30 flex h-12 items-center gap-2.5 border-b border-line bg-surface px-3.5 dark:border-slate-800 md:hidden">
         <BrandMark size={20} className="text-brand dark:text-teal-300" />
         <p className="text-[13px] font-semibold tracking-title text-ink dark:text-slate-100">未央 · Everlong</p>
         <div className="ml-auto flex items-center gap-0.5">
@@ -175,7 +175,7 @@ export function Sidebar({
         </div>
       </header>
 
-      <div className="sticky top-12 z-20 border-b border-line bg-surface/90 px-2 py-1 backdrop-blur-md dark:border-slate-800 dark:bg-slate-900/90 md:hidden">
+      <div className="sticky top-12 z-20 border-b border-line bg-surface px-2 py-1 dark:border-slate-800 md:hidden">
         {renderNav(
           true,
           [...NAV, CHANGELOG_NAV, ...(isAdmin ? [ADMIN_NAV] : [])],

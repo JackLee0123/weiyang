@@ -37,7 +37,7 @@ export function ImageGallery({ images }: { images: string[] }) {
       </div>
       {open && (
         <div
-          className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/80 p-4 backdrop-blur-sm"
+          className="fixed inset-0 z-50 flex items-center justify-center bg-ink/[0.72] p-4"
           role="presentation"
           onClick={(event) => {
             event.stopPropagation()

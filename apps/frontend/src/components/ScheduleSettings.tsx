@@ -195,7 +195,7 @@ export function ScheduleSettings({ onClose }: { onClose: () => void }) {
               type="button"
               className={`rounded-md py-1.5 text-sm font-medium transition ${
                 form.recurrence === item.value
-                  ? 'bg-surface text-brand shadow-sm dark:bg-slate-700 dark:text-teal-200'
+                  ? 'bg-surface text-brand dark:bg-slate-700 dark:text-teal-200'
                   : 'text-ink-soft hover:text-ink dark:text-slate-300 dark:hover:text-slate-100'
               }`}
               onClick={() => setRecurrence(item.value)}

@@ -200,7 +200,7 @@ export function TimetableImport({ initial, onClose }: { initial?: TimetableSetti
         <div className="flex gap-1 rounded-md border border-line bg-surface-soft p-0.5 dark:border-slate-700 dark:bg-slate-900/50">
           <button
             className={`flex flex-1 items-center justify-center gap-1.5 rounded px-3 py-1.5 text-sm font-medium transition ${
-              tab === 'file' ? 'bg-surface text-ink shadow-sm dark:bg-slate-700 dark:text-slate-100' : 'text-ink-muted dark:text-slate-400'
+              tab === 'file' ? 'bg-surface text-ink dark:bg-slate-700 dark:text-slate-100' : 'text-ink-muted dark:text-slate-400'
             }`}
             onClick={() => switchTab('file')}
           >
@@ -208,7 +208,7 @@ export function TimetableImport({ initial, onClose }: { initial?: TimetableSetti
           </button>
           <button
             className={`flex flex-1 items-center justify-center gap-1.5 rounded px-3 py-1.5 text-sm font-medium transition ${
-              tab === 'wisedu' ? 'bg-surface text-ink shadow-sm dark:bg-slate-700 dark:text-slate-100' : 'text-ink-muted dark:text-slate-400'
+              tab === 'wisedu' ? 'bg-surface text-ink dark:bg-slate-700 dark:text-slate-100' : 'text-ink-muted dark:text-slate-400'
             }`}
             onClick={() => switchTab('wisedu')}
           >

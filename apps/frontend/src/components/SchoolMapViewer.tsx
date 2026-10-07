@@ -144,7 +144,7 @@ function Lightbox({ onClose }: { onClose: () => void }) {
 
   return (
     <div
-      className="fixed inset-0 z-[60] flex flex-col bg-slate-950/95 backdrop-blur-sm"
+      className="fixed inset-0 z-[60] flex flex-col bg-ink/[0.92]"
       role="dialog"
       aria-modal="true"
       aria-label="学校地图"
@@ -186,7 +186,7 @@ function Lightbox({ onClose }: { onClose: () => void }) {
         )}
       </div>
 
-      <div className="pointer-events-none absolute bottom-4 left-1/2 flex -translate-x-1/2 items-center gap-1 rounded-full bg-slate-900/80 p-1 shadow-soft ring-1 ring-white/10 backdrop-blur">
+      <div className="pointer-events-none absolute bottom-4 left-1/2 flex -translate-x-1/2 items-center gap-1 rounded-full bg-slate-900/80 p-1 ring-1 ring-white/10">
         <button type="button" className="pointer-events-auto rounded-full p-2 text-slate-200 transition-colors hover:bg-white/10 hover:text-white disabled:opacity-40" onClick={zoomOut} disabled={atFit} aria-label="缩小" title="缩小">
           <Minus size={18} />
         </button>

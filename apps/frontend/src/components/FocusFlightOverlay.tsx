@@ -164,7 +164,7 @@ export function FocusFlightOverlay({ onClose }: { onClose: () => void }) {
                 <p className="mt-1 text-sm text-ink-muted dark:text-slate-400">把专注变成一段旅程</p>
               </div>
 
-              <div className="rounded-lg border border-line bg-surface p-5 shadow-soft dark:border-slate-700 dark:bg-slate-800">
+              <div className="panel p-5">
                 <label className="label">专注时长</label>
                 <div className="grid grid-cols-4 gap-2">
                   {FOCUS_PRESETS.map((preset) => {
@@ -311,7 +311,7 @@ export function FocusFlightOverlay({ onClose }: { onClose: () => void }) {
                 </p>
               </div>
 
-              <div className="rounded-lg border border-line bg-surface p-5 shadow-soft dark:border-slate-700 dark:bg-slate-800">
+              <div className="panel p-5">
                 <div className="flex justify-between text-sm">
                   <span className="text-ink-muted dark:text-slate-400">本次专注</span>
                   <span className="font-medium text-ink dark:text-slate-100">{flightMinutes} 分钟</span>

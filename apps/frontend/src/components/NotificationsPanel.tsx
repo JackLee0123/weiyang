@@ -24,7 +24,7 @@ export function NotificationsPanel({ onClose, initialTab = 'push' }: { onClose: 
             aria-pressed={tab === item.key}
             className={`flex flex-1 items-center justify-center gap-1.5 rounded px-3 py-1.5 text-sm font-medium transition ${
               tab === item.key
-                ? 'bg-surface text-ink shadow-sm dark:bg-slate-700 dark:text-slate-100'
+                ? 'bg-surface text-ink dark:bg-slate-700 dark:text-slate-100'
                 : 'text-ink-muted dark:text-slate-400'
             }`}
             onClick={() => setTab(item.key)}

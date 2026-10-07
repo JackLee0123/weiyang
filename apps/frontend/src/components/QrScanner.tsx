@@ -151,7 +151,7 @@ export function QrScanner({ onDetected, onClose }: { onDetected: (raw: string) =
   return (
     <div className="fixed inset-0 z-[60] flex flex-col items-center justify-center bg-slate-950/90 p-4">
       <div className="relative w-full max-w-sm">
-        <div className="relative aspect-square w-full overflow-hidden rounded-xl border border-slate-700 bg-black">
+        <div className="relative aspect-square w-full overflow-hidden rounded-md border border-slate-700 bg-black">
           <video ref={videoRef} className="h-full w-full object-cover" playsInline muted autoPlay />
           <canvas ref={canvasRef} className="hidden" />
           {ready && !error && (
