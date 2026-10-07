@@ -193,10 +193,10 @@ export function LoginPage({ theme, onToggleTheme, onLogin }: LoginPageProps) {
         {theme === 'dark' ? <Sun size={18} /> : <Moon size={18} />}
       </button>
 
-      <div className="w-full max-w-sm rounded-card border border-line bg-surface p-6 dark:border-slate-800 dark:bg-slate-900">
+      <div className="w-full max-w-[388px] rounded-card border border-line bg-surface p-10 dark:border-slate-800 dark:bg-slate-900">
         <div className="flex flex-col items-center text-center">
           <BrandMark size={30} className="text-brand dark:text-teal-300" />
-          <h1 className="mt-4 text-lg font-medium tracking-title text-ink dark:text-slate-100">{title}</h1>
+          <h1 className="mt-5 font-display text-[27px] font-normal leading-tight tracking-title text-ink dark:text-slate-100">{title}</h1>
           <p className="mt-1 text-sm text-ink-muted dark:text-slate-400">{subtitle}</p>
         </div>
 
