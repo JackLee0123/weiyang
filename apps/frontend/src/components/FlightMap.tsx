@@ -68,7 +68,7 @@ function OfflineMap({ route, progress }: { route: FlightRoute; progress: number 
   const angle = next ? (Math.atan2(next[1] - plane[1], next[0] - plane[0]) * 180) / Math.PI : 0
 
   return (
-    <div className="flight-map overflow-hidden rounded-lg border border-line bg-surface text-ink dark:border-slate-700 dark:bg-slate-800">
+    <div className="flight-map panel overflow-hidden text-ink dark:bg-slate-800">
       <svg
         viewBox={viewBox}
         className="block h-auto w-full"

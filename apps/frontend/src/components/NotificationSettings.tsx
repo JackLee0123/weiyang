@@ -106,20 +106,20 @@ export function NotificationSettings({ onClose }: { onClose: () => void }) {
       {!state ? (
         <p className="text-sm text-ink-muted dark:text-slate-400">正在检测当前设备…</p>
       ) : !state.serverSupported ? (
-        <div className="flex items-start gap-3 rounded-md bg-surface-soft p-3 dark:bg-white/5">
+        <div className="flex items-start gap-3 rounded-md border border-line-soft bg-surface-soft p-3 dark:bg-white/5">
           <ShieldCheck size={18} className="mt-0.5 shrink-0 text-ink-faint dark:text-slate-500" />
           <p className="text-sm text-ink-soft dark:text-slate-300">
             服务器尚未配置通知服务（VAPID），请联系管理员。
           </p>
         </div>
       ) : state.unsupported ? (
-        <div className="flex items-start gap-3 rounded-md bg-surface-soft p-3 dark:bg-white/5">
+        <div className="flex items-start gap-3 rounded-md border border-line-soft bg-surface-soft p-3 dark:bg-white/5">
           <ShieldCheck size={18} className="mt-0.5 shrink-0 text-ink-faint dark:text-slate-500" />
           <p className="text-sm text-ink-soft dark:text-slate-300">当前浏览器或设备不支持 Web Push，无法开启通知。</p>
         </div>
       ) : state.denied ? (
         <div className="space-y-3">
-          <div className="flex items-start gap-3 rounded-md bg-surface-soft p-3 dark:bg-white/5">
+          <div className="flex items-start gap-3 rounded-md border border-line-soft bg-surface-soft p-3 dark:bg-white/5">
             <BellOff size={18} className="mt-0.5 shrink-0 text-rose-500" />
             <p className="text-sm text-ink-soft dark:text-slate-300">
               你已拒绝通知权限。想重新开启，请到浏览器/系统「设置 → 通知」中允许本站通知，然后点击下方「重新检测」。
@@ -134,7 +134,7 @@ export function NotificationSettings({ onClose }: { onClose: () => void }) {
         </div>
       ) : state.iosRequiresInstall ? (
         <div className="space-y-3">
-          <div className="flex items-start gap-3 rounded-md bg-surface-soft p-3 dark:bg-white/5">
+          <div className="flex items-start gap-3 rounded-md border border-line-soft bg-surface-soft p-3 dark:bg-white/5">
             <Smartphone size={18} className="mt-0.5 shrink-0 text-brand dark:text-teal-300" />
             <p className="text-sm text-ink-soft dark:text-slate-300">
               iPhone 需要先将本网站添加到主屏幕，安装后才能开启通知。

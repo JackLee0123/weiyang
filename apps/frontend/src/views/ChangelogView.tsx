@@ -125,7 +125,7 @@ export function ChangelogView() {
 
           {totalPages > 1 && (
             <nav
-              className="flex items-center justify-between gap-3 rounded-card border border-line bg-surface px-3 py-2 dark:border-slate-800 dark:bg-slate-800"
+              className="panel flex items-center justify-between gap-3 px-3 py-2"
               aria-label="更新日志分页"
             >
               <button

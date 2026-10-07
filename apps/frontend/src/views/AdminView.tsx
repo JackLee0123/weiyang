@@ -66,7 +66,7 @@ export function AdminView({ meId }: { meId: number }) {
       {usersQ.isSuccess && users.length === 0 && <EmptyState title="还没有用户" hint="用户注册后会自动出现在这里" />}
 
       {users.length > 0 && (
-        <div className="overflow-x-auto rounded-card border border-line bg-surface dark:border-slate-800 dark:bg-slate-800">
+        <div className="panel overflow-x-auto">
           <table className="w-full min-w-[640px] text-sm">
             <thead>
               <tr className="border-b border-line text-left text-2xs font-medium tracking-label text-ink-muted dark:border-slate-700 dark:text-slate-400">

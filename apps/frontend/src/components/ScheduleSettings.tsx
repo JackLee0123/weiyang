@@ -188,7 +188,7 @@ export function ScheduleSettings({ onClose }: { onClose: () => void }) {
 
       <div>
         <label className="label">重复方式</label>
-        <div className="grid grid-cols-4 gap-1 rounded-lg bg-surface-soft p-1 dark:bg-white/5">
+        <div className="grid grid-cols-4 gap-1 rounded-md bg-surface-soft p-1 dark:bg-white/5">
           {RECURRENCE.map((item) => (
             <button
               key={item.value}

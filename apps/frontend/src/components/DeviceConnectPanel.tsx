@@ -205,7 +205,7 @@ export function DeviceConnectPanel({ initialCode }: DeviceConnectPanelProps = {}
 
   return (
     <div className="space-y-5">
-      <div className="flex items-start gap-3 rounded-md border border-line bg-surface-soft p-3 dark:border-slate-700 dark:bg-slate-900/50">
+      <div className="flex items-start gap-3 rounded-md border border-line-soft bg-surface-soft p-3 dark:bg-slate-900/50">
         <Watch size={18} className="mt-0.5 shrink-0 text-brand-ink dark:text-teal-300" />
         <div className="text-sm leading-relaxed text-ink-soft dark:text-slate-300">
           <p className="font-medium text-ink dark:text-slate-100">连接课表同步脚本</p>
@@ -234,7 +234,7 @@ export function DeviceConnectPanel({ initialCode }: DeviceConnectPanelProps = {}
       )}
 
       {stage === 'confirm' && pending && (
-        <div className="space-y-3 rounded-md border border-line bg-surface p-3 dark:border-slate-700 dark:bg-slate-900/40">
+        <div className="panel space-y-3 p-3">
           <p className="text-sm text-ink dark:text-slate-100">
             确认把「{pending.label}」连接到当前账号？
           </p>
@@ -350,7 +350,7 @@ export function DeviceConnectPanel({ initialCode }: DeviceConnectPanelProps = {}
         {watches.map((device) => (
           <div
             key={device.id}
-            className="flex items-center gap-3 rounded-md border border-line bg-surface px-3 py-2 dark:border-slate-700 dark:bg-slate-900/40"
+            className="panel flex items-center gap-3 px-3 py-2"
           >
             <Watch size={16} className="shrink-0 text-brand-ink dark:text-teal-300" />
             <div className="min-w-0 flex-1">
