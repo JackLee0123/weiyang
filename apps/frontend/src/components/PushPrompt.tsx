@@ -1,4 +1,4 @@
-import { Bell, BellRing, X } from 'lucide-react'
+import { Bell, BellRing, X } from './icons'
 import { useCallback, useEffect, useState } from 'react'
 import {
   enableNotifications,

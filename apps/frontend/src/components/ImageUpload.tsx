@@ -1,4 +1,4 @@
-import { ImagePlus, Loader2, X } from 'lucide-react'
+import { ImagePlus, Loader2, X } from './icons'
 import { useRef, useState } from 'react'
 import { fileToDataUri, MAX_IMAGE_BYTES, MAX_IMAGES } from '../lib/image'
 

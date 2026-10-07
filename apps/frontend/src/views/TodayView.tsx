@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react'
 import { parseISO, format } from 'date-fns'
-import { ChevronLeft, ChevronRight, Lock, Plus } from 'lucide-react'
+import { ChevronLeft, ChevronRight, Lock, Plus } from '../components/icons'
 import { PlanItem } from '../components/PlanItem'
 import { RecordItem } from '../components/RecordItem'
 import { FocusPanel } from '../components/FocusPanel'

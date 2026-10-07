@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { ChevronDown, ChevronLeft, ChevronRight, Sparkles } from 'lucide-react'
+import { ChevronDown, ChevronLeft, ChevronRight, Sparkles } from '../components/icons'
 import { CHANGELOG, CHANGELOG_KIND_META, CURRENT_VERSION, type ChangelogEntry } from '../lib/changelog'
 import { FeedbackForm } from '../components/FeedbackForm'
 

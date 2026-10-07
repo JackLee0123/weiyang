@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react'
 import { addDays, startOfMonth, startOfWeek, format, isSameMonth, isToday } from 'date-fns'
-import { ChevronLeft, ChevronRight, CalendarPlus } from 'lucide-react'
+import { ChevronLeft, ChevronRight, CalendarPlus } from '../components/icons'
 import { usePlans, useRecords } from '../lib/queries'
 import { monthRange, nextMonth, prevMonth, todayISO } from '../lib/date'
 import type { Plan, RecordEntry } from '../lib/types'

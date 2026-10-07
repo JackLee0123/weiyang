@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
-import { Plane, X } from 'lucide-react'
+import { Plane, X } from './icons'
 import { FOCUS_MAX, FOCUS_MIN, FOCUS_PRESETS, clampMinutes, formatClock, routeFor } from '../lib/flight'
 import { nextFocusName } from '../lib/focus'
 import { usePlanMutations, usePlans, useRecordMutations, useRecords } from '../lib/queries'

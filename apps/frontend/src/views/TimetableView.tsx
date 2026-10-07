@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react'
 import { format } from 'date-fns'
-import { AlertTriangle, CalendarPlus, ChevronLeft, ChevronRight, Trash2, Upload } from 'lucide-react'
+import { AlertTriangle, CalendarPlus, ChevronLeft, ChevronRight, Trash2, Upload } from '../components/icons'
 import { Modal } from '../components/Modal'
 import { SchoolMapViewer } from '../components/SchoolMapViewer'
 import { TimetableImport } from '../components/TimetableImport'

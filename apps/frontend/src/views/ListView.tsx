@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react'
-import { Plus, Search } from 'lucide-react'
+import { Plus, Search } from '../components/icons'
 import { PlanItem } from '../components/PlanItem'
 import { RecordItem } from '../components/RecordItem'
 import { PlanForm } from '../components/PlanForm'

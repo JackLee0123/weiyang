@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { Megaphone, X } from 'lucide-react'
+import { Megaphone, X } from './icons'
 import { useAnnouncementMutations, useUnreadAnnouncement } from '../lib/queries'
 
 /** 后端存的是 UTC（不带时区后缀），显示时按本地时间换算。 */

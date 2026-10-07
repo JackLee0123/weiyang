@@ -1,5 +1,5 @@
 import { useRef, useState } from 'react'
-import { Download, TriangleAlert, Upload } from 'lucide-react'
+import { Download, TriangleAlert, Upload } from './icons'
 import { api } from '../lib/api'
 import type { Backup } from '../lib/types'
 

@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
-import { CameraOff, X } from 'lucide-react'
+import { CameraOff, X } from './icons'
 
 type DecodeFn = (
   data: Uint8ClampedArray,

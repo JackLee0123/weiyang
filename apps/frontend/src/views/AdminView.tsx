@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Check, Loader2, ShieldAlert, Trash2 } from 'lucide-react'
+import { Check, Loader2, ShieldAlert, Trash2 } from '../components/icons'
 import { useAdminMutations, useAdminUsers } from '../lib/queries'
 import { AdminScheduleImport } from '../components/AdminScheduleImport'
 import { Modal } from '../components/Modal'

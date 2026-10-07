@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react'
 import { format } from 'date-fns'
-import { ChevronLeft, ChevronRight, MapPin } from 'lucide-react'
+import { ChevronLeft, ChevronRight, MapPin } from '../components/icons'
 import { useHeatmap } from '../lib/queries'
 import { activityLevel, buildCalendarWeeks, buildYearRange, LEVEL_CLASS, scoreOf } from '../lib/heatmap'
 import { toISO } from '../lib/date'

@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
-import { Check, MoveRight, RefreshCw } from 'lucide-react'
+import { Check, MoveRight, RefreshCw } from './icons'
 import { api } from '../lib/api'
 import type { CaptchaChallenge } from '../lib/types'
 

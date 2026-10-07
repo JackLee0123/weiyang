@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { ChevronDown, ChevronUp, Download, FileUp, Plus, RefreshCw, Save, School, Search, Settings2, Trash2, Upload, X } from 'lucide-react'
+import { ChevronDown, ChevronUp, Download, FileUp, Plus, RefreshCw, Save, School, Search, Settings2, Trash2, Upload, X } from './icons'
 import { useTimetableMutations } from '../lib/queries'
 import { api } from '../lib/api'
 import type { ParseTimetableResult, PeriodTime, TimetableSettings } from '../lib/types'

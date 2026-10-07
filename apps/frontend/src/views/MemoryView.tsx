@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { addDays, addMonths, format, parseISO, subDays, subMonths } from 'date-fns'
-import { ChevronLeft, ChevronRight, Flame, MapPin } from 'lucide-react'
+import { ChevronLeft, ChevronRight, Flame, MapPin } from '../components/icons'
 import { useMemoryReport } from '../lib/queries'
 import { monthRange, weekRange } from '../lib/date'
 import { formatMinutes } from '../lib/format'

@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react'
-import { AlertTriangle, Check, Download, FileSpreadsheet, Loader2, Undo2, Upload, UserRound } from 'lucide-react'
+import { AlertTriangle, Check, Download, FileSpreadsheet, Loader2, Undo2, Upload, UserRound } from './icons'
 import { useAdminScheduleImport } from '../lib/queries'
 import { isPast } from '../lib/date'
 import type { AdminScheduleImportResult, AdminSchedulePreview, AdminUser } from '../lib/types'

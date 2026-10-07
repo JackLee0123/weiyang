@@ -1,4 +1,4 @@
-import { Check, Lock, Pencil, Timer } from 'lucide-react'
+import { Check, Lock, Pencil, Timer } from './icons'
 import type { RecordEntry } from '../lib/types'
 import { ImageGallery } from './ImageGallery'
 import { useRecordMutations } from '../lib/queries'

@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { ClipboardCheck, Lock, Pi, Trash2 } from 'lucide-react'
+import { ClipboardCheck, Lock, Pi, Trash2 } from './icons'
 import { ImageUpload } from './ImageUpload'
 import { useRecordMutations } from '../lib/queries'
 import type { Plan, RecordEntry, RecordEntryPayload } from '../lib/types'

@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { BellRing, CalendarClock } from 'lucide-react'
+import { BellRing, CalendarClock } from './icons'
 import { NotificationSettings } from './NotificationSettings'
 import { ScheduleSettings } from './ScheduleSettings'
 

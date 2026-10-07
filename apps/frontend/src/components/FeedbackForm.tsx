@@ -1,5 +1,5 @@
 import { useRef, useState } from 'react'
-import { ImagePlus, Loader2, MessageSquareText, Send, X } from 'lucide-react'
+import { ImagePlus, Loader2, MessageSquareText, Send, X } from './icons'
 import { api } from '../lib/api'
 import { getStoredUser } from '../lib/auth'
 

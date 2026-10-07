@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
-import { ArrowRight, Eye, EyeOff, LockKeyhole, Mail, Moon, Sun, UserRound } from 'lucide-react'
+import { ArrowRight, Eye, EyeOff, LockKeyhole, Mail, Moon, Sun, UserRound } from './icons'
 import { api } from '../lib/api'
 import { setAuth } from '../lib/auth'
 import type { Theme } from '../lib/theme'

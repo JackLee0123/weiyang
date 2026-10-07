@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
-import { Maximize, Minus, Plus, X, ZoomIn } from 'lucide-react'
+import { Maximize, Minus, Plus, X, ZoomIn } from './icons'
 
 const MAP_SRC = '/campus-map.jpg'
 const MAX_SCALE = 8

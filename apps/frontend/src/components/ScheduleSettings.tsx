@@ -1,4 +1,4 @@
-import { BellRing, CalendarClock, Clock, Plus, RefreshCw, Save, X } from 'lucide-react'
+import { BellRing, CalendarClock, Clock, Plus, RefreshCw, Save, X } from './icons'
 import { useCallback, useEffect, useState } from 'react'
 import { api } from '../lib/api'
 import type { PushScheduleRecurrence } from '../lib/types'

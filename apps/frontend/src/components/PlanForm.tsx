@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { Calendar, Clock, Flag, Lock, Trash2 } from 'lucide-react'
+import { Calendar, Clock, Flag, Lock, Trash2 } from './icons'
 import { ImageUpload } from './ImageUpload'
 import { usePlanMutations } from '../lib/queries'
 import type { Plan, PlanPayload, PlanStatus, Priority } from '../lib/types'

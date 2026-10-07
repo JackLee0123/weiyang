@@ -1,6 +1,6 @@
 import { useMemo } from 'react'
 import { format, parseISO } from 'date-fns'
-import { PieChart } from 'lucide-react'
+import { PieChart } from './icons'
 import { summarizeFocus, type FocusSlice } from '../lib/focus'
 import { formatMinutes, minutesParts } from '../lib/format'
 import type { RecordEntry } from '../lib/types'

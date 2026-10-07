@@ -1,4 +1,4 @@
-import { Bell, BellOff, Megaphone, Send, Trash2 } from 'lucide-react'
+import { Bell, BellOff, Megaphone, Send, Trash2 } from '../components/icons'
 import { useCallback, useEffect, useState } from 'react'
 import { clearStoredNotifications, getStoredNotifications } from '../lib/push'
 import { useAnnouncementMutations, useAnnouncements } from '../lib/queries'

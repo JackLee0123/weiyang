@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { addDays } from 'date-fns'
-import { CalendarClock, PlaneLanding, RotateCcw } from 'lucide-react'
+import { CalendarClock, PlaneLanding, RotateCcw } from '../components/icons'
 import { Modal } from '../components/Modal'
 import { EmptyState } from '../components/EmptyState'
 import { PriorityBadge, StatusBadge } from '../components/badges'

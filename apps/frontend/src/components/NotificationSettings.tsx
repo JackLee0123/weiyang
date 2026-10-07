@@ -1,4 +1,4 @@
-import { Bell, BellOff, BellRing, MonitorUp, RefreshCw, Share, ShieldCheck, Smartphone } from 'lucide-react'
+import { Bell, BellOff, BellRing, MonitorUp, RefreshCw, Share, ShieldCheck, Smartphone } from './icons'
 import { useCallback, useEffect, useState } from 'react'
 import { api } from '../lib/api'
 import { disableNotifications, enableNotifications, fetchPushStatus, markPrompted, type PushUiState } from '../lib/push'

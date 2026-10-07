@@ -1,4 +1,4 @@
-import { Check, Lock, Pencil } from 'lucide-react'
+import { Check, Lock, Pencil } from './icons'
 import type { Plan } from '../lib/types'
 import { PriorityBadge, StatusBadge } from './badges'
 import { ImageGallery } from './ImageGallery'

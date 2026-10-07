@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
-import { CheckCircle2, Loader2, RefreshCw, ScanLine, Smartphone, Trash2, Watch } from 'lucide-react'
-import { Package } from 'lucide-react'
+import { CheckCircle2, Loader2, RefreshCw, ScanLine, Smartphone, Trash2, Watch } from './icons'
+import { Package } from './icons'
 import { api } from '../lib/api'
 import { deviceKindLabel, deviceTitle, formatDeviceTime, parseConnectPayload } from '../lib/devices'
 import type { ConnectedDevice } from '../lib/types'

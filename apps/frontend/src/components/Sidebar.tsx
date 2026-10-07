@@ -1,4 +1,4 @@
-import { Activity, Bell, BookOpen, CalendarCheck, CalendarDays, CalendarRange, Database, History, List, LogOut, MonitorDown, Moon, Plane, Plus, Route, Sun, Users, Watch } from 'lucide-react'
+import { Activity, Bell, BookOpen, CalendarCheck, CalendarDays, CalendarRange, Database, History, List, LogOut, MonitorDown, Moon, Plane, Plus, Route, Sun, Users, Watch } from './icons'
 import { useEffect, useState, type ReactNode } from 'react'
 import type { Theme } from '../lib/theme'
 import type { View } from '../lib/types'

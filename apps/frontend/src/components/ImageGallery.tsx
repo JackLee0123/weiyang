@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { X } from 'lucide-react'
+import { X } from './icons'
 
 export function ImageGallery({ images }: { images: string[] }) {
   const [openIndex, setOpenIndex] = useState<number | null>(null)
