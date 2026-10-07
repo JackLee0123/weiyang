@@ -100,9 +100,9 @@ export function Sidebar({
   ]
 
   const rowClass = (active = false) =>
-    `group relative flex w-full items-center gap-2.5 rounded-md px-2.5 py-[7px] text-left text-[13px] transition-colors ${
+    `group relative flex w-full items-center gap-2.5 border-l-2 border-transparent px-2.5 py-[7px] text-left text-[13px] transition-colors ${
       active
-        ? 'bg-surface-soft font-medium text-ink dark:bg-slate-800 dark:text-slate-100'
+        ? 'border-ink bg-surface-muted/70 font-medium text-ink dark:border-slate-300 dark:bg-slate-800/60 dark:text-slate-100'
         : 'text-ink-soft hover:bg-surface-soft/70 hover:text-ink dark:text-slate-400 dark:hover:bg-slate-800/60 dark:hover:text-slate-200'
     }`
 
@@ -153,7 +153,7 @@ export function Sidebar({
 
   return (
     <>
-      <header className="sticky top-0 z-30 flex h-12 items-center gap-2.5 border-b border-line bg-surface px-3.5 dark:border-slate-800 md:hidden">
+      <header className="sticky top-0 z-30 flex h-12 items-center gap-2.5 border-b border-line bg-paper px-3.5 dark:border-slate-800 md:hidden">
         <BrandMark size={20} className="text-brand dark:text-teal-300" />
         <p className="text-[13px] font-semibold tracking-title text-ink dark:text-slate-100">未央 · Everlong</p>
         <div className="ml-auto flex items-center gap-0.5">
@@ -175,7 +175,7 @@ export function Sidebar({
         </div>
       </header>
 
-      <div className="sticky top-12 z-20 border-b border-line bg-surface px-2 py-1 dark:border-slate-800 md:hidden">
+      <div className="sticky top-12 z-20 border-b border-line bg-paper px-2 py-1 dark:border-slate-800 md:hidden">
         {renderNav(
           true,
           [...NAV, CHANGELOG_NAV, ...(isAdmin ? [ADMIN_NAV] : [])],
@@ -203,11 +203,11 @@ export function Sidebar({
         )}
       </div>
 
-      <aside className="hidden w-[232px] shrink-0 flex-col border-r border-line bg-surface dark:border-slate-800 dark:bg-slate-900 md:flex">
+      <aside className="hidden w-[238px] shrink-0 flex-col border-r border-line bg-paper dark:border-slate-800 dark:bg-slate-900 md:flex">
         <div className="flex items-center gap-2.5 px-4 pb-4 pt-5">
           <BrandMark size={22} className="shrink-0 text-brand dark:text-teal-300" />
           <div className="min-w-0">
-            <p className="truncate text-[13px] font-semibold tracking-title text-ink dark:text-slate-100">未央 · Everlong</p>
+            <p className="font-display truncate text-[15px] font-normal tracking-title text-ink dark:text-slate-100">未央 · Everlong</p>
             <p className="truncate text-2xs text-ink-faint dark:text-slate-500">记录 & 排期</p>
           </div>
         </div>
