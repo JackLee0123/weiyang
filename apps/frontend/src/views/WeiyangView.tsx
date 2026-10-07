@@ -73,7 +73,7 @@ export function WeiyangView() {
                 todayPlans.map((plan) => (
                   <div
                     key={plan.id}
-                    className="group -mx-2 flex flex-wrap items-center gap-3 rounded-md border-b border-line-soft px-2 py-3 transition-colors last:border-0 hover:bg-surface-soft/60 dark:border-slate-800 dark:hover:bg-slate-800/40"
+                    className="group -mx-2 flex flex-wrap items-center gap-3 rounded-md border-b border-line-soft px-2 py-3 transition-colors last:border-0 hover:bg-surface-muted/60 dark:border-slate-800 dark:hover:bg-slate-800/40"
                   >
                     <div className="min-w-0 flex-1">
                       <p className="truncate text-sm text-ink dark:text-slate-100">{plan.title}</p>
@@ -119,7 +119,7 @@ export function WeiyangView() {
                 enRoute.map((plan) => (
                   <div
                     key={plan.id}
-                    className="flex flex-wrap items-center gap-3 rounded-md border-b border-line-soft px-2 py-3 transition-colors last:border-0 hover:bg-surface-soft/60 sm:-mx-2 dark:border-slate-800 dark:hover:bg-slate-800/40"
+                    className="flex flex-wrap items-center gap-3 rounded-md border-b border-line-soft px-2 py-3 transition-colors last:border-0 hover:bg-surface-muted/60 sm:-mx-2 dark:border-slate-800 dark:hover:bg-slate-800/40"
                   >
                     <div className="min-w-0 flex-1">
                       <p className="truncate text-sm text-ink dark:text-slate-100">{plan.title}</p>

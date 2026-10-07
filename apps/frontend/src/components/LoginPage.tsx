@@ -294,7 +294,7 @@ export function LoginPage({ theme, onToggleTheme, onLogin }: LoginPageProps) {
               />
               <button
                 type="button"
-                className="absolute right-2 top-1/2 -translate-y-1/2 rounded p-1 text-ink-faint transition hover:bg-surface-soft hover:text-ink dark:text-slate-500 dark:hover:bg-white/10 dark:hover:text-slate-200"
+                className="absolute right-2 top-1/2 -translate-y-1/2 rounded p-1 text-ink-faint transition hover:bg-surface-muted hover:text-ink dark:text-slate-500 dark:hover:bg-white/10 dark:hover:text-slate-200"
                 onClick={() => setShowPassword((value) => !value)}
                 aria-label="切换密码可见性"
                 title="切换密码可见性"

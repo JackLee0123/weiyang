@@ -82,7 +82,7 @@ export function AdminView({ meId }: { meId: number }) {
               {users.map((user) => {
                 const self = user.id === meId
                 return (
-                  <tr key={user.id} className="border-b border-line-soft transition-colors last:border-0 hover:bg-surface-soft/50 dark:border-slate-800 dark:hover:bg-slate-800/40">
+                  <tr key={user.id} className="border-b border-line-soft transition-colors last:border-0 hover:bg-surface-muted/50 dark:border-slate-800 dark:hover:bg-slate-800/40">
                     <td className="px-3 py-2.5">
                       <div className="flex items-center gap-2">
                         <div className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full border border-line text-2xs text-ink-soft dark:border-slate-700 dark:text-slate-300">

@@ -59,7 +59,7 @@ export function AnnouncementPopup() {
             className={`mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-full ${
               important
                 ? 'bg-amber-50 text-amber-700 dark:bg-amber-400/10 dark:text-amber-300'
-                : 'bg-surface-soft text-ink-soft dark:bg-slate-700/60 dark:text-slate-300'
+                : 'bg-surface-muted text-ink-soft dark:bg-slate-700/60 dark:text-slate-300'
             }`}
           >
             <Megaphone size={15} strokeWidth={1.75} />

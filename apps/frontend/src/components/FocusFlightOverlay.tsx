@@ -204,7 +204,7 @@ export function FocusFlightOverlay({ onClose }: { onClose: () => void }) {
                   </div>
                 </div>
 
-                <div className="mt-3 rounded-md border border-line-soft bg-surface-soft px-3 py-2.5 dark:border-slate-700 dark:bg-slate-700/40">
+                <div className="mt-3 rounded-md border border-line-soft bg-surface-muted px-3 py-2.5 dark:border-slate-700 dark:bg-slate-700/40">
                   <p className="text-xs font-medium text-ink-soft dark:text-slate-300">匹配真实航程</p>
                   <p className="mt-0.5 text-sm font-medium text-ink dark:text-slate-100">
                     {flightRoute.from.name} <span className="text-ink-muted">({flightRoute.from.code})</span> →{' '}

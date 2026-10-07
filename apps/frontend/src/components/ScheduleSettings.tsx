@@ -149,7 +149,7 @@ export function ScheduleSettings({ onClose }: { onClose: () => void }) {
     `h-8 min-w-8 rounded-md px-2 text-sm transition ${
       active
         ? 'bg-brand text-white dark:bg-brand/15 dark:text-teal-200'
-        : 'text-ink-soft hover:bg-surface-soft dark:text-slate-300 dark:hover:bg-white/10'
+        : 'text-ink-soft hover:bg-surface-muted dark:text-slate-300 dark:hover:bg-white/10'
     }`
 
   return (
@@ -188,7 +188,7 @@ export function ScheduleSettings({ onClose }: { onClose: () => void }) {
 
       <div>
         <label className="label">重复方式</label>
-        <div className="grid grid-cols-4 gap-1 rounded-md bg-surface-soft p-1 dark:bg-white/5">
+        <div className="grid grid-cols-4 gap-1 rounded-md bg-surface-muted p-1 dark:bg-white/5">
           {RECURRENCE.map((item) => (
             <button
               key={item.value}
@@ -306,7 +306,7 @@ export function ScheduleSettings({ onClose }: { onClose: () => void }) {
       )}
 
       {preview !== 'none' && (
-        <div className="rounded-md bg-surface-soft p-3 text-sm dark:bg-white/5">
+        <div className="rounded-md bg-surface-muted p-3 text-sm dark:bg-white/5">
           <p className="flex items-center gap-2 font-medium text-ink dark:text-slate-100">
             <CalendarClock size={15} className="text-brand dark:text-teal-300" />
             下次提醒

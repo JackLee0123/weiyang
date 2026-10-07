@@ -29,7 +29,7 @@ function Preview({ result }: { result: ParseTimetableResult }) {
       )}
       <div className="max-h-64 overflow-auto rounded-md border border-line dark:border-slate-700">
         <table className="w-full text-left text-xs">
-          <thead className="sticky top-0 bg-surface-soft text-ink-muted dark:bg-slate-900/80 dark:text-slate-400">
+          <thead className="sticky top-0 bg-surface-muted text-ink-muted dark:bg-slate-900/80 dark:text-slate-400">
             <tr>
               <th className="px-2 py-1.5 font-medium">课程</th>
               <th className="px-2 py-1.5 font-medium">星期</th>
@@ -182,11 +182,11 @@ export function TimetableImport({ initial, onClose }: { initial?: TimetableSetti
   return (
     <div className="space-y-5">
       <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-        <div className="rounded-md border border-line-soft bg-surface-soft p-3 dark:border-slate-700/60 dark:bg-slate-900/40">
+        <div className="rounded-md border border-line-soft bg-surface-muted p-3 dark:border-slate-700/60 dark:bg-slate-900/40">
           <label className="label">学期信息</label>
           <input className="field" placeholder="例如 2025-2026-1" value={term} onChange={(e) => setTerm(e.target.value)} />
         </div>
-        <div className="rounded-md border border-line-soft bg-surface-soft p-3 dark:border-slate-700/60 dark:bg-slate-900/40">
+        <div className="rounded-md border border-line-soft bg-surface-muted p-3 dark:border-slate-700/60 dark:bg-slate-900/40">
           <label className="label">开学第 1 周周一</label>
           <input type="date" className="field" value={week1} onChange={(e) => setWeek1(e.target.value)} />
         </div>
@@ -197,7 +197,7 @@ export function TimetableImport({ initial, onClose }: { initial?: TimetableSetti
           <Upload size={15} className="text-ink-muted dark:text-slate-400" />
           导入方式
         </div>
-        <div className="flex gap-1 rounded-md border border-line bg-surface-soft p-0.5 dark:border-slate-700 dark:bg-slate-900/50">
+        <div className="flex gap-1 rounded-md border border-line bg-surface-muted p-0.5 dark:border-slate-700 dark:bg-slate-900/50">
           <button
             className={`flex flex-1 items-center justify-center gap-1.5 rounded px-3 py-1.5 text-sm font-medium transition ${
               tab === 'file' ? 'bg-surface text-ink dark:bg-slate-700 dark:text-slate-100' : 'text-ink-muted dark:text-slate-400'
@@ -294,7 +294,7 @@ export function TimetableImport({ initial, onClose }: { initial?: TimetableSetti
       <div>
         <button
           type="button"
-          className="flex w-full items-center justify-between rounded-md border border-line bg-surface-soft px-3 py-2 text-sm dark:border-slate-700 dark:bg-slate-900/40"
+          className="flex w-full items-center justify-between rounded-md border border-line bg-surface-muted px-3 py-2 text-sm dark:border-slate-700 dark:bg-slate-900/40"
           onClick={() => setShowAdvanced((v) => !v)}
           aria-expanded={showAdvanced}
         >
@@ -351,7 +351,7 @@ export function TimetableImport({ initial, onClose }: { initial?: TimetableSetti
       </div>
 
       {result && (
-        <div className="rounded-md border border-line-soft bg-surface-soft p-3 dark:border-slate-700/60 dark:bg-slate-900/40">
+        <div className="rounded-md border border-line-soft bg-surface-muted p-3 dark:border-slate-700/60 dark:bg-slate-900/40">
           <p className="mb-2 text-sm font-medium text-ink dark:text-slate-100">解析结果</p>
           <Preview result={result} />
         </div>

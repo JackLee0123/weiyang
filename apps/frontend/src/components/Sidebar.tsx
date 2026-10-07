@@ -103,7 +103,7 @@ export function Sidebar({
     `group relative flex w-full items-center gap-2.5 border-l-2 border-transparent px-2.5 py-[7px] text-left text-[13px] transition-colors ${
       active
         ? 'border-ink bg-surface-muted/70 font-medium text-ink dark:border-slate-300 dark:bg-slate-800/60 dark:text-slate-100'
-        : 'text-ink-soft hover:bg-surface-soft/70 hover:text-ink dark:text-slate-400 dark:hover:bg-slate-800/60 dark:hover:text-slate-200'
+        : 'text-ink-soft hover:bg-surface-muted/70 hover:text-ink dark:text-slate-400 dark:hover:bg-slate-800/60 dark:hover:text-slate-200'
     }`
 
   const iconClass = (active = false) =>
@@ -127,8 +127,8 @@ export function Sidebar({
               key={item.key}
               className={`flex shrink-0 items-center gap-1.5 rounded-md px-2.5 py-1.5 text-xs font-medium transition-colors ${
                 active
-                  ? 'bg-surface-soft text-ink dark:bg-slate-800 dark:text-slate-100'
-                  : 'text-ink-muted hover:bg-surface-soft/70 hover:text-ink dark:text-slate-400 dark:hover:bg-slate-800/60 dark:hover:text-slate-200'
+                  ? 'bg-surface-muted text-ink dark:bg-slate-800 dark:text-slate-100'
+                  : 'text-ink-muted hover:bg-surface-muted/70 hover:text-ink dark:text-slate-400 dark:hover:bg-slate-800/60 dark:hover:text-slate-200'
               }`}
               onClick={() => onNavigate(item.key)}
             >
@@ -182,14 +182,14 @@ export function Sidebar({
           <>
             {/* 手机上侧栏是收起的，这些入口要放在顶部才能点到（扫码连手环就在手机上做） */}
             <button
-              className="flex shrink-0 items-center gap-1.5 rounded-md px-2.5 py-1.5 text-xs font-medium text-ink-muted transition-colors hover:bg-surface-soft/70 hover:text-ink dark:text-slate-400 dark:hover:bg-slate-800/60 dark:hover:text-slate-200"
+              className="flex shrink-0 items-center gap-1.5 rounded-md px-2.5 py-1.5 text-xs font-medium text-ink-muted transition-colors hover:bg-surface-muted/70 hover:text-ink dark:text-slate-400 dark:hover:bg-slate-800/60 dark:hover:text-slate-200"
               onClick={onOpenDevices}
             >
               <Watch size={14} strokeWidth={1.75} />
               设备连接
             </button>
             <button
-              className="flex shrink-0 items-center gap-1.5 rounded-md px-2.5 py-1.5 text-xs font-medium text-ink-muted transition-colors hover:bg-surface-soft/70 hover:text-ink dark:text-slate-400 dark:hover:bg-slate-800/60 dark:hover:text-slate-200"
+              className="flex shrink-0 items-center gap-1.5 rounded-md px-2.5 py-1.5 text-xs font-medium text-ink-muted transition-colors hover:bg-surface-muted/70 hover:text-ink dark:text-slate-400 dark:hover:bg-slate-800/60 dark:hover:text-slate-200"
               onClick={onOpenBackup}
             >
               <Database size={14} strokeWidth={1.75} />
@@ -197,7 +197,7 @@ export function Sidebar({
             </button>
             <InstallAppButton
               compact
-              className="flex shrink-0 items-center gap-1.5 rounded-md px-2.5 py-1.5 text-xs font-medium text-ink-muted transition-colors hover:bg-surface-soft/70 hover:text-ink dark:text-slate-400 dark:hover:bg-slate-800/60 dark:hover:text-slate-200"
+              className="flex shrink-0 items-center gap-1.5 rounded-md px-2.5 py-1.5 text-xs font-medium text-ink-muted transition-colors hover:bg-surface-muted/70 hover:text-ink dark:text-slate-400 dark:hover:bg-slate-800/60 dark:hover:text-slate-200"
             />
           </>,
         )}
@@ -230,7 +230,7 @@ export function Sidebar({
         <div className="space-y-3 border-t border-line-soft p-3 dark:border-slate-800">
           {user && (
             <div className="flex items-center gap-2.5">
-              <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full border border-line bg-surface-soft text-2xs font-medium text-ink-soft dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300">
+              <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full border border-line bg-surface-muted text-2xs font-medium text-ink-soft dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300">
                 {user.name.slice(0, 1).toUpperCase()}
               </div>
               <div className="min-w-0 flex-1">

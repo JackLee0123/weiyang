@@ -97,8 +97,8 @@ export function ListView() {
               key={t}
               className={`rounded-md px-2.5 py-1.5 text-sm transition-colors ${
                 tab === t
-                  ? 'bg-surface-soft font-medium text-ink dark:bg-slate-800 dark:text-slate-100'
-                  : 'text-ink-muted hover:bg-surface-soft/60 hover:text-ink dark:text-slate-400 dark:hover:bg-slate-800/50 dark:hover:text-slate-200'
+                  ? 'bg-surface-muted font-medium text-ink dark:bg-slate-800 dark:text-slate-100'
+                  : 'text-ink-muted hover:bg-surface-muted/60 hover:text-ink dark:text-slate-400 dark:hover:bg-slate-800/50 dark:hover:text-slate-200'
               }`}
               onClick={() => setTab(t)}
             >

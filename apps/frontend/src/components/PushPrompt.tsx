@@ -59,7 +59,7 @@ export function PushPrompt({ onOpenSettings }: { onOpenSettings: () => void }) {
       className={`mb-3 flex flex-col gap-3 rounded-lg border px-4 py-3 sm:flex-row sm:items-center sm:justify-between ${
         showIos
           ? 'border-amber-200/70 bg-amber-50/60 dark:border-amber-300/40 dark:bg-amber-400/10'
-          : 'border-line bg-surface-soft/60 dark:border-slate-700 dark:bg-slate-800/50'
+          : 'border-line bg-surface-muted/60 dark:border-slate-700 dark:bg-slate-800/50'
       }`}
     >
       <div className="flex items-start gap-3">

@@ -22,7 +22,7 @@ function ChangelogCard({
         type="button"
         onClick={onToggle}
         aria-expanded={open}
-        className="flex w-full items-start gap-3 px-4 py-3.5 text-left transition hover:bg-surface-soft dark:hover:bg-white/5"
+        className="flex w-full items-start gap-3 px-4 py-3.5 text-left transition hover:bg-surface-muted dark:hover:bg-white/5"
       >
         <span className="mt-0.5 shrink-0 font-mono text-2xs text-ink-faint dark:text-slate-500">
           {entry.version}
@@ -144,8 +144,8 @@ export function ChangelogView() {
                     type="button"
                     className={`tnum h-7 min-w-7 rounded-md px-2 text-xs transition-colors ${
                       page === pageNumber
-                        ? 'bg-surface-soft font-medium text-ink dark:bg-slate-800 dark:text-slate-100'
-                        : 'text-ink-muted hover:bg-surface-soft hover:text-ink dark:text-slate-400 dark:hover:bg-slate-800/60 dark:hover:text-slate-200'
+                        ? 'bg-surface-muted font-medium text-ink dark:bg-slate-800 dark:text-slate-100'
+                        : 'text-ink-muted hover:bg-surface-muted hover:text-ink dark:text-slate-400 dark:hover:bg-slate-800/60 dark:hover:text-slate-200'
                     }`}
                     aria-current={page === pageNumber ? 'page' : undefined}
                     onClick={() => changePage(pageNumber)}

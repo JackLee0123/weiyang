@@ -109,7 +109,7 @@ export function FocusPanel({
                       <li
                         key={item.key}
                         className={`flex items-center gap-2 text-sm ${
-                          clickable ? 'cursor-pointer rounded px-1 py-0.5 hover:bg-surface-soft dark:hover:bg-slate-700/40' : 'px-1'
+                          clickable ? 'cursor-pointer rounded px-1 py-0.5 hover:bg-surface-muted dark:hover:bg-slate-700/40' : 'px-1'
                         }`}
                         onClick={clickable ? () => onOpenRecord?.(item.recordId as number) : undefined}
                         title={clickable ? '去这条记录里填用时' : undefined}

@@ -163,7 +163,7 @@ export function TimetableView() {
               <div className="max-h-72 overflow-auto">
                 <ul className="divide-y divide-line-soft dark:divide-slate-700/60">
                   {allCourses.map((c) => (
-                  <li key={c.id} className="group flex items-center gap-3 px-4 py-2.5 transition-colors hover:bg-surface-soft/60 dark:hover:bg-slate-800/40">
+                  <li key={c.id} className="group flex items-center gap-3 px-4 py-2.5 transition-colors hover:bg-surface-muted/60 dark:hover:bg-slate-800/40">
                       <div className="min-w-0 flex-1">
                         <p className="truncate text-sm text-ink dark:text-slate-100">{c.name}</p>
                         <p className="truncate text-2xs text-ink-faint dark:text-slate-500">

@@ -23,12 +23,12 @@ function Summary({ preview, targetCount }: { preview: AdminSchedulePreview; targ
         解析出 {preview.rows.length} 条日程
       </span>
       {detected.length > 0 && (
-        <span className="rounded-sm bg-surface-soft px-2 py-0.5 text-ink-muted dark:bg-slate-700/70 dark:text-slate-300">
+        <span className="rounded-sm bg-surface-muted px-2 py-0.5 text-ink-muted dark:bg-slate-700/70 dark:text-slate-300">
           自动识别：{detected.join('，')}
         </span>
       )}
       {dates.length > 0 && (
-        <span className="rounded-sm bg-surface-soft px-2 py-0.5 text-ink-muted dark:bg-slate-700/70 dark:text-slate-300">
+        <span className="rounded-sm bg-surface-muted px-2 py-0.5 text-ink-muted dark:bg-slate-700/70 dark:text-slate-300">
           日期范围 {dates[0]} ~ {dates[dates.length - 1]}
         </span>
       )}
@@ -43,7 +43,7 @@ function Summary({ preview, targetCount }: { preview: AdminSchedulePreview; targ
         </span>
       )}
       {targetCount > 0 && (
-        <span className="rounded-sm bg-surface-soft px-2 py-0.5 text-ink-muted dark:bg-slate-700/70 dark:text-slate-300">
+        <span className="rounded-sm bg-surface-muted px-2 py-0.5 text-ink-muted dark:bg-slate-700/70 dark:text-slate-300">
           将写入 {targetCount} 人 × {preview.rows.length - pastCount} 条
         </span>
       )}
@@ -231,7 +231,7 @@ export function AdminScheduleImport({ meId, users }: { meId: number; users: Admi
       )}
 
       {parsed && (
-        <div className="space-y-3 rounded-md border border-line-soft bg-surface-soft p-3 dark:border-slate-700/60 dark:bg-slate-900/40">
+        <div className="space-y-3 rounded-md border border-line-soft bg-surface-muted p-3 dark:border-slate-700/60 dark:bg-slate-900/40">
           <Summary preview={parsed} targetCount={targetCount} />
 
           {parsed.warnings.length > 0 && (
@@ -249,7 +249,7 @@ export function AdminScheduleImport({ meId, users }: { meId: number; users: Admi
 
           <div className="max-h-72 overflow-auto rounded-md border border-line dark:border-slate-700">
             <table className="w-full min-w-[560px] text-left text-xs">
-              <thead className="sticky top-0 bg-surface-soft text-ink-muted dark:bg-slate-900/90 dark:text-slate-400">
+              <thead className="sticky top-0 bg-surface-muted text-ink-muted dark:bg-slate-900/90 dark:text-slate-400">
                 <tr>
                   <th className="px-2 py-1.5 font-medium">日期</th>
                   <th className="px-2 py-1.5 font-medium">时间</th>

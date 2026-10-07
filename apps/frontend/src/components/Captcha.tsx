@@ -150,7 +150,7 @@ export function Captcha({ onValid }: CaptchaProps) {
             </button>
           </div>
 
-          <div ref={sliderRef} className="relative mx-1 h-9 select-none overflow-hidden rounded-full bg-surface-soft dark:bg-slate-700/60">
+          <div ref={sliderRef} className="relative mx-1 h-9 select-none overflow-hidden rounded-full bg-surface-muted dark:bg-slate-700/60">
             <div
               className="absolute top-1/2 flex h-9 w-10 -translate-y-1/2 touch-none cursor-grab items-center justify-center rounded-full bg-brand text-white shadow active:cursor-grabbing dark:bg-teal-400 dark:text-teal-900"
               style={{ left: thumbLeft }}

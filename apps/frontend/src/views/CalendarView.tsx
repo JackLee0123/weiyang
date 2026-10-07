@@ -84,8 +84,8 @@ export function CalendarView({ onOpenDay }: { onOpenDay: (date: string) => void 
                 onClick={() => onOpenDay(iso)}
                 className={`min-h-[72px] border-b border-r border-line-soft p-1.5 text-left align-top transition sm:min-h-[92px] ${
                   inMonth
-                    ? 'bg-surface hover:bg-surface-soft dark:bg-slate-800 dark:hover:bg-slate-700/70'
-                    : 'bg-surface-muted/70 hover:bg-surface-soft dark:bg-slate-900/30 dark:hover:bg-slate-800'
+                    ? 'bg-surface hover:bg-surface-muted dark:bg-slate-800 dark:hover:bg-slate-700/70'
+                    : 'bg-surface-muted/70 hover:bg-surface-muted dark:bg-slate-900/30 dark:hover:bg-slate-800'
                 }`}
               >
                 <div className="flex items-center justify-between">

@@ -16,7 +16,7 @@ export function NotificationsPanel({ onClose, initialTab = 'push' }: { onClose: 
 
   return (
     <div className="space-y-4">
-      <div className="flex gap-1 rounded-md border border-line bg-surface-soft p-0.5 dark:border-slate-700 dark:bg-slate-900/50">
+      <div className="flex gap-1 rounded-md border border-line bg-surface-muted p-0.5 dark:border-slate-700 dark:bg-slate-900/50">
         {TABS.map((item) => (
           <button
             key={item.key}

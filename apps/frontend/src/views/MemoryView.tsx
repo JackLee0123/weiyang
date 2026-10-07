@@ -61,8 +61,8 @@ export function MemoryView() {
                 key={p}
                 className={`rounded-md px-2.5 py-1.5 text-sm transition-colors ${
                   period === p
-                    ? 'bg-surface-soft font-medium text-ink dark:bg-slate-800 dark:text-slate-100'
-                    : 'text-ink-muted hover:bg-surface-soft/60 hover:text-ink dark:text-slate-400 dark:hover:bg-slate-800/50 dark:hover:text-slate-200'
+                    ? 'bg-surface-muted font-medium text-ink dark:bg-slate-800 dark:text-slate-100'
+                    : 'text-ink-muted hover:bg-surface-muted/60 hover:text-ink dark:text-slate-400 dark:hover:bg-slate-800/50 dark:hover:text-slate-200'
                 }`}
                 onClick={() => setPeriod(p)}
               >
@@ -155,7 +155,7 @@ export function MemoryView() {
                           <span className="text-ink-soft dark:text-slate-300">{category}</span>
                           <span className="text-xs text-ink-muted dark:text-slate-500">{count} 条</span>
                         </div>
-                        <div className="mt-1.5 h-1 overflow-hidden rounded-full bg-surface-soft dark:bg-slate-700/50">
+                        <div className="mt-1.5 h-1 overflow-hidden rounded-full bg-surface-muted dark:bg-slate-700/50">
                           <div
                             className="h-full rounded-full bg-brand/80 dark:bg-teal-300/80"
                             style={{ width: maxCategory ? `${(count / maxCategory) * 100}%` : '0%' }}
