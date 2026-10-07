@@ -3,50 +3,100 @@
 @tailwind utilities;
 
 /* ─────────────────────────────────────────────
-   Design tokens — Light
-   纸感暖中性底色 + 纯白表面 + 近黑墨色；
-   颜色只留给主操作与状态，其余靠线与留白分层。
+   Design tokens — Light（方向代号「纸墨」）
+   暖白纸底 + 墨色文字 + 单一深松绿强调色；
+   分层靠发丝级 1px 低对比线与留白，不靠卡片阴影。
+   取值对应设计稿 :root 段，改这里等于改全站。
    ───────────────────────────────────────────── */
 :root {
   color-scheme: light;
-  --app-bg: #f6f6f4;
+
+  /* 纸面 */
+  --paper: #faf9f7;
+  --paper-sunk: #f3f1ec;
   --surface: #ffffff;
-  --surface-muted: #f6f6f4;
-  --surface-soft: #efefec;
-  --text: #1a1a17;
-  --text-soft: #55554e;
-  --text-muted: #7d7d74;
-  --text-faint: #a8a8a0;
-  --line: #e6e6e1;
-  --line-soft: #efefeb;
-  --line-strong: #d2d2cb;
+  --surface-2: #f6f4f0;
+
+  /* 墨色 */
+  --text: #1b1a17;
+  --text-soft: #54524b;
+  --text-muted: #8b877d;
+  --text-faint: #b5b1a7;
+
+  /* 线 */
+  --line: #e7e4dd;
+  --line-soft: #f0eee9;
+  --line-strong: #d5d1c8;
+
+  /* 强调（全站唯一） */
   --brand: #15564d;
   --brand-deep: #0e423b;
-  --brand-soft: #e7edea;
+  --brand-soft: #e9eeec;
   --brand-ink: #123f39;
+
+  /* 语义（压暗，不荧光） */
+  --ok: #3e6b4b;
+  --warn: #8a6a24;
+  --danger: #8c3a32;
+  --info: #3f5a78;
+
+  /* 兼容旧变量名（组件里仍在用 --app-bg / --surface-muted / --surface-soft） */
+  --app-bg: var(--paper);
+  --surface-muted: var(--surface-2);
+  --surface-soft: var(--line-soft);
+
+  /* 字体 */
+  --font-display: Georgia, 'Songti SC', 'Source Han Serif SC', 'Noto Serif SC', 'Songti', serif;
+  --font-body: -apple-system, 'PingFang SC', 'Microsoft YaHei', 'Segoe UI', system-ui, sans-serif;
+  --font-num: ui-monospace, 'SFMono-Regular', Consolas, 'Liberation Mono', monospace;
+
+  /* 圆角：2 / 4 / 6 / 10 / 999 */
+  --r-xs: 2px;
+  --r-sm: 4px;
+  --r-md: 6px;
+  --r-lg: 10px;
+  --r-pill: 999px;
+
+  /* 阴影：只有浮层一处 */
+  --shadow-float: 0 24px 60px -24px rgb(27 26 23 / 0.28), 0 2px 8px -3px rgb(27 26 23 / 0.1);
 }
 
 /* ─────────────────────────────────────────────
    Design tokens — Dark
-   近黑的暖灰，而不是偏蓝的slate，避免"科技蓝"味。
+   本版只画浅色稿，这里保留换算式，使令牌可扩展；
+   不视为已经完成的深色主题。
    ───────────────────────────────────────────── */
 .dark {
   color-scheme: dark;
-  --app-bg: #171714;
-  --surface: #22221e;
-  --surface-muted: #1c1c19;
-  --surface-soft: #2a2a26;
-  --text: #f0f0ec;
-  --text-soft: #c9c9c2;
-  --text-muted: #8f8f86;
-  --text-faint: #6c6c64;
-  --line: #33332e;
-  --line-soft: #2a2a26;
-  --line-strong: #3f3f39;
+  --paper: #171614;
+  --paper-sunk: #121110;
+  --surface: #201f1b;
+  --surface-2: #26241f;
+
+  --text: #f0eee9;
+  --text-soft: #c6c2b8;
+  --text-muted: #8e8a80;
+  --text-faint: #6b675e;
+
+  --line: #322f2a;
+  --line-soft: #282521;
+  --line-strong: #3e3a33;
+
   --brand: #7fb3aa;
   --brand-deep: #a9c8c1;
   --brand-soft: #16302c;
   --brand-ink: #d2e0dc;
+
+  --ok: #8db394;
+  --warn: #cda96a;
+  --danger: #ce8f87;
+  --info: #94a9c6;
+
+  --app-bg: var(--paper);
+  --surface-muted: var(--surface-2);
+  --surface-soft: var(--line-soft);
+
+  --shadow-float: 0 24px 60px -24px rgb(0 0 0 / 0.5), 0 2px 8px -3px rgb(0 0 0 / 0.3);
 }
 
 html,
@@ -55,15 +105,35 @@ body,
   height: 100%;
 }
 
+html {
+  scroll-behavior: smooth;
+}
+
 body {
   margin: 0;
-  font-family: 'Inter', 'PingFang SC', 'Microsoft YaHei', 'Noto Sans SC', system-ui, sans-serif;
+  font-family: var(--font-body);
   font-size: 14px;
-  line-height: 22px;
+  line-height: 23px;
   background: var(--app-bg);
   color: var(--text);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+}
+
+/* 全局数字规则：等宽字形，列表与统计不会跳动 */
+.tnum {
+  font-variant-numeric: tabular-nums lining-nums;
+}
+
+/* 标题衬线栈 */
+.serif {
+  font-family: var(--font-display);
+}
+
+/* 版本 / 接口 / 代码 */
+.mono {
+  font-family: var(--font-num);
+  font-size: 11px;
 }
 
 ::selection {
@@ -71,11 +141,6 @@ body {
 }
 .dark ::selection {
   background: rgb(127 179 170 / 0.24);
-}
-
-/* 数字用等宽字形，列表与统计不会跳动 */
-.tnum {
-  font-variant-numeric: tabular-nums lining-nums;
 }
 
 * {
@@ -98,88 +163,154 @@ body {
   background: var(--text-faint);
 }
 
-.dark *::-webkit-scrollbar-thumb {
-  background: #3a3a36;
-}
-
 input[type='time']::-webkit-calendar-picker-indicator {
   opacity: 0.4;
 }
 
 @layer components {
   /* ── 按钮 ───────────────────────────
-     全局只有一个"实心"按钮（主操作）；「记一笔」改成描边次级样式，
-     不再用第二个高饱和彩色按钮抢注意力。 */
+     整屏只有一个实心按钮（主操作）；其余操作收成描边或纯文字，
+     破坏性操作永远不做成第二个实心按钮。 */
   .btn {
-    @apply inline-flex items-center justify-center gap-1.5 rounded-btn px-3 py-[7px] text-sm font-medium transition-colors duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand/25 focus-visible:ring-offset-2 focus-visible:ring-offset-white disabled:cursor-not-allowed disabled:opacity-40 dark:focus-visible:ring-offset-slate-900;
+    @apply inline-flex items-center justify-center gap-1.5 rounded-btn px-3 py-[7px] text-sm font-medium transition-colors duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand/30 focus-visible:ring-offset-2 focus-visible:ring-offset-paper disabled:cursor-not-allowed disabled:opacity-40 dark:focus-visible:ring-offset-slate-900;
   }
   .btn-primary {
-    @apply btn bg-brand text-white hover:bg-brand-deep active:bg-brand-deep disabled:hover:bg-brand dark:bg-teal-500 dark:hover:bg-teal-400 dark:active:bg-teal-400;
+    @apply btn bg-brand text-white hover:bg-brand-deep active:bg-brand-deep disabled:hover:bg-brand dark:bg-teal-500 dark:text-slate-900 dark:hover:bg-teal-400 dark:active:bg-teal-400;
   }
+  /* 次级：描边按钮（旧名 btn-record 保留为别名，减少无谓改动） */
+  .btn-outline,
   .btn-record {
-    @apply btn border border-line-strong bg-surface text-ink hover:border-ink-faint hover:bg-surface-soft dark:border-slate-600 dark:bg-slate-800 dark:text-slate-100 dark:hover:border-slate-500 dark:hover:bg-slate-700;
+    @apply btn border border-line-strong bg-surface text-ink hover:border-ink-faint hover:bg-surface-muted dark:border-slate-600 dark:bg-slate-700 dark:text-slate-100 dark:hover:border-slate-500 dark:hover:bg-slate-600;
   }
   .btn-ghost {
-    @apply btn border border-transparent text-ink-soft hover:bg-surface-soft hover:text-ink dark:text-slate-300 dark:hover:bg-slate-700/50 dark:hover:text-slate-100;
+    @apply btn border border-transparent text-ink-soft hover:bg-surface-muted hover:text-ink dark:text-slate-300 dark:hover:bg-slate-700/50 dark:hover:text-slate-100;
   }
   .btn-quiet {
-    @apply btn px-2 text-xs text-ink-muted hover:bg-surface-soft hover:text-ink dark:text-slate-400 dark:hover:bg-slate-700/50 dark:hover:text-slate-100;
+    @apply btn px-2 text-xs text-ink-muted hover:bg-surface-muted hover:text-ink dark:text-slate-400 dark:hover:bg-slate-700/50 dark:hover:text-slate-100;
   }
-  /* 破坏性操作：安静的红色文字按钮，不做成第二个实心按钮 */
   .btn-danger {
     @apply btn border border-transparent text-rose-600 hover:bg-rose-50 dark:text-rose-300 dark:hover:bg-rose-500/10;
   }
 
+  /* 图标按钮 */
+  .iconbtn {
+    @apply grid h-[27px] w-[27px] place-items-center rounded-sm border border-transparent text-ink-faint transition-colors duration-150 hover:border-line-strong hover:bg-surface hover:text-ink-soft dark:text-slate-500 dark:hover:border-slate-600 dark:hover:bg-slate-700 dark:hover:text-slate-200;
+  }
+  .iconbtn-solid {
+    @apply iconbtn border-brand bg-brand text-white hover:border-brand-deep hover:bg-brand-deep hover:text-white dark:border-teal-500 dark:bg-teal-500 dark:text-slate-900;
+  }
+
+  /* 分段切换：选中用极浅底 + 加粗，不用色块 */
+  .seg {
+    @apply inline-flex gap-px;
+  }
+  .seg > button {
+    @apply rounded-sm px-2.5 py-[5px] text-xs font-normal text-ink-muted transition-colors duration-150 dark:text-slate-400;
+  }
+  .seg > button[aria-pressed='true'],
+  .seg > button.on {
+    @apply bg-surface-muted font-semibold text-ink dark:bg-slate-700 dark:text-slate-100;
+  }
+
   /* 提示条：左侧一条强调线，替代整块圆角淡彩底 */
   .notice {
-    @apply flex items-start gap-2 border-l-2 px-3 py-2 text-xs leading-5;
+    @apply flex items-start gap-2 border-l-2 px-3 py-2 text-xs leading-6;
   }
   .notice-warn {
-    @apply notice border-amber-400 bg-amber-50/60 text-amber-800 dark:border-amber-300/60 dark:bg-amber-400/10 dark:text-amber-200;
+    @apply notice border-amber-500 bg-amber-50 text-amber-700 dark:border-amber-300/60 dark:bg-amber-400/10 dark:text-amber-200;
   }
   .notice-info {
-    @apply notice border-line-strong bg-surface-soft/60 text-ink-soft dark:border-slate-600 dark:bg-slate-800/50 dark:text-slate-300;
+    @apply notice border-line-strong bg-surface-muted text-ink-soft dark:border-slate-600 dark:bg-slate-800/50 dark:text-slate-300;
   }
   .notice-ok {
-    @apply notice border-teal-400 bg-teal-50/60 text-teal-800 dark:border-teal-300/60 dark:bg-teal-500/10 dark:text-teal-200;
+    @apply notice border-emerald-500 bg-emerald-50 text-emerald-700 dark:border-teal-300/60 dark:bg-teal-500/10 dark:text-teal-200;
   }
   .notice-err {
-    @apply notice border-rose-400 bg-rose-50/60 text-rose-700 dark:border-rose-300/60 dark:bg-rose-500/10 dark:text-rose-300;
+    @apply notice border-rose-600 bg-rose-50 text-rose-700 dark:border-rose-300/60 dark:bg-rose-500/10 dark:text-rose-300;
   }
 
   /* ── 表单 ─────────────────────────── */
   .field {
-    @apply w-full rounded-input border border-line bg-surface px-3 py-[7px] text-sm text-ink transition-colors placeholder:text-ink-faint hover:border-line-strong focus:border-brand/60 focus:outline-none focus:ring-2 focus:ring-brand/12 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100 dark:placeholder:text-slate-500;
+    @apply w-full rounded-input border border-line bg-surface px-3 py-[7px] text-sm text-ink transition-colors placeholder:text-ink-faint hover:border-line-strong focus:border-brand/60 focus:outline-none focus:ring-[3px] focus:ring-brand/12 dark:border-slate-600 dark:bg-slate-700 dark:text-slate-100 dark:placeholder:text-slate-500;
   }
   .label {
-    @apply mb-1.5 block text-xs font-medium text-ink-muted dark:text-slate-400;
+    @apply mb-1.5 block text-meta font-medium text-ink-muted dark:text-slate-400;
   }
 
   /* ── 容器与文字 ───────────────────── */
   .panel {
     @apply rounded-card border border-line bg-surface dark:border-slate-700 dark:bg-slate-800;
   }
+  /* 区块标题：衬线、轻字重、负字距 */
   .section-title {
-    @apply text-sm font-semibold tracking-title text-ink dark:text-slate-100;
+    @apply font-display text-section font-normal tracking-section text-ink dark:text-slate-100;
   }
-  /* 小节标签：小字 + 字距，替代原来的淡彩图标方块 */
+  .page-title {
+    @apply font-display text-3xl font-normal tracking-title text-ink dark:text-slate-100;
+  }
+  /* 小节眉标：小字 + 大字距 */
   .eyebrow {
-    @apply text-xs font-medium tracking-label text-ink-muted dark:text-slate-400;
+    @apply text-2xs font-medium uppercase tracking-label text-ink-muted dark:text-slate-400;
+  }
+  /* 数据带的数字：衬线轻字重 + 等宽数字 */
+  .figure {
+    @apply font-display tabular-nums lining-nums text-num font-normal tracking-section text-ink dark:text-slate-100;
   }
   .chip {
-    @apply inline-flex items-center gap-1 rounded-sm border border-line px-1.5 py-0.5 text-2xs text-ink-muted dark:border-slate-700 dark:text-slate-400;
+    @apply inline-flex items-center gap-1 rounded-sm border border-line bg-surface px-1.5 py-0.5 text-2xs text-ink-muted dark:border-slate-700 dark:bg-slate-800 dark:text-slate-400;
+  }
+  /* 列表行：只有一条 1px 极浅线，hover 只是底色轻微变化 */
+  .listrow {
+    @apply flex items-center gap-3 border-b border-line-soft px-2 py-2.75 transition-colors duration-150 last:border-b-0 hover:bg-surface-muted dark:border-slate-700/60 dark:hover:bg-slate-700/40;
+  }
+  /* 数据带：上下各一条发丝线，不套卡片 */
+  .band {
+    @apply grid grid-cols-2 border-y border-line sm:grid-cols-4;
+  }
+  .band > div {
+    @apply border-l border-line px-4 py-3 first:border-l-0 first:pl-0;
+  }
+  .band .band-label {
+    @apply text-meta text-ink-muted dark:text-slate-400;
+  }
+  .band .band-value {
+    @apply mt-1 font-display tabular-nums lining-nums text-num font-normal tracking-section text-ink dark:text-slate-100;
+  }
+
+  /* ── 空态 / 加载 ───────────────────── */
+  .empty {
+    @apply flex flex-col items-center gap-1.5 border-t border-line px-5 py-13 text-center;
+  }
+  .empty-title {
+    @apply text-list text-ink dark:text-slate-200;
+  }
+  .empty-hint {
+    @apply text-meta text-ink-faint dark:text-slate-500;
+  }
+  .sk {
+    @apply h-[9px] rounded-pill bg-surface-muted dark:bg-slate-700;
+  }
+  .spin {
+    @apply inline-block h-[15px] w-[15px] rounded-pill border-[1.5px] border-line-strong border-t-brand;
+    animation: sp 0.8s linear infinite;
   }
 }
 
-/* Focus Flight immersive scene */
+@keyframes sp {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* Focus Flight immersive scene——改用纸墨的雾面天空，不用荧光蓝 */
 .flight-sky {
   position: absolute;
   inset: 0;
-  background: linear-gradient(180deg, #7dd3fc 0%, #bae6fd 45%, #fef3c7 100%);
+  background: linear-gradient(180deg, #6e9ba6 0%, #9fbbb6 46%, #e6dfcd 100%);
   transition: background 0.3s ease;
 }
 .dark .flight-sky {
-  background: linear-gradient(180deg, #0b1026 0%, #1e293b 60%, #334155 100%);
+  background: linear-gradient(180deg, #111a24 0%, #1e2c38 60%, #33414c 100%);
 }
 
 .flight-cloud {
@@ -187,8 +318,8 @@ input[type='time']::-webkit-calendar-picker-indicator {
   left: -20%;
   height: 10vh;
   border-radius: 9999px;
-  background: rgba(255, 255, 255, 0.55);
-  filter: blur(18px);
+  background: rgba(255, 255, 255, 0.5);
+  filter: blur(19px);
   opacity: 0.8;
   animation: cloud-drift linear infinite;
 }
@@ -207,23 +338,23 @@ input[type='time']::-webkit-calendar-picker-indicator {
 }
 
 .flight-map {
-  --map-ocean: #e0ecf7;
-  --map-land: #cfe3d0;
-  --map-coast: #9fb3a2;
-  --map-grid: rgba(100, 116, 139, 0.14);
-  --map-route-remain: #9fb6c7;
+  --map-ocean: #e4e7e3;
+  --map-land: #d8e0d4;
+  --map-coast: #a9b3a4;
+  --map-grid: rgba(90, 96, 86, 0.14);
+  --map-route-remain: #a8b0a6;
   --map-route-flown: #15564d;
   --map-pin: #15564d;
-  --map-text: #334155;
+  --map-text: #54524b;
 }
 
 .dark .flight-map {
-  --map-ocean: #0b1220;
-  --map-land: #16202f;
-  --map-coast: #2e4058;
+  --map-ocean: #14161a;
+  --map-land: #1c2320;
+  --map-coast: #33403a;
   --map-grid: rgba(148, 163, 184, 0.12);
-  --map-route-remain: #33506b;
+  --map-route-remain: #3a4742;
   --map-route-flown: #7fb3aa;
   --map-pin: #7fb3aa;
-  --map-text: #cbd5e1;
+  --map-text: #c6c2b8;
 }
