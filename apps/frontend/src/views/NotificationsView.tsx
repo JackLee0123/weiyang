@@ -167,7 +167,7 @@ export function NotificationsView({ onBack, isAdmin = false }: { onBack?: () => 
     <div className="mx-auto w-full max-w-2xl space-y-4">
       <div className="flex items-end justify-between gap-3">
         <div>
-          <h1 className="text-3xl font-light tracking-title text-ink dark:text-slate-100">通知</h1>
+          <h1 className="page-title">通知</h1>
           <p className="mt-1 text-xs text-ink-muted dark:text-slate-400">这里会保存你收到的系统推送</p>
         </div>
         <div className="flex items-center gap-2">

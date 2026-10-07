@@ -50,7 +50,7 @@ export function HeatmapView({ onOpenDay }: { onOpenDay: (date: string) => void }
     <div className="space-y-5">
       <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
         <div>
-          <h1 className="text-3xl font-light tracking-title text-ink dark:text-slate-100">活跃度</h1>
+          <h1 className="page-title">活跃度</h1>
           <p className="mt-1 text-xs text-ink-muted dark:text-slate-400">
             <span className="tnum">{year}</span> 年 · 有 <span className="tnum">{activeDays}</span> 天记录
           </p>

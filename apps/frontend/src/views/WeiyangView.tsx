@@ -51,7 +51,7 @@ export function WeiyangView() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-3xl font-light tracking-title text-ink dark:text-slate-100">未央</h1>
+        <h1 className="page-title">未央</h1>
         <p className="mt-1 text-xs text-ink-muted dark:text-slate-400">
           未完成的不是负债，是仍在航线上的部分。
         </p>

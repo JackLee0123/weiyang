@@ -51,7 +51,7 @@ export function MemoryView() {
     <div className="space-y-5">
       <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
         <div>
-          <h1 className="text-3xl font-light tracking-title text-ink dark:text-slate-100">回忆</h1>
+          <h1 className="page-title">回忆</h1>
           <p className="mt-1 text-xs text-ink-muted dark:text-slate-400">把一段时光，还原成一段航程。</p>
         </div>
         <div className="flex flex-wrap items-center gap-2">

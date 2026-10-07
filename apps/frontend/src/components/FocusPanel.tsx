@@ -80,14 +80,14 @@ export function FocusPanel({
           <div>
             <p className="eyebrow">次数</p>
             <p className="mt-1 flex items-baseline gap-1">
-              <span className="tnum text-3xl font-light text-ink dark:text-slate-100">{summary.count}</span>
+              <span className="figure">{summary.count}</span>
               <span className="text-xs text-ink-muted dark:text-slate-400">次</span>
             </p>
           </div>
           <div>
             <p className="eyebrow">时长</p>
             <p className="mt-1 flex items-baseline gap-1">
-              <span className="tnum text-3xl font-light text-brand dark:text-teal-300">{duration.value}</span>
+              <span className="figure text-brand dark:text-teal-300">{duration.value}</span>
               <span className="text-xs text-ink-muted dark:text-slate-400">{duration.unit}</span>
             </p>
           </div>

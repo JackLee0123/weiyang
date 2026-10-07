@@ -62,7 +62,7 @@ export function TimetableView() {
     <div className="space-y-5">
       <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
         <div>
-          <h1 className="text-3xl font-light tracking-title text-ink dark:text-slate-100">课表</h1>
+          <h1 className="page-title">课表</h1>
           <p className="mt-1 text-xs text-ink-muted dark:text-slate-400">
             {activeTerm ? `${activeTerm} · 第 ${weekIndex} 周` : '未选择学期'} · {format(new Date(weekStart + 'T00:00:00'), 'M月d日')} -{' '}
             {format(new Date(weekEnd + 'T00:00:00'), 'M月d日')}

@@ -55,7 +55,7 @@ export function TodayView({ date, onChangeDate }: { date: string; onChangeDate: 
           <div className="h-9 w-px bg-line dark:bg-slate-800" />
           <div>
             <h1 className="flex items-baseline gap-2.5 tracking-title text-ink dark:text-slate-100">
-              <span className="tnum text-3xl font-light leading-9">{format(parsed, 'M月d日')}</span>
+              <span className="page-title tnum">{format(parsed, 'M月d日')}</span>
               <span className="text-sm text-ink-faint dark:text-slate-500">
                 {weekday}
                 {isToday && ' · 今天'}

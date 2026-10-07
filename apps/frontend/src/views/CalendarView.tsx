@@ -42,7 +42,7 @@ export function CalendarView({ onOpenDay }: { onOpenDay: (date: string) => void 
     <div className="space-y-5">
       <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
         <div>
-          <h1 className="tnum text-3xl font-light tracking-title text-ink dark:text-slate-100">{format(month, 'yyyy年M月')}</h1>
+          <h1 className="page-title tnum">{format(month, 'yyyy年M月')}</h1>
           <p className="mt-1 text-xs text-ink-muted dark:text-slate-400">点击日期查看当天计划与记录</p>
         </div>
         <div className="flex items-center gap-0.5">

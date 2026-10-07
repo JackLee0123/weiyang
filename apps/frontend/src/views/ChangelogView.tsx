@@ -85,7 +85,7 @@ export function ChangelogView() {
     <div className="space-y-5">
       <div className="flex flex-wrap items-end justify-between gap-3">
         <div>
-          <h1 className="text-3xl font-light tracking-title text-ink dark:text-slate-100">更新日志</h1>
+          <h1 className="page-title">更新日志</h1>
           <p className="mt-1 text-xs text-ink-muted dark:text-slate-400">记录每一次版本迭代带来的变化</p>
         </div>
         <div className="flex items-baseline gap-1.5 text-2xs text-ink-faint dark:text-slate-500">

@@ -47,7 +47,7 @@ export function AdminView({ meId }: { meId: number }) {
     <div className="space-y-5">
       <header className="flex items-end justify-between gap-3">
         <div>
-          <h1 className="text-3xl font-light tracking-title text-ink dark:text-slate-100">用户管理</h1>
+          <h1 className="page-title">用户管理</h1>
           <p className="mt-1 flex items-center gap-1.5 text-xs text-ink-muted dark:text-slate-400">
             <ShieldAlert size={13} strokeWidth={1.75} className="text-ink-faint dark:text-slate-500" />
             只有管理员能看到这一页

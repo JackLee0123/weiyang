@@ -66,7 +66,7 @@ export function ListView() {
     <div className="space-y-5">
       <div className="flex flex-wrap items-end justify-between gap-3">
         <div>
-          <h1 className="text-3xl font-light tracking-title text-ink dark:text-slate-100">全部</h1>
+          <h1 className="page-title">全部</h1>
           <p className="mt-1 text-xs text-ink-muted dark:text-slate-400">搜索、筛选并回顾计划与实际记录</p>
         </div>
         <div className="flex gap-2">
