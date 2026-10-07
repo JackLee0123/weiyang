@@ -264,6 +264,14 @@ export const ImagePlus = frame(
   </>,
 )
 
+export const Inbox = frame(
+  <>
+    <path d="M3 13.5 5.6 5.4A1 1 0 0 1 6.5 4.7h11a1 1 0 0 1 .9.7L21 13.5" />
+    <path d="M3 13.5h5l1.2 2.6h5.6l1.2-2.6h5" />
+    <path d="M3 13.5v5a1 1 0 0 0 1 1h16a1 1 0 0 0 1-1v-5" />
+  </>,
+)
+
 export const List = frame(
   <>
     <path d="M8 6h13M8 12h13M8 18h13" />
