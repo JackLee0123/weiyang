@@ -16,7 +16,7 @@ export function PlanItem({ plan, onEdit }: { plan: Plan; onEdit: (plan: Plan) =>
   const time = plan.start_time ? `${plan.start_time}${plan.end_time ? ' - ' + plan.end_time : ''}` : ''
 
   return (
-    <div className={`group -mx-2 flex items-center gap-3 rounded-md border-b border-line-soft px-2 py-3 transition-colors last:border-0 hover:bg-surface-soft/60 focus-within:bg-surface-soft/60 dark:border-slate-800 dark:hover:bg-slate-800/40 ${done ? 'opacity-55' : ''}`}>
+    <div className={`group -mx-2 flex items-center gap-3 border-b border-line-soft px-2 py-2.5 transition-colors last:border-0 hover:bg-surface-muted focus-within:bg-surface-muted dark:border-slate-700/60 dark:hover:bg-slate-800/40 ${done ? 'opacity-55' : ''}`}>
       <button
         className={`flex h-[18px] w-[18px] shrink-0 items-center justify-center rounded-full border transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand/25 focus-visible:ring-offset-1 ${
           locked

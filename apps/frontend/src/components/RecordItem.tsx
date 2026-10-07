@@ -15,7 +15,7 @@ export function RecordItem({ record, onEdit }: { record: RecordEntry; onEdit: (r
   return (
     <div className="group -mx-2 flex items-start gap-3 rounded-md border-b border-line-soft px-2 py-3 transition-colors last:border-0 hover:bg-surface-soft/60 focus-within:bg-surface-soft/60 dark:border-slate-800 dark:hover:bg-slate-800/40">
       <button
-        className={`mt-0.5 flex h-[18px] w-[18px] shrink-0 items-center justify-center rounded-[5px] border transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand/25 focus-visible:ring-offset-1 ${
+        className={`mt-0.5 flex h-[18px] w-[18px] shrink-0 items-center justify-center rounded-[3px] border transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand/25 focus-visible:ring-offset-1 ${
           locked
             ? 'cursor-not-allowed border-line text-ink-faint dark:border-slate-700 dark:text-slate-600'
             : record.is_completed
