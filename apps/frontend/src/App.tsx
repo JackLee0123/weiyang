@@ -12,6 +12,7 @@ import { FocusFlightOverlay } from './components/FocusFlightOverlay'
 import { TodayView } from './views/TodayView'
 import { WeiyangView } from './views/WeiyangView'
 import { MemoryView } from './views/MemoryView'
+import { NotesView } from './views/NotesView'
 import { CalendarView } from './views/CalendarView'
 import { HeatmapView } from './views/HeatmapView'
 import { ListView } from './views/ListView'
@@ -148,6 +149,7 @@ export default function App() {
           {view === 'today' && <TodayView date={date} onChangeDate={setDate} />}
           {view === 'weiyang' && <WeiyangView />}
           {view === 'memory' && <MemoryView />}
+          {view === 'notes' && <NotesView />}
           {view === 'calendar' && (
             <CalendarView
               onOpenDay={(d) => {

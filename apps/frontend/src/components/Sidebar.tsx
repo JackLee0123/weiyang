@@ -1,4 +1,4 @@
-import { Activity, Bell, BookOpen, CalendarCheck, CalendarDays, CalendarRange, Database, History, List, LogOut, MonitorDown, Moon, Plane, Plus, Route, Sun, Users, Watch } from './icons'
+import { Activity, Bell, BookOpen, CalendarCheck, CalendarDays, CalendarRange, Database, History, List, LogOut, MonitorDown, Moon, NotebookPen, Plane, Plus, Route, Sun, Users, Watch } from './icons'
 import { useEffect, useState, type ReactNode } from 'react'
 import type { Theme } from '../lib/theme'
 import type { View } from '../lib/types'
@@ -8,6 +8,7 @@ const NAV: { key: View; label: string; icon: typeof CalendarCheck }[] = [
   { key: 'today', label: '今日', icon: CalendarCheck },
   { key: 'weiyang', label: '未央', icon: Route },
   { key: 'memory', label: '回忆', icon: BookOpen },
+  { key: 'notes', label: '笔记', icon: NotebookPen },
   { key: 'notifications', label: '通知', icon: Bell },
   { key: 'calendar', label: '日历', icon: CalendarDays },
   { key: 'timetable', label: '课表', icon: CalendarRange },

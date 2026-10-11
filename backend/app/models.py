@@ -245,3 +245,53 @@ class AnnouncementRead(Base):
     read_at: Mapped[datetime] = mapped_column(DateTime, default=now_utc, nullable=False)
 
     announcement: Mapped[Announcement] = relationship(back_populates="reads")
+
+
+class ObsidianNote(Base):
+    """从 Obsidian 插件同步过来的笔记。
+
+    路径以用户的「同步根目录」为根（root 为空时表示整个库）。
+    Markdown 原文在上传时渲染为 HTML（content_html），网页端按富文本直接展示。
+    软删除（deleted=1）表示库中已删除，但记录保留以便列表一致。
+    """
+
+    __tablename__ = "obsidian_notes"
+    __table_args__ = (
+        UniqueConstraint("user_id", "path", name="uq_obsidian_note_user_path"),
+        {"mysql_charset": "utf8mb4"},
+    )
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+    user_id: Mapped[int] = mapped_column(ForeignKey("users.id", ondelete="CASCADE"), index=True, nullable=False)
+    # 相对路径（posix 风格，含 .md 后缀）
+    path: Mapped[str] = mapped_column(String(512), nullable=False)
+    title: Mapped[str] = mapped_column(String(255), nullable=False)
+    content_md: Mapped[str] = mapped_column(Text, nullable=False)
+    content_html: Mapped[str] = mapped_column(Text, nullable=False)
+    # 内容哈希：相同内容直接跳过，避免重复上传/更新
+    content_hash: Mapped[str] = mapped_column(String(64), nullable=False)
+    deleted: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=now_utc, nullable=False)
+    updated_at: Mapped[datetime] = mapped_column(DateTime, default=now_utc, onupdate=now_utc, nullable=False)
+
+    user: Mapped[User] = relationship()
+
+
+class ObsidianSettings(Base):
+    """每个用户的 Obsidian 同步设置：API 密钥（仅存哈希）与同步根目录。"""
+
+    __tablename__ = "obsidian_settings"
+    __table_args__ = {"mysql_charset": "utf8mb4"}
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+    user_id: Mapped[int] = mapped_column(
+        ForeignKey("users.id", ondelete="CASCADE"), unique=True, index=True, nullable=False
+    )
+    # 仅存 SHA-256 哈希，明文只在生成时返回一次
+    api_key_hash: Mapped[Optional[str]] = mapped_column(String(64), nullable=True)
+    api_key_created_at: Mapped[Optional[datetime]] = mapped_column(DateTime, nullable=True)
+    sync_root: Mapped[str] = mapped_column(String(255), default="", nullable=False)
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=now_utc, nullable=False)
+    updated_at: Mapped[datetime] = mapped_column(DateTime, default=now_utc, onupdate=now_utc, nullable=False)
+
+    user: Mapped[User] = relationship()

@@ -684,3 +684,67 @@ class AnnouncementAdminOut(AnnouncementOut):
     created_by_name: Optional[str] = None
     read_count: int = 0
     user_count: int = 0
+
+
+# ---------------- Obsidian 同步 ----------------
+
+class ObsidianSettingsOut(BaseModel):
+    has_api_key: bool
+    api_key_created_at: Optional[datetime] = None
+    sync_root: str = ""
+    note_count: int = 0
+
+
+class ObsidianApiKeyOut(BaseModel):
+    api_key: str  # 明文只返回这一次
+    created_at: datetime
+
+
+class ObsidianSyncRootIn(BaseModel):
+    sync_root: str = Field(default="", max_length=255)
+
+
+class ObsidianNoteUpsertIn(BaseModel):
+    path: str = Field(min_length=1, max_length=500)
+    content: str = Field(max_length=2_000_000)
+
+
+class ObsidianNoteBatchItem(BaseModel):
+    path: str = Field(min_length=1, max_length=500)
+    content: str = Field(max_length=2_000_000)
+
+
+class ObsidianNoteBatchIn(BaseModel):
+    notes: list[ObsidianNoteBatchItem] = Field(max_length=500)
+
+
+class ObsidianNoteRenameIn(BaseModel):
+    old_path: str = Field(min_length=1, max_length=500)
+    new_path: str = Field(min_length=1, max_length=500)
+    content: Optional[str] = Field(default=None, max_length=2_000_000)
+
+
+class ObsidianNoteDeleteIn(BaseModel):
+    path: str = Field(min_length=1, max_length=500)
+
+
+class ObsidianSyncResult(BaseModel):
+    ok: bool
+    updated: int = 0
+    skipped: int = 0
+    errors: list[str] = []
+
+
+class ObsidianNoteListItem(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+    path: str
+    title: str
+    updated_at: datetime
+
+
+class ObsidianNoteOut(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+    path: str
+    title: str
+    content_html: str
+    updated_at: datetime

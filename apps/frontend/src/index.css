@@ -358,3 +358,47 @@ input[type='time']::-webkit-calendar-picker-indicator {
   --map-pin: #7fb3aa;
   --map-text: #c6c2b8;
 }
+
+/* ── Obsidian 笔记富文本渲染 ───────────────────── */
+.prose-notes {
+  @apply text-base leading-7 text-ink dark:text-slate-200;
+  word-break: break-word;
+}
+.prose-notes h1, .prose-notes h2, .prose-notes h3, .prose-notes h4, .prose-notes h5, .prose-notes h6 {
+  @apply font-display font-normal text-ink dark:text-slate-100;
+  margin: 1.4em 0 0.6em;
+}
+.prose-notes h1 { font-size: 24px; }
+.prose-notes h2 { font-size: 20px; }
+.prose-notes h3 { font-size: 17px; }
+.prose-notes h4 { font-size: 15px; }
+.prose-notes p { margin: 0.7em 0; }
+.prose-notes a { @apply text-brand underline underline-offset-2 dark:text-teal-300; }
+.prose-notes ul, .prose-notes ol { margin: 0.7em 0; padding-left: 1.5em; }
+.prose-notes ul { list-style: disc; }
+.prose-notes ol { list-style: decimal; }
+.prose-notes li { margin: 0.25em 0; }
+.prose-notes li > ul, .prose-notes li > ol { margin: 0.2em 0; }
+.prose-notes blockquote {
+  @apply border-l-2 border-line-strong pl-4 text-ink-soft dark:border-slate-600 dark:text-slate-400;
+  margin: 0.9em 0;
+}
+.prose-notes code {
+  @apply rounded-sm bg-surface-muted px-1 py-0.5 font-mono text-[13px] text-ink-soft dark:bg-slate-800 dark:text-slate-300;
+}
+.prose-notes pre {
+  @apply overflow-x-auto rounded-md bg-surface-muted p-4 dark:bg-slate-800;
+  margin: 0.9em 0;
+}
+.prose-notes pre code { @apply bg-transparent p-0 dark:bg-transparent; }
+.prose-notes table {
+  @apply w-full border-collapse text-sm;
+  margin: 0.9em 0;
+}
+.prose-notes th, .prose-notes td {
+  @apply border border-line px-3 py-1.5 text-left dark:border-slate-700;
+}
+.prose-notes th { @apply bg-surface-muted font-medium dark:bg-slate-800; }
+.prose-notes hr { @apply my-6 border-line dark:border-slate-700; }
+.prose-notes img { @apply max-w-full rounded-md; }
+.prose-notes input[type="checkbox"] { margin-right: 0.4em; }

@@ -150,6 +150,30 @@ npm run build    # 产出 dist/cn.everlong.watch.debug.<版本>.rpk
 | POST | `/api/devices/handshake/:code/poll` | 手环端轮询，确认后一次性领取访问令牌 |
 | GET / DELETE | `/api/devices` / `/api/devices/:id` | 已连接设备列表 / 解绑设备 |
 
+## 笔记（Obsidian 同步）
+
+在 Obsidian 里写的 Markdown 笔记，可以同步到网站「笔记」页直接当富文本读。
+后端把 Markdown 渲染成 HTML 并按白名单消毒后存库，网页端只负责列表与展示，
+不做运行期解析。
+
+网页端：「笔记」页左侧按你库里的文件夹层级列出已同步的笔记，右侧是正文；
+右上角「同步设置」里生成 API 密钥（以 `obsk_` 开头，只显示一次，服务端只存
+SHA-256 哈希），还可以限定只同步某个子目录（留空 = 整个库）。
+
+Obsidian 端：插件源码在 `obsidian-everlong-sync/`，构建与安装见该目录的 README：
+
+```bash
+cd obsidian-everlong-sync
+pnpm install && pnpm build     # 产出 main.js
+# 把 main.js 与 manifest.json 复制到 <你的库>/.obsidian/plugins/everlong-sync/
+```
+
+插件在新建 / 保存 / 重命名 / 删除笔记时把 Markdown 推给后端（保存后 2 秒防抖），
+也可以手动全量同步；内容没变过的笔记服务端会跳过。
+
+几点说明：`[[双链]]` 在网页端显示为普通文本，`![[附件]]`（图片等）暂不上传，
+只留一行占位；重新生成密钥后旧密钥立即失效。
+
 ## 手机通知（Web Push）
 
 支持 Android Chrome / Edge、iPhone Safari 与 iOS/iPadOS PWA：用户把网站安装到主屏幕后，
@@ -303,12 +327,19 @@ uv run alembic upgrade head
 | DELETE | `/api/devices/:id` | 解绑设备 |
 | GET | `/api/devices/watchapp/status` | 服务端是否具备打手环安装包的条件 |
 | POST | `/api/devices/watchapp/build` | 用当前账号的课表打包，直接下载 rpk |
+| GET | `/api/obsidian/settings` | 读笔记同步设置（密钥状态、同步目录、已同步篇数） |
+| PUT | `/api/obsidian/settings/root` | 设置同步目录（留空 = 整个库） |
+| POST | `/api/obsidian/settings/api-key` | 生成新的 Obsidian API 密钥（旧密钥立即失效） |
+| GET | `/api/obsidian/notes` | 已同步笔记列表（路径 / 标题 / 更新时间） |
+| GET | `/api/obsidian/notes/content?path=` | 取单篇笔记的富文本正文 |
+| POST | `/api/obsidian/sync/note` `/batch` `/delete` `/rename` | 插件推送单篇 / 批量 / 删除 / 重命名（`X-Obsidian-Key` 认证，无需登录） |
+| GET | `/api/obsidian/sync/check` | 插件校验密钥是否有效 |
 
 除 `health`、`auth` 与手环连接的 `handshake` / `poll`（手环端尚未登录，凭一次性
 `poll_token` 领取令牌）之外，其余接口都需要在请求头携带 `Authorization: Bearer <token>`，
 数据按登录账号隔离，每个账号只能看到自己的计划与记录。
 
-界面提供 **今日 / 未央 / 回忆 / 日历 / 课表 / 活跃度 / 全部** 等视图：今日用于当天计划勾选与补记，日历按月份浏览，课表以周网格展示课程并可一键生成课程计划，活跃度展示过去 12 个月的 GitHub 风格热力图，全部用于搜索和按状态/分类筛选。
+界面提供 **今日 / 未央 / 回忆 / 笔记 / 日历 / 课表 / 活跃度 / 全部** 等视图：今日用于当天计划勾选与补记，日历按月份浏览，课表以周网格展示课程并可一键生成课程计划，活跃度展示过去 12 个月的 GitHub 风格热力图，全部用于搜索和按状态/分类筛选，笔记用于阅读从 Obsidian 同步过来的 Markdown。
 
 金智教务抓取默认针对新疆政法学院教务系统（课表站 `jwxt.xjzfu.edu.cn` + 统一身份认证
 `authserver.xjzfu.edu.cn`），可通过环境变量覆盖：

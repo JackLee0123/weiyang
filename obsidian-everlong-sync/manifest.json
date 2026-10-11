@@ -1,0 +1,9 @@
+{
+  "id": "everlong-sync",
+  "name": "Everlong Sync",
+  "version": "0.1.0",
+  "minAppVersion": "1.4.0",
+  "description": "把笔记同步到未央 · Everlong 网站，网页端以富文本展示。",
+  "author": "Everlong",
+  "isDesktopOnly": false
+}

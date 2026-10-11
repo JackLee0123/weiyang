@@ -405,4 +405,30 @@ export interface ConnectedDevice {
   is_current: boolean
 }
 
-export type View = 'today' | 'weiyang' | 'calendar' | 'list' | 'heatmap' | 'memory' | 'timetable' | 'notifications' | 'changelog' | 'admin'
+export type View = 'today' | 'weiyang' | 'calendar' | 'list' | 'heatmap' | 'memory' | 'timetable' | 'notifications' | 'changelog' | 'admin' | 'notes'
+
+/** Obsidian 同步过来的笔记（网页端按富文本展示）。 */
+export interface ObsidianSettings {
+  has_api_key: boolean
+  api_key_created_at?: string | null
+  sync_root: string
+  note_count: number
+}
+
+export interface ObsidianApiKeyResult {
+  api_key: string
+  created_at: string
+}
+
+export interface ObsidianNoteListItem {
+  path: string
+  title: string
+  updated_at: string
+}
+
+export interface ObsidianNote {
+  path: string
+  title: string
+  content_html: string
+  updated_at: string
+}

@@ -21,6 +21,10 @@ import type {
   GeneratePlansResult,
   LoginPayload,
   MemoryReport,
+  ObsidianApiKeyResult,
+  ObsidianNote,
+  ObsidianNoteListItem,
+  ObsidianSettings,
   ParseTimetableResult,
   PeriodTime,
   Plan,
@@ -223,6 +227,23 @@ export const api = {
   },
   deleteAnnouncement(id: number) {
     return request<void>(`/announcements/${id}`, { method: 'DELETE' })
+  },
+
+  // ---------------- Obsidian 同步 ----------------
+  fetchObsidianSettings() {
+    return request<ObsidianSettings>('/obsidian/settings')
+  },
+  regenerateObsidianApiKey() {
+    return request<ObsidianApiKeyResult>('/obsidian/settings/api-key', { method: 'POST' })
+  },
+  setObsidianSyncRoot(sync_root: string) {
+    return request<ObsidianSettings>('/obsidian/settings/root', { method: 'PUT', body: JSON.stringify({ sync_root }) })
+  },
+  fetchObsidianNotes() {
+    return request<ObsidianNoteListItem[]>('/obsidian/notes')
+  },
+  fetchObsidianNote(path: string) {
+    return request<ObsidianNote>(`/obsidian/notes/content${qs({ path })}`)
   },
   updateUser(id: number, payload: AdminUserUpdate) {
     return request<AdminUser>(`/admin/users/${id}`, { method: 'PATCH', body: JSON.stringify(payload) })

@@ -1,0 +1,17 @@
+{
+  "$schema": "https://json.schemastore.org/package.json",
+  "name": "obsidian-everlong-sync",
+  "version": "0.1.0",
+  "private": true,
+  "description": "把 Obsidian 笔记同步到未央 · Everlong 网站，网页端以富文本展示",
+  "scripts": {
+    "build": "esbuild main.ts --bundle --external:obsidian --format=cjs --target=es2018 --outfile=main.js",
+    "dev": "esbuild main.ts --bundle --external:obsidian --format=cjs --target=es2018 --outfile=main.js --watch"
+  },
+  "devDependencies": {
+    "@types/node": "^22",
+    "esbuild": "^0.24",
+    "obsidian": "^1.7",
+    "typescript": "~5.6"
+  }
+}

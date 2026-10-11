@@ -22,6 +22,7 @@ from .routers import (
     devices,
     feedback,
     health,
+    obsidian,
     plans,
     push,
     records,
@@ -108,6 +109,7 @@ for router in (
     push.router,
     devices.router,
     announcements.router,
+    obsidian.router,
 ):
     app.include_router(router)
 

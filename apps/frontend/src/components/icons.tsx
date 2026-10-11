@@ -93,6 +93,14 @@ export const BookOpen = frame(
   </>,
 )
 
+export const NotebookPen = frame(
+  <>
+    <path d="M4 20h16" />
+    <path d="M13.5 4.5 19 10l-9.5 9.5H4v-5.5l9.5-9.5Z" />
+    <path d="m12 6 4 4" />
+  </>,
+)
+
 export const Calendar = frame(
   <>
     <rect x="3" y="5" width="18" height="16" rx="1" />

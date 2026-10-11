@@ -12,7 +12,7 @@ export interface ChangelogEntry {
   items: ChangelogItem[]
 }
 
-export const CURRENT_VERSION = 'v0.9.1'
+export const CURRENT_VERSION = 'v0.10.0'
 
 export const CHANGELOG_KIND_META: Record<ChangelogKind, { label: string; className: string }> = {
   feature: { label: '新增', className: 'text-teal-700 dark:text-teal-300' },
@@ -22,6 +22,29 @@ export const CHANGELOG_KIND_META: Record<ChangelogKind, { label: string; classNa
 }
 
 export const CHANGELOG: ChangelogEntry[] = [
+  {
+    version: 'v0.10.0',
+    date: '2026-10-11',
+    title: 'Obsidian 笔记同步',
+    items: [
+      {
+        kind: 'feature',
+        text: '新增「笔记」页：把 Obsidian 里的 Markdown 笔记同步到网站，网页端直接按富文本阅读——标题、列表、表格、代码块、任务清单、引用都保留原样，左侧按你库里的文件夹层级列出已同步的笔记',
+      },
+      {
+        kind: 'feature',
+        text: '配套 Obsidian 插件 Everlong Sync（见 obsidian-everlong-sync/）：新建 / 保存 / 重命名 / 删除笔记时自动推送（保存后 2 秒防抖），也能手动全量同步；内容没变过的笔记服务端会跳过',
+      },
+      {
+        kind: 'feature',
+        text: '「笔记 → 同步设置」里生成 API 密钥（只显示一次，服务端只存哈希），插件用它在请求头里认证；随时可以重新生成，旧密钥立即失效。还可以指定只同步某个子目录，留空则同步整个库',
+      },
+      {
+        kind: 'notice',
+        text: 'Markdown 在服务端渲染后按白名单消毒，前端再经 DOMPurify 过一道；[[双链]] 转成普通文本，![[附件]] 暂不上传，只留一行占位说明',
+      },
+    ],
+  },
   {
     version: 'v0.9.1',
     date: '2026-10-05',
