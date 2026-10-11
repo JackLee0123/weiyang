@@ -29,3 +29,7 @@ watchapp/_npm.exit
 # local SSH deploy key used for production (never commit the private key)
 _gh_deploy
 _gh_deploy.pub
+# 本地运行产物与预览截图（`.run/` 下都是本机临时文件）
+.run/
+# 后端跑测试留下的 pytest 临时目录
+backend/pytest-of-Administrator/
