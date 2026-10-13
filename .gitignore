@@ -33,3 +33,5 @@ _gh_deploy.pub
 .run/
 # 后端跑测试留下的 pytest 临时目录
 backend/pytest-of-Administrator/
+# pnpm 在本机落下的依赖存储目录
+.pnpm-store/
