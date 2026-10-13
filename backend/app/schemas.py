@@ -331,6 +331,15 @@ class PlanOut(PlanBase):
     updated_at: datetime
 
 
+class PlanBatchDeleteIn(BaseModel):
+    plan_ids: list[int]
+
+
+class PlanBatchDeleteOut(BaseModel):
+    deleted: int
+    skipped: list[int] = []
+
+
 class RecordBase(BaseModel):
     date: str = Field(..., pattern=DATE_RE)
     title: str = Field(..., min_length=1, max_length=200)

@@ -164,6 +164,43 @@ def delete_plan(db: Session, plan: models.Plan) -> None:
     db.commit()
 
 
+def delete_plans(db: Session, user_id: int, plan_ids: list[int]) -> tuple[int, list[int]]:
+    """批量删除计划，仅删除属于当前用户且未封存的计划。
+
+    与单条删除保持一致：过去日期已封存，无法删除；其余状态均可删除。
+    返回 (实际删除数量, 因不存在/已封存而跳过的 id 列表)。
+    """
+    if not plan_ids:
+        return 0, []
+    today = today_iso()
+    plans = list(
+        db.scalars(
+            select(models.Plan).where(
+                models.Plan.id.in_(plan_ids),
+                models.Plan.user_id == user_id,
+            )
+        ).all()
+    )
+    found_ids = {plan.id for plan in plans}
+    skipped = [pid for pid in plan_ids if pid not in found_ids]
+    deletable = [plan for plan in plans if plan.date >= today]
+    skipped.extend(plan.id for plan in plans if plan.date < today)
+    skipped = list(dict.fromkeys(skipped))
+
+    for plan in deletable:
+        for record in db.scalars(
+            select(models.Record).where(
+                models.Record.linked_plan_id == plan.id,
+                models.Record.source == PLAN_RECORD_SOURCE,
+            )
+        ).all():
+            db.delete(record)
+        db.delete(plan)
+    if deletable:
+        db.commit()
+    return len(deletable), skipped
+
+
 # 记录来源标记：plan 表示这条记录由「计划勾选完成」自动生成，并跟随计划变化。
 PLAN_RECORD_SOURCE = "plan"
 MANUAL_RECORD_SOURCE = "manual"

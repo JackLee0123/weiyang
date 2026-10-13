@@ -58,7 +58,8 @@ export function usePlanMutations() {
   const create = useMutation({ mutationFn: (p: PlanPayload) => api.createPlan(p), onSuccess: refresh })
   const update = useMutation({ mutationFn: (v: { id: number; payload: Partial<PlanPayload> }) => api.updatePlan(v.id, v.payload), onSuccess: refresh })
   const remove = useMutation({ mutationFn: (id: number) => api.deletePlan(id), onSuccess: refresh })
-  return { create, update, remove }
+  const removeBatch = useMutation({ mutationFn: (ids: number[]) => api.deletePlans(ids), onSuccess: refresh })
+  return { create, update, remove, removeBatch }
 }
 
 export function useRecordMutations() {

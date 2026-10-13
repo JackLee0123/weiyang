@@ -616,6 +616,15 @@ export const Watch = frame(
 
 export const X = frame(<path d="M6 6l12 12M18 6 6 18" />)
 
+export const Square = frame(<rect x="3.5" y="3.5" width="17" height="17" rx="2" />)
+
+export const CheckSquare = frame(
+  <>
+    <path d="m9 12 2 2 4-4" />
+    <rect x="3.5" y="3.5" width="17" height="17" rx="2" />
+  </>,
+)
+
 export const ZoomIn = frame(
   <>
     <circle cx="11" cy="11" r="6.5" />

@@ -57,3 +57,15 @@ def delete_plan(plan_id: int, db: Session = Depends(get_db), current_user: User 
         raise HTTPException(status_code=403, detail="过去的日期已封存为永久回忆，无法删除计划")
     repository.delete_plan(db, plan)
     return None
+
+
+@router.post("/batch-delete", response_model=schemas.PlanBatchDeleteOut)
+def batch_delete_plans(
+    data: schemas.PlanBatchDeleteIn,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    if not data.plan_ids:
+        raise HTTPException(status_code=400, detail="请选择要删除的计划")
+    deleted, skipped = repository.delete_plans(db, current_user.id, data.plan_ids)
+    return schemas.PlanBatchDeleteOut(deleted=deleted, skipped=skipped)

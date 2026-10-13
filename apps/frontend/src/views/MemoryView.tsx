@@ -1,10 +1,11 @@
 import { useState } from 'react'
 import { addDays, addMonths, format, parseISO, subDays, subMonths } from 'date-fns'
-import { ChevronLeft, ChevronRight, Flame, MapPin } from '../components/icons'
-import { useMemoryReport } from '../lib/queries'
+import { CheckSquare, ChevronLeft, ChevronRight, Flame, MapPin, Square, Trash2 } from '../components/icons'
+import { useMemoryReport, usePlanMutations } from '../lib/queries'
 import { monthRange, weekRange } from '../lib/date'
 import { formatMinutes } from '../lib/format'
 import { EmptyState } from '../components/EmptyState'
+import { Modal } from '../components/Modal'
 
 type Period = 'week' | 'month'
 
@@ -15,17 +16,48 @@ function fmtDay(date: string) {
 export function MemoryView() {
   const [period, setPeriod] = useState<Period>('week')
   const [anchor, setAnchor] = useState(() => new Date())
+  const [selected, setSelected] = useState<Set<number>>(new Set())
+  const [showConfirm, setShowConfirm] = useState(false)
 
   const range = period === 'week' ? weekRange(anchor) : monthRange(anchor)
   const currentRange = period === 'week' ? weekRange(new Date()) : monthRange(new Date())
   const reportQ = useMemoryReport(range.start, range.end)
   const report = reportQ.data
+  const { removeBatch } = usePlanMutations()
 
   const shift = (dir: 1 | -1) => {
     setAnchor((prev) => {
       if (period === 'week') return dir === 1 ? addDays(prev, 7) : subDays(prev, 7)
       return dir === 1 ? addMonths(prev, 1) : subMonths(prev, 1)
     })
+  }
+
+  const toggleSelect = (id: number) => {
+    const next = new Set(selected)
+    if (next.has(id)) {
+      next.delete(id)
+    } else {
+      next.add(id)
+    }
+    setSelected(next)
+  }
+
+  const toggleSelectAll = () => {
+    if (!report) return
+    const unfinished = report.unfinished
+    if (selected.size === unfinished.length) {
+      setSelected(new Set())
+    } else {
+      setSelected(new Set(unfinished.map((p) => p.id)))
+    }
+  }
+
+  const handleBatchDelete = async () => {
+    if (selected.size === 0) return
+    const ids = Array.from(selected)
+    await removeBatch.mutateAsync(ids)
+    setSelected(new Set())
+    setShowConfirm(false)
   }
 
   const label =
@@ -86,6 +118,30 @@ export function MemoryView() {
           )}
         </div>
       </div>
+
+      {showConfirm && (
+        <Modal title="确认删除" onClose={() => setShowConfirm(false)}>
+          <p className="text-sm text-ink-soft dark:text-slate-300">
+            确定要删除选中的 <span className="tnum font-medium text-ink dark:text-slate-100">{selected.size}</span> 项未央计划吗？删除后无法恢复。
+          </p>
+          <div className="mt-4 flex flex-wrap gap-2">
+            <button
+              className="btn-danger flex-1"
+              onClick={() => void handleBatchDelete()}
+              disabled={removeBatch.isPending}
+            >
+              {removeBatch.isPending ? '删除中…' : '确认删除'}
+            </button>
+            <button
+              className="btn-ghost flex-1"
+              onClick={() => setShowConfirm(false)}
+              disabled={removeBatch.isPending}
+            >
+              取消
+            </button>
+          </div>
+        </Modal>
+      )}
 
       {!hasContent ? (
         <EmptyState title="这段时间还没有回忆" hint="记录当天内容或完成计划后，这里就会生长出航程" />
@@ -178,16 +234,48 @@ export function MemoryView() {
                 {report.unfinished.length === 0 ? (
                   <p className="text-sm text-ink-muted dark:text-slate-400">这段回忆里没有未央的航段。</p>
                 ) : (
-                  <ul className="space-y-2">
-                    {report.unfinished.map((plan) => (
-                      <li key={plan.id} className="flex items-center gap-2.5 text-sm">
-                        <span className="tnum shrink-0 text-2xs text-ink-faint dark:text-slate-500">
-                          {plan.date.slice(5)}
-                        </span>
-                        <span className="truncate text-ink-soft dark:text-slate-300">{plan.title}</span>
-                      </li>
-                    ))}
-                  </ul>
+                  <>
+                    <div className="mb-2 flex items-center gap-2">
+                      <button
+                        className="btn-quiet flex items-center gap-1 px-2 py-1.5 text-2xs"
+                        onClick={toggleSelectAll}
+                        aria-label={selected.size === report.unfinished.length ? '取消全选' : '全选'}
+                      >
+                        {selected.size === report.unfinished.length ? (
+                          <CheckSquare size={13} />
+                        ) : (
+                          <Square size={13} />
+                        )}
+                        {selected.size === report.unfinished.length ? '取消全选' : '全选'}
+                      </button>
+                      {selected.size > 0 && (
+                        <button
+                          className="btn-danger ml-auto flex items-center gap-1 px-2 py-1.5 text-2xs"
+                          onClick={() => setShowConfirm(true)}
+                        >
+                          <Trash2 size={13} />
+                          删除 {selected.size} 项
+                        </button>
+                      )}
+                    </div>
+                    <ul className="space-y-2">
+                      {report.unfinished.map((plan) => (
+                        <li
+                          key={plan.id}
+                          className="group flex cursor-pointer items-center gap-2.5 rounded-md text-sm transition-colors hover:bg-surface-muted/60 dark:hover:bg-slate-800/40"
+                          onClick={() => toggleSelect(plan.id)}
+                        >
+                          <span className="shrink-0 text-ink-faint dark:text-slate-500">
+                            {selected.has(plan.id) ? <CheckSquare size={15} /> : <Square size={15} />}
+                          </span>
+                          <span className="tnum shrink-0 text-2xs text-ink-faint dark:text-slate-500">
+                            {plan.date.slice(5)}
+                          </span>
+                          <span className="truncate text-ink-soft dark:text-slate-300">{plan.title}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </>
                 )}
               </div>
             </section>

@@ -12,7 +12,7 @@ export interface ChangelogEntry {
   items: ChangelogItem[]
 }
 
-export const CURRENT_VERSION = 'v1.0.0'
+export const CURRENT_VERSION = 'v1.0.1'
 
 export const CHANGELOG_KIND_META: Record<ChangelogKind, { label: string; className: string }> = {
   feature: { label: '新增', className: 'text-teal-700 dark:text-teal-300' },
@@ -22,6 +22,21 @@ export const CHANGELOG_KIND_META: Record<ChangelogKind, { label: string; classNa
 }
 
 export const CHANGELOG: ChangelogEntry[] = [
+  {
+    version: 'v1.0.1',
+    date: '2026-10-13',
+    title: '回忆页可以批量清掉没完成的计划',
+    items: [
+      {
+        kind: 'feature',
+        text: '「回忆」页的「未央航段」（那段时间里没完成的计划）现在可以勾选：支持全选 / 取消全选，选中后点「删除 N 项」会弹确认框，确认后一次删干净',
+      },
+      {
+        kind: 'notice',
+        text: '和单条删除一个规矩：过去的日期已经封存成回忆，删不掉——所以翻到过去那几周时，这些「未央航段」删了也还在。只能删自己的计划，勾到别人的不会被动到',
+      },
+    ],
+  },
   {
     version: 'v1.0.0',
     date: '2026-10-13',

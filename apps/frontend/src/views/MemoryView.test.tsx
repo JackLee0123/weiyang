@@ -1,14 +1,15 @@
-import { fireEvent, render, screen } from '@testing-library/react'
+import { fireEvent, render, screen, waitFor } from '@testing-library/react'
 import { format, startOfMonth } from 'date-fns'
 import { describe, expect, it, vi } from 'vitest'
 import { MemoryView } from './MemoryView'
 import { toISO } from '../lib/date'
 import type { MemoryReport } from '../lib/types'
 
-const mocks = vi.hoisted(() => ({ useMemoryReport: vi.fn() }))
+const mocks = vi.hoisted(() => ({ useMemoryReport: vi.fn(), removeBatch: vi.fn() }))
 
 vi.mock('../lib/queries', () => ({
   useMemoryReport: mocks.useMemoryReport,
+  usePlanMutations: () => ({ removeBatch: { mutateAsync: mocks.removeBatch, isPending: false } }),
 }))
 
 function makeReport(overrides: Partial<MemoryReport> = {}): MemoryReport {
@@ -69,5 +70,17 @@ describe('MemoryView', () => {
     fireEvent.click(screen.getByText('月报'))
 
     expect(screen.getByText(format(startOfMonth(new Date()), 'yyyy年M月'))).toBeInTheDocument()
+  })
+
+  it('批量删除未完成计划会走确认弹窗', async () => {
+    mocks.useMemoryReport.mockReturnValue({ isLoading: false, data: makeReport() })
+    mocks.removeBatch.mockResolvedValue({ deleted: 1, skipped: [] })
+
+    render(<MemoryView />)
+    fireEvent.click(screen.getByLabelText('全选'))
+    fireEvent.click(screen.getByText(/删除 1 项/))
+    fireEvent.click(screen.getByRole('button', { name: '确认删除' }))
+
+    await waitFor(() => expect(mocks.removeBatch).toHaveBeenCalledWith([1]))
   })
 })

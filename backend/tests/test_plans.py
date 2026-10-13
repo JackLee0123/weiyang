@@ -154,3 +154,45 @@ def test_plan_update_images_replace_and_clear(client, auth_headers):
     # 显式 null 也清空
     again = client.patch(f"/api/plans/{plan['id']}", json={"images": None}, headers=auth_headers).json()
     assert again["images"] == []
+
+
+def test_batch_delete_plans(client, auth_headers):
+    a = client.post("/api/plans", json={"date": FUTURE, "title": "a"}, headers=auth_headers).json()
+    b = client.post("/api/plans", json={"date": FUTURE, "title": "b"}, headers=auth_headers).json()
+    other = client.post("/api/plans", json={"date": FUTURE, "title": "c"}, headers=auth_headers).json()
+
+    response = client.post(
+        "/api/plans/batch-delete",
+        json={"plan_ids": [a["id"], b["id"]]},
+        headers=auth_headers,
+    )
+    assert response.status_code == 200
+    assert response.json() == {"deleted": 2, "skipped": []}
+
+    remaining = client.get("/api/plans", headers=auth_headers).json()
+    assert [p["id"] for p in remaining] == [other["id"]]
+
+
+def test_batch_delete_requires_auth(client):
+    assert client.post("/api/plans/batch-delete", json={"plan_ids": [1]}).status_code == 401
+
+
+def test_batch_delete_empty_is_bad_request(client, auth_headers):
+    response = client.post("/api/plans/batch-delete", json={"plan_ids": []}, headers=auth_headers)
+    assert response.status_code == 400
+
+
+def test_batch_delete_does_not_touch_others(client, auth_headers, register_user):
+    other_headers = register_user("other@example.com")
+    mine = client.post("/api/plans", json={"date": FUTURE, "title": "mine"}, headers=auth_headers).json()
+    other = client.post("/api/plans", json={"date": FUTURE, "title": "other"}, headers=other_headers).json()
+
+    response = client.post(
+        "/api/plans/batch-delete",
+        json={"plan_ids": [mine["id"], other["id"]]},
+        headers=auth_headers,
+    )
+    assert response.status_code == 200
+    assert response.json() == {"deleted": 1, "skipped": [other["id"]]}
+
+    assert client.get(f"/api/plans/{other['id']}", headers=other_headers).status_code == 200

@@ -190,6 +190,12 @@ export const api = {
   deletePlan(id: number) {
     return request<void>(`/plans/${id}`, { method: 'DELETE' })
   },
+  deletePlans(planIds: number[]) {
+    return request<{ deleted: number; skipped: number[] }>(`/plans/batch-delete`, {
+      method: 'POST',
+      body: JSON.stringify({ plan_ids: planIds }),
+    })
+  },
 
   fetchRecords(params: { start?: string; end?: string; category?: string; q?: string } = {}) {
     return request<RecordEntry[]>(`/records${qs(params)}`)
