@@ -1,4 +1,5 @@
 import type {
+  AdminScheduleBatch,
   AdminUser,
   AdminUserUpdate,
   AdminScheduleImportPayload,
@@ -261,6 +262,15 @@ export const api = {
   },
   rollbackAdminSchedule(plan_ids: number[]) {
     return request<{ deleted: number }>('/admin/schedule/rollback', { method: 'POST', body: JSON.stringify({ plan_ids }) })
+  },
+  fetchAdminScheduleImports() {
+    return request<AdminScheduleBatch[]>('/admin/schedule/imports')
+  },
+  cancelAdminScheduleImport(batchId: number) {
+    return request<{ deleted: number }>(`/admin/schedule/imports/${batchId}/cancel`, { method: 'POST' })
+  },
+  cancelAdminScheduleImportForUser(batchId: number, userId: number) {
+    return request<{ deleted: number }>(`/admin/schedule/imports/${batchId}/cancel-user/${userId}`, { method: 'POST' })
   },
   downloadAdminScheduleTemplate() {
     return requestBlob('/admin/schedule/template')

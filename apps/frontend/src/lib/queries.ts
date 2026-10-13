@@ -89,14 +89,16 @@ export function useAdminMutations() {
   return { update, remove }
 }
 
-/** 管理员批量导入日程：解析预览 / 正式导入 / 撤销本次导入。 */
+/** 管理员批量导入日程：解析预览 / 正式导入 / 撤销 / 历史与取消。 */
 export function useAdminScheduleImport() {
   const qc = useQueryClient()
   const refresh = () => {
     qc.invalidateQueries({ queryKey: ['plans'] })
     qc.invalidateQueries({ queryKey: ['stats'] })
     qc.invalidateQueries({ queryKey: ['admin-users'] })
+    qc.invalidateQueries({ queryKey: ['admin-schedule-imports'] })
   }
+  const history = useQuery({ queryKey: ['admin-schedule-imports'], queryFn: () => api.fetchAdminScheduleImports() })
   const preview = useMutation({ mutationFn: (file: File) => api.previewAdminSchedule(file) })
   const importRows = useMutation({
     mutationFn: (payload: AdminScheduleImportPayload) => api.importAdminSchedule(payload),
@@ -106,8 +108,16 @@ export function useAdminScheduleImport() {
     mutationFn: (planIds: number[]) => api.rollbackAdminSchedule(planIds),
     onSuccess: refresh,
   })
+  const cancelBatch = useMutation({
+    mutationFn: (batchId: number) => api.cancelAdminScheduleImport(batchId),
+    onSuccess: refresh,
+  })
+  const cancelBatchUser = useMutation({
+    mutationFn: (value: { batchId: number; userId: number }) => api.cancelAdminScheduleImportForUser(value.batchId, value.userId),
+    onSuccess: refresh,
+  })
   const template = useMutation({ mutationFn: () => api.downloadAdminScheduleTemplate() })
-  return { preview, importRows, rollback, template }
+  return { preview, importRows, rollback, cancelBatch, cancelBatchUser, template, history }
 }
 
 export function useCourses(term?: string) {

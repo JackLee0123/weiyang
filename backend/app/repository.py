@@ -239,6 +239,7 @@ def bulk_create_plans(
     rows: list[dict],
     *,
     skip_duplicates: bool = True,
+    admin_id: Optional[int] = None,
 ) -> dict:
     """把同一批日程复制给多个用户。跳过过去日期，并按 (日期, 标题, 开始时间) 去重。
 
@@ -251,7 +252,7 @@ def bulk_create_plans(
         if user_id not in targets:
             targets.append(user_id)
     if not targets or not rows:
-        return {"created": 0, "skipped_past": 0, "skipped_duplicate": 0, "targets": [], "plan_ids": []}
+        return {"created": 0, "skipped_past": 0, "skipped_duplicate": 0, "targets": [], "plan_ids": [], "batch_id": None}
 
     names = {
         user.id: user.name
@@ -269,6 +270,7 @@ def bulk_create_plans(
     created_plans: list[models.Plan] = []
     details: list[dict] = []
     total_past = total_duplicate = 0
+    plan_ids_by_user: dict[int, list[int]] = {}
 
     for user_id in targets:
         detail = {"user_id": user_id, "name": names.get(user_id, ""), "created": 0, "skipped_past": 0, "skipped_duplicate": 0}
@@ -304,12 +306,45 @@ def bulk_create_plans(
     db.commit()
     for plan in created_plans:
         db.refresh(plan)
+    for plan in created_plans:
+        plan_ids_by_user.setdefault(plan.user_id, []).append(plan.id)
+
+    batch: Optional[models.ScheduleImportBatch] = None
+    if created_plans or details:
+        dates = sorted(plan.date for plan in created_plans)
+        batch = models.ScheduleImportBatch(
+            admin_id=admin_id,
+            date_start=dates[0] if dates else None,
+            date_end=dates[-1] if dates else None,
+            rows_count=len(rows),
+            created_count=sum(item["created"] for item in details),
+            skipped_past=total_past,
+            skipped_duplicate=total_duplicate,
+        )
+        db.add(batch)
+        db.flush()
+        for item in details:
+            db.add(
+                models.ScheduleImportItem(
+                    batch_id=batch.id,
+                    user_id=item["user_id"],
+                    user_name=item["name"],
+                    plan_ids=plan_ids_by_user.get(item["user_id"], []),
+                    created=item["created"],
+                    skipped_past=item["skipped_past"],
+                    skipped_duplicate=item["skipped_duplicate"],
+                )
+            )
+        db.commit()
+        db.refresh(batch)
+
     return {
         "created": sum(item["created"] for item in details),
         "skipped_past": total_past,
         "skipped_duplicate": total_duplicate,
         "targets": details,
         "plan_ids": [plan.id for plan in created_plans],
+        "batch_id": batch.id if batch else None,
     }
 
 
@@ -324,6 +359,62 @@ def delete_imported_plans(db: Session, plan_ids: list[int]) -> int:
     )
     db.commit()
     return int(deleted or 0)
+
+
+def list_import_batches(db: Session, limit: int = 50) -> list[models.ScheduleImportBatch]:
+    stmt = (
+        select(models.ScheduleImportBatch)
+        .order_by(models.ScheduleImportBatch.id.desc())
+        .limit(limit)
+    )
+    return list(db.scalars(stmt).all())
+
+
+def count_batch_remaining_plans(db: Session, batch: models.ScheduleImportBatch) -> int:
+    ids: list[int] = []
+    for item in batch.items:
+        if item.cancelled_at is None:
+            ids.extend(item.plan_ids or [])
+    if not ids:
+        return 0
+    return int(
+        db.scalar(
+            select(func.count(models.Plan.id)).where(
+                models.Plan.id.in_(ids), models.Plan.source == ADMIN_IMPORT_SOURCE
+            )
+        )
+        or 0
+    )
+
+
+def cancel_import_batch(db: Session, batch: models.ScheduleImportBatch, user_id: Optional[int] = None) -> int:
+    """撤销某次导入：不传 user_id 时整批撤销，传入时只撤销该用户在那次导入中写入的日程。"""
+    now = now_utc()
+    ids: list[int] = []
+    touched = False
+    for item in batch.items:
+        if item.cancelled_at is not None:
+            continue
+        if user_id is not None and item.user_id != user_id:
+            continue
+        ids.extend(item.plan_ids or [])
+        item.cancelled_at = now
+        touched = True
+    deleted = 0
+    if ids:
+        deleted = (
+            db.query(models.Plan)
+            .filter(models.Plan.id.in_(ids), models.Plan.source == ADMIN_IMPORT_SOURCE)
+            .delete(synchronize_session=False)
+        )
+        deleted = int(deleted or 0)
+    if touched or ids:
+        db.commit()
+    return deleted
+
+
+def get_import_batch(db: Session, batch_id: int) -> Optional[models.ScheduleImportBatch]:
+    return db.scalar(select(models.ScheduleImportBatch).where(models.ScheduleImportBatch.id == batch_id))
 
 
 def list_courses(db: Session, user_id: int, term: Optional[str] = None) -> list[models.Course]:

@@ -218,6 +218,31 @@ export interface AdminScheduleImportResult {
   skipped_duplicate: number
   targets: AdminScheduleTarget[]
   plan_ids: number[]
+  batch_id: number | null
+}
+
+/** 批量导入历史里某个用户的明细（与后端 AdminScheduleBatchItemOut 对齐）。 */
+export interface AdminScheduleBatchItem {
+  user_id: number | null
+  user_name: string
+  created: number
+  skipped_past: number
+  skipped_duplicate: number
+  cancelled: boolean
+}
+
+/** 一次批量导入的历史记录（与后端 AdminScheduleBatchOut 对齐）。 */
+export interface AdminScheduleBatch {
+  id: number
+  created_at: string
+  date_start: string | null
+  date_end: string | null
+  rows_count: number
+  created_count: number
+  skipped_past: number
+  skipped_duplicate: number
+  remaining_plans: number
+  items: AdminScheduleBatchItem[]
 }
 
 export interface RegisterPayload {

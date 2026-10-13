@@ -1,8 +1,8 @@
 import { useMemo, useState } from 'react'
-import { AlertTriangle, Check, Download, FileSpreadsheet, Loader2, Undo2, Upload, UserRound } from './icons'
+import { AlertTriangle, Check, Download, FileSpreadsheet, History, Loader2, Undo2, Upload, UserRound } from './icons'
 import { useAdminScheduleImport } from '../lib/queries'
 import { isPast } from '../lib/date'
-import type { AdminScheduleImportResult, AdminSchedulePreview, AdminUser } from '../lib/types'
+import type { AdminScheduleBatch, AdminScheduleImportResult, AdminSchedulePreview, AdminUser } from '../lib/types'
 
 const PREVIEW_LIMIT = 50
 
@@ -85,8 +85,113 @@ function ResultPanel({
   )
 }
 
+function formatBatchTime(iso: string): string {
+  const date = new Date(iso.endsWith('Z') || iso.includes('+') ? iso : `${iso}Z`)
+  if (Number.isNaN(date.getTime())) return iso
+  const pad = (n: number) => String(n).padStart(2, '0')
+  return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())} ${pad(date.getHours())}:${pad(date.getMinutes())}`
+}
+
+function HistoryPanel({
+  batches,
+  loading,
+  cancellingBatch,
+  cancellingUser,
+  onCancelBatch,
+  onCancelUser,
+}: {
+  batches: AdminScheduleBatch[]
+  loading: boolean
+  cancellingBatch: number | null
+  cancellingUser: string | null
+  onCancelBatch: (batchId: number) => void
+  onCancelUser: (batchId: number, userId: number) => void
+}) {
+  return (
+    <div className="space-y-2 border-t border-line-soft pt-3 dark:border-slate-700/60">
+      <div className="flex items-center gap-1.5 text-sm font-medium text-ink dark:text-slate-100">
+        <History size={14} className="text-ink-muted dark:text-slate-400" /> 导入历史
+        <span className="text-xs font-normal text-ink-muted dark:text-slate-400">（最近 {batches.length} 次）</span>
+      </div>
+      {loading && (
+        <p className="flex items-center gap-1.5 text-xs text-ink-muted dark:text-slate-400">
+          <Loader2 size={12} className="animate-spin" /> 正在加载导入历史…
+        </p>
+      )}
+      {!loading && batches.length === 0 && (
+        <p className="text-xs text-ink-muted dark:text-slate-400">还没有批量导入过日程，历史会显示在这里。</p>
+      )}
+      <ul className="space-y-2">
+        {batches.map((batch) => (
+          <li key={batch.id} className="rounded-md border border-line-soft bg-surface-muted p-2.5 dark:border-slate-700/60 dark:bg-slate-900/40">
+            <div className="flex flex-wrap items-center gap-2 text-xs">
+              <span className="font-medium text-ink dark:text-slate-100">第 {batch.id} 次导入</span>
+              <span className="text-ink-muted dark:text-slate-400">{formatBatchTime(batch.created_at)}</span>
+              {batch.date_start && (
+                <span className="text-ink-muted dark:text-slate-400">
+                  日程范围 {batch.date_start}{batch.date_end && batch.date_end !== batch.date_start ? ` ~ ${batch.date_end}` : ''}
+                </span>
+              )}
+              <span className="rounded-sm text-2xs font-medium text-brand dark:text-teal-300">
+                写入 {batch.created_count} 条
+                {batch.remaining_plans < batch.created_count ? `（还剩 ${batch.remaining_plans} 条未删除）` : ''}
+              </span>
+              {batch.skipped_duplicate > 0 && (
+                <span className="text-ink-muted dark:text-slate-400">重复 {batch.skipped_duplicate}</span>
+              )}
+              {batch.skipped_past > 0 && <span className="text-ink-muted dark:text-slate-400">过期 {batch.skipped_past}</span>}
+              {batch.remaining_plans > 0 && (
+                <button
+                  className="btn-ghost ml-auto px-2 py-1 text-xs text-rose-600 dark:text-rose-300"
+                  onClick={() => {
+                    if (window.confirm(`确定要取消第 ${batch.id} 次导入吗？会删除所有用户还没删掉的 ${batch.remaining_plans} 条日程。`)) {
+                      onCancelBatch(batch.id)
+                    }
+                  }}
+                  disabled={cancellingBatch === batch.id}
+                >
+                  {cancellingBatch === batch.id ? <Loader2 size={13} className="animate-spin" /> : <Undo2 size={13} />} 取消本次导入
+                </button>
+              )}
+            </div>
+            {batch.items.length > 0 && (
+              <ul className="mt-1.5 space-y-0.5">
+                {batch.items.map((item) => (
+                  <li key={`${batch.id}-${item.user_id ?? 'unknown'}`} className="flex flex-wrap items-center gap-2 text-xs text-ink-muted dark:text-slate-400">
+                    <span className="text-ink dark:text-slate-200">{item.user_name || `用户 ${item.user_id}`}</span>
+                    <span>写入 {item.created} 条</span>
+                    {item.cancelled ? (
+                      <span className="rounded-sm text-2xs font-medium text-ink-faint dark:text-slate-500">已取消</span>
+                    ) : (
+                      item.created > 0 &&
+                      item.user_id !== null && (
+                        <button
+                          className="btn-ghost px-1.5 py-0.5 text-2xs text-rose-600 dark:text-rose-300"
+                          onClick={() => {
+                            if (item.user_id !== null && window.confirm(`确定要取消 ${item.user_name} 在这次导入中的 ${item.created} 条日程吗？`)) {
+                              onCancelUser(batch.id, item.user_id)
+                            }
+                          }}
+                          disabled={cancellingUser === `${batch.id}:${item.user_id}`}
+                        >
+                          {cancellingUser === `${batch.id}:${item.user_id}` ? <Loader2 size={11} className="animate-spin" /> : <Undo2 size={11} />}
+                          取消该用户
+                        </button>
+                      )
+                    )}
+                  </li>
+                ))}
+              </ul>
+            )}
+          </li>
+        ))}
+      </ul>
+    </div>
+  )
+}
+
 export function AdminScheduleImport({ meId, users }: { meId: number; users: AdminUser[] }) {
-  const { preview, importRows, rollback, template } = useAdminScheduleImport()
+  const { preview, importRows, rollback, cancelBatch, cancelBatchUser, template, history } = useAdminScheduleImport()
   const [file, setFile] = useState<File | null>(null)
   const [parsed, setParsed] = useState<AdminSchedulePreview | null>(null)
   const [selected, setSelected] = useState<number[]>([])
@@ -94,6 +199,8 @@ export function AdminScheduleImport({ meId, users }: { meId: number; users: Admi
   const [skipDuplicates, setSkipDuplicates] = useState(true)
   const [result, setResult] = useState<AdminScheduleImportResult | null>(null)
   const [message, setMessage] = useState<{ kind: 'ok' | 'error'; text: string } | null>(null)
+  const [cancellingBatch, setCancellingBatch] = useState<number | null>(null)
+  const [cancellingUser, setCancellingUser] = useState<string | null>(null)
 
   const me = users.find((user) => user.id === meId)
   const activeUsers = useMemo(() => users.filter((user) => user.is_active), [users])
@@ -178,6 +285,32 @@ export function AdminScheduleImport({ meId, users }: { meId: number; users: Admi
       URL.revokeObjectURL(url)
     } catch (error) {
       setMessage({ kind: 'error', text: error instanceof Error ? error.message : '模板下载失败' })
+    }
+  }
+
+  const doCancelBatch = async (batchId: number) => {
+    setMessage(null)
+    setCancellingBatch(batchId)
+    try {
+      const data = await cancelBatch.mutateAsync(batchId)
+      setMessage({ kind: 'ok', text: `已取消第 ${batchId} 次导入，删除 ${data.deleted} 条日程` })
+    } catch (error) {
+      setMessage({ kind: 'error', text: error instanceof Error ? error.message : '取消导入失败' })
+    } finally {
+      setCancellingBatch(null)
+    }
+  }
+
+  const doCancelUser = async (batchId: number, userId: number) => {
+    setMessage(null)
+    setCancellingUser(`${batchId}:${userId}`)
+    try {
+      const data = await cancelBatchUser.mutateAsync({ batchId, userId })
+      setMessage({ kind: 'ok', text: `已取消该用户在第 ${batchId} 次导入中的日程，删除 ${data.deleted} 条` })
+    } catch (error) {
+      setMessage({ kind: 'error', text: error instanceof Error ? error.message : '取消失败' })
+    } finally {
+      setCancellingUser(null)
     }
   }
 
@@ -326,6 +459,15 @@ export function AdminScheduleImport({ meId, users }: { meId: number; users: Admi
       )}
 
       {result && <ResultPanel result={result} onRollback={() => void doRollback()} rolling={rollback.isPending} />}
+
+      <HistoryPanel
+        batches={history.data ?? []}
+        loading={history.isPending}
+        cancellingBatch={cancellingBatch}
+        cancellingUser={cancellingUser}
+        onCancelBatch={(batchId) => void doCancelBatch(batchId)}
+        onCancelUser={(batchId, userId) => void doCancelUser(batchId, userId)}
+      />
     </section>
   )
 }

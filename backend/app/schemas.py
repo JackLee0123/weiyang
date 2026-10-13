@@ -244,6 +244,7 @@ class AdminScheduleImportOut(BaseModel):
     skipped_duplicate: int
     targets: list[AdminScheduleTargetOut]
     plan_ids: list[int] = []
+    batch_id: Optional[int] = None
 
 
 class AdminScheduleRollbackIn(BaseModel):
@@ -252,6 +253,28 @@ class AdminScheduleRollbackIn(BaseModel):
 
 class AdminScheduleRollbackOut(BaseModel):
     deleted: int
+
+
+class AdminScheduleBatchItemOut(BaseModel):
+    user_id: Optional[int]
+    user_name: str
+    created: int
+    skipped_past: int
+    skipped_duplicate: int
+    cancelled: bool
+
+
+class AdminScheduleBatchOut(BaseModel):
+    id: int
+    created_at: datetime
+    date_start: Optional[str] = None
+    date_end: Optional[str] = None
+    rows_count: int
+    created_count: int
+    skipped_past: int
+    skipped_duplicate: int
+    remaining_plans: int
+    items: list[AdminScheduleBatchItemOut]
 
 
 class PlanBase(BaseModel):

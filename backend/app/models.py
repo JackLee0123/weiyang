@@ -146,6 +146,47 @@ class Plan(Base):
     records: Mapped[list["Record"]] = relationship(back_populates="linked_plan")
 
 
+class ScheduleImportBatch(Base):
+    """管理员批量导入日程的批次记录：一次导入对应一条，逐用户逐日程明细在 Item 里。"""
+
+    __tablename__ = "schedule_import_batches"
+    __table_args__ = {"mysql_charset": "utf8mb4"}
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+    admin_id: Mapped[Optional[int]] = mapped_column(ForeignKey("users.id", ondelete="SET NULL"), nullable=True)
+    # 写入的日程日期范围（便于列表里一眼看出这次导的是哪段时间）
+    date_start: Mapped[Optional[str]] = mapped_column(String(10), nullable=True)
+    date_end: Mapped[Optional[str]] = mapped_column(String(10), nullable=True)
+    rows_count: Mapped[int] = mapped_column(Integer, default=0, nullable=False)
+    created_count: Mapped[int] = mapped_column(Integer, default=0, nullable=False)
+    skipped_past: Mapped[int] = mapped_column(Integer, default=0, nullable=False)
+    skipped_duplicate: Mapped[int] = mapped_column(Integer, default=0, nullable=False)
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=now_utc, nullable=False)
+
+    items: Mapped[list["ScheduleImportItem"]] = relationship(back_populates="batch", cascade="all, delete-orphan")
+
+
+class ScheduleImportItem(Base):
+    """批次里某个用户的导入明细；撤销整批或撤销某用户时据此找到 plan_ids。"""
+
+    __tablename__ = "schedule_import_items"
+    __table_args__ = {"mysql_charset": "utf8mb4"}
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+    batch_id: Mapped[int] = mapped_column(
+        ForeignKey("schedule_import_batches.id", ondelete="CASCADE"), index=True, nullable=False
+    )
+    user_id: Mapped[Optional[int]] = mapped_column(ForeignKey("users.id", ondelete="SET NULL"), nullable=True)
+    user_name: Mapped[str] = mapped_column(String(80), default="", nullable=False)
+    plan_ids: Mapped[Optional[list]] = mapped_column(JSON, default=list, nullable=True)
+    created: Mapped[int] = mapped_column(Integer, default=0, nullable=False)
+    skipped_past: Mapped[int] = mapped_column(Integer, default=0, nullable=False)
+    skipped_duplicate: Mapped[int] = mapped_column(Integer, default=0, nullable=False)
+    cancelled_at: Mapped[Optional[datetime]] = mapped_column(DateTime, nullable=True)
+
+    batch: Mapped[ScheduleImportBatch] = relationship(back_populates="items")
+
+
 class Record(Base):
     __tablename__ = "records"
     __table_args__ = {"mysql_charset": "utf8mb4"}

@@ -12,7 +12,7 @@ export interface ChangelogEntry {
   items: ChangelogItem[]
 }
 
-export const CURRENT_VERSION = 'v0.10.0'
+export const CURRENT_VERSION = 'v1.0.0'
 
 export const CHANGELOG_KIND_META: Record<ChangelogKind, { label: string; className: string }> = {
   feature: { label: '新增', className: 'text-teal-700 dark:text-teal-300' },
@@ -22,6 +22,29 @@ export const CHANGELOG_KIND_META: Record<ChangelogKind, { label: string; classNa
 }
 
 export const CHANGELOG: ChangelogEntry[] = [
+  {
+    version: 'v1.0.0',
+    date: '2026-10-13',
+    title: '批量导入可追溯、可撤销',
+    items: [
+      {
+        kind: 'feature',
+        text: '「用户管理 → 批量导入日程」新增「导入历史」：最近 50 次导入都留档，一眼能看到每次导入的日程日期范围、写给了哪些人各多少条、现在还剩多少条没删',
+      },
+      {
+        kind: 'feature',
+        text: '每次导入都可以整批「取消本次导入」，删掉那次写入且还留着的日程；也可以只「取消该用户」，其他人在那次导入里的日程照旧保留',
+      },
+      {
+        kind: 'notice',
+        text: '取消只针对那次导入写入的日程（按导入来源识别），你自己「记一笔」或不通过导入产生的计划不受影响；已经取消过的用户会标成「已取消」，重复点不会重复删',
+      },
+      {
+        kind: 'improvement',
+        text: '「还剩 N 条未删除」是实时算的：你在日历里手动删掉的导入日程，会立刻从这个数字里减掉，方便判断还有没有必要整批取消',
+      },
+    ],
+  },
   {
     version: 'v0.10.0',
     date: '2026-10-11',

@@ -11,12 +11,18 @@ vi.mock('../lib/api', () => ({
     importAdminSchedule: vi.fn(),
     rollbackAdminSchedule: vi.fn(),
     downloadAdminScheduleTemplate: vi.fn(),
+    fetchAdminScheduleImports: vi.fn(),
+    cancelAdminScheduleImport: vi.fn(),
+    cancelAdminScheduleImportForUser: vi.fn(),
   },
 }))
 
 const previewAdminSchedule = vi.mocked(api.previewAdminSchedule)
 const importAdminSchedule = vi.mocked(api.importAdminSchedule)
 const rollbackAdminSchedule = vi.mocked(api.rollbackAdminSchedule)
+const fetchAdminScheduleImports = vi.mocked(api.fetchAdminScheduleImports)
+const cancelAdminScheduleImport = vi.mocked(api.cancelAdminScheduleImport)
+const cancelAdminScheduleImportForUser = vi.mocked(api.cancelAdminScheduleImportForUser)
 
 const USERS: AdminUser[] = [
   { id: 1, email: 'admin@example.com', name: '管理员', is_admin: true, is_active: true, created_at: '2026-01-01T00:00:00' },
@@ -62,6 +68,7 @@ function pickFile() {
 describe('AdminScheduleImport', () => {
   beforeEach(() => {
     vi.clearAllMocks()
+    fetchAdminScheduleImports.mockResolvedValue([])
     Object.assign(URL, { createObjectURL: vi.fn(() => 'blob:mock'), revokeObjectURL: vi.fn() })
   })
 
@@ -73,6 +80,7 @@ describe('AdminScheduleImport', () => {
       skipped_duplicate: 0,
       targets: [{ user_id: 1, name: '管理员', created: 1, skipped_past: 0, skipped_duplicate: 0 }],
       plan_ids: [10],
+      batch_id: 1,
     })
     renderPanel()
 
@@ -98,6 +106,7 @@ describe('AdminScheduleImport', () => {
         { user_id: 2, name: '成员', created: 1, skipped_past: 0, skipped_duplicate: 0 },
       ],
       plan_ids: [10, 11],
+      batch_id: 2,
     })
     rollbackAdminSchedule.mockResolvedValue({ deleted: 2 })
     renderPanel()
@@ -126,5 +135,41 @@ describe('AdminScheduleImport', () => {
     fireEvent.click(screen.getByRole('button', { name: /解析预览/ }))
     expect(await screen.findByText('没有识别出表头')).toBeInTheDocument()
     expect(importAdminSchedule).not.toHaveBeenCalled()
+  })
+
+  it('展示导入历史，可取消整批或取消某个用户', async () => {
+    fetchAdminScheduleImports.mockResolvedValue([
+      {
+        id: 7,
+        created_at: '2026-10-13T10:00:00',
+        date_start: '2099-01-01',
+        date_end: '2099-01-01',
+        rows_count: 1,
+        created_count: 2,
+        skipped_past: 0,
+        skipped_duplicate: 0,
+        remaining_plans: 2,
+        items: [
+          { user_id: 1, user_name: '管理员', created: 1, skipped_past: 0, skipped_duplicate: 0, cancelled: false },
+          { user_id: 2, user_name: '成员', created: 1, skipped_past: 0, skipped_duplicate: 0, cancelled: false },
+        ],
+      },
+    ])
+    cancelAdminScheduleImport.mockResolvedValue({ deleted: 2 })
+    cancelAdminScheduleImportForUser.mockResolvedValue({ deleted: 1 })
+    const confirmSpy = vi.spyOn(window, 'confirm').mockReturnValue(true)
+    renderPanel()
+
+    expect(await screen.findByText('第 7 次导入')).toBeInTheDocument()
+    expect(screen.getByText(/写入 2 条/)).toBeInTheDocument()
+
+    fireEvent.click(screen.getAllByRole('button', { name: /取消该用户/ })[1])
+    await waitFor(() => expect(cancelAdminScheduleImportForUser).toHaveBeenCalledWith(7, 2))
+    expect(await screen.findByText(/已取消该用户在第 7 次导入中的日程，删除 1 条/)).toBeInTheDocument()
+
+    fireEvent.click(screen.getByRole('button', { name: /取消本次导入/ }))
+    await waitFor(() => expect(cancelAdminScheduleImport).toHaveBeenCalledWith(7))
+    expect(await screen.findByText(/已取消第 7 次导入，删除 2 条日程/)).toBeInTheDocument()
+    confirmSpy.mockRestore()
   })
 })

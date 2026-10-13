@@ -272,6 +272,15 @@ uv run alembic upgrade head
 过去的日期不会写入；已存在的相同日程（同一天、同一标题、同一开始时间）会自动跳过；
 导入完成后会显示每个人写入的条数，并可以一键「撤销本次导入」（只删除这次导入生成的日程）。
 
+每一次导入都会在「导入历史」里留档（最近 50 次）：能看到这次的日程日期范围、写给了哪些人
+各多少条、跳过了多少重复 / 过期行，以及**还剩多少条没被删掉**。历史里的操作有两种粒度：
+
+- **取消本次导入**：删掉这次导入写入、且还留着的全部日程；
+- **取消该用户**：只处理那次导入里写给某个人的日程，其他人的不受影响。
+
+取消只认「这次导入写入的日程」（按计划来源标记识别），你自己记的、或不通过导入产生的计划
+不会被删；已经取消过的用户会标成「已取消」，再点不会重复删。
+
 ## 计划完成 → 记录同步
 
 在「今日」页把一条计划勾选完成后，当天的「记录」里会自动多出一条对应的记录，并标上「来自计划」：
@@ -311,6 +320,9 @@ uv run alembic upgrade head
 | POST | `/api/admin/schedule/preview` | 解析上传的 .xlsx 日程表，返回预览（管理员，不落库） |
 | POST | `/api/admin/schedule/import` | 把日程批量导入自己 / 指定用户 / 全部用户（管理员） |
 | POST | `/api/admin/schedule/rollback` | 撤销某次批量导入生成的日程（管理员） |
+| GET | `/api/admin/schedule/imports` | 批量导入历史，含每人明细与剩余条数（管理员） |
+| POST | `/api/admin/schedule/imports/:id/cancel` | 取消某次导入写入的日程（管理员） |
+| POST | `/api/admin/schedule/imports/:id/cancel-user/:userId` | 只取消某次导入里写给某个用户的日程（管理员） |
 | GET | `/api/admin/schedule/template` | 下载日程导入模板 xlsx（管理员） |
 | POST | `/api/timetable/parse` | 解析上传的 Excel / HTML / ICS 或粘贴文本，返回课表预览（不保存） |
 | POST | `/api/timetable/wisedu/captcha` | 获取金智教务登录验证码（一次性会话） |

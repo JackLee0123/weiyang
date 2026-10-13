@@ -375,3 +375,56 @@ def test_rollback_ignores_manual_plans(client, admin_headers):
     )
     assert rollback.json()["deleted"] == 0
     assert len(client.get("/api/plans", headers=admin_headers).json()) == 1
+
+
+def test_import_history_and_cancel(client, admin_headers, register_user):
+    other_headers = register_user("history@example.com")
+    rows = [{"date": TOMORROW.isoformat(), "title": "历史批次", "category": "通知"}]
+    response = client.post(
+        "/api/admin/schedule/import",
+        json={"rows": rows, "include_self": True, "user_ids": [2]},
+        headers=admin_headers,
+    )
+    assert response.status_code == 200
+    body = response.json()
+    assert body["batch_id"] is not None
+
+    history = client.get("/api/admin/schedule/imports", headers=admin_headers)
+    assert history.status_code == 200
+    batches = history.json()
+    assert batches[0]["id"] == body["batch_id"]
+    assert batches[0]["created_count"] == 2
+    assert batches[0]["remaining_plans"] == 2
+    assert len(batches[0]["items"]) == 2
+    assert all(not item["cancelled"] for item in batches[0]["items"])
+
+    # 只取消某个用户那次导入的日程
+    cancel_user = client.post(
+        f"/api/admin/schedule/imports/{body['batch_id']}/cancel-user/2",
+        headers=admin_headers,
+    )
+    assert cancel_user.status_code == 200
+    assert cancel_user.json()["deleted"] == 1
+    assert client.get("/api/plans", headers=other_headers).json() == []
+    assert len(client.get("/api/plans", headers=admin_headers).json()) == 1
+
+    again = client.post(
+        f"/api/admin/schedule/imports/{body['batch_id']}/cancel-user/2",
+        headers=admin_headers,
+    )
+    assert again.json()["deleted"] == 0
+
+    # 取消整个批次
+    cancel_all = client.post(
+        f"/api/admin/schedule/imports/{body['batch_id']}/cancel",
+        headers=admin_headers,
+    )
+    assert cancel_all.json()["deleted"] == 1
+    assert client.get("/api/plans", headers=admin_headers).json() == []
+
+    batches = client.get("/api/admin/schedule/imports", headers=admin_headers).json()
+    assert batches[0]["remaining_plans"] == 0
+    assert all(item["cancelled"] for item in batches[0]["items"])
+
+    missing = client.post("/api/admin/schedule/imports/99999/cancel", headers=admin_headers)
+    assert missing.status_code == 404

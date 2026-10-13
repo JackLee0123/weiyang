@@ -144,6 +144,7 @@ def import_schedule(
         targets,
         [row.model_dump() for row in data.rows],
         skip_duplicates=data.skip_duplicates,
+        admin_id=admin.id,
     )
     return schemas.AdminScheduleImportOut(**result)
 
@@ -154,6 +155,64 @@ def rollback_schedule_import(
     db: Session = Depends(get_db),
     _admin=Depends(require_admin),
 ):
-    """撤销上一次批量导入（只删除由导入生成的日程）。"""
+    """撤销上一次批量导入（只删除由导入生成的日程）。兼容旧的前端按 plan_ids 撤销。"""
     deleted = repository.delete_imported_plans(db, data.plan_ids)
+    return schemas.AdminScheduleRollbackOut(deleted=deleted)
+
+
+def _batch_out(db: Session, batch) -> schemas.AdminScheduleBatchOut:
+    return schemas.AdminScheduleBatchOut(
+        id=batch.id,
+        created_at=batch.created_at,
+        date_start=batch.date_start,
+        date_end=batch.date_end,
+        rows_count=batch.rows_count,
+        created_count=batch.created_count,
+        skipped_past=batch.skipped_past,
+        skipped_duplicate=batch.skipped_duplicate,
+        remaining_plans=repository.count_batch_remaining_plans(db, batch),
+        items=[
+            schemas.AdminScheduleBatchItemOut(
+                user_id=item.user_id,
+                user_name=item.user_name,
+                created=item.created,
+                skipped_past=item.skipped_past,
+                skipped_duplicate=item.skipped_duplicate,
+                cancelled=item.cancelled_at is not None,
+            )
+            for item in batch.items
+        ],
+    )
+
+
+@router.get("/schedule/imports", response_model=list[schemas.AdminScheduleBatchOut])
+def list_schedule_imports(db: Session = Depends(get_db), _admin=Depends(require_admin)):
+    """批量导入的历史列表（最近的在前）。"""
+    return [_batch_out(db, batch) for batch in repository.list_import_batches(db)]
+
+
+@router.post("/schedule/imports/{batch_id}/cancel", response_model=schemas.AdminScheduleRollbackOut)
+def cancel_schedule_import(batch_id: int, db: Session = Depends(get_db), _admin=Depends(require_admin)):
+    """取消某一次批量导入：删除那次导入写入且还存在的日程。"""
+    batch = repository.get_import_batch(db, batch_id)
+    if not batch:
+        raise HTTPException(status_code=404, detail="导入批次不存在")
+    deleted = repository.cancel_import_batch(db, batch)
+    return schemas.AdminScheduleRollbackOut(deleted=deleted)
+
+
+@router.post("/schedule/imports/{batch_id}/cancel-user/{user_id}", response_model=schemas.AdminScheduleRollbackOut)
+def cancel_schedule_import_for_user(
+    batch_id: int, user_id: int, db: Session = Depends(get_db), _admin=Depends(require_admin)
+):
+    """只取消某一次导入里写入给指定用户的日程，其他用户保留。"""
+    batch = repository.get_import_batch(db, batch_id)
+    if not batch:
+        raise HTTPException(status_code=404, detail="导入批次不存在")
+    item = next((item for item in batch.items if item.user_id == user_id), None)
+    if item is None:
+        raise HTTPException(status_code=404, detail="这次导入里没有写入过该用户的日程")
+    if item.cancelled_at is not None:
+        return schemas.AdminScheduleRollbackOut(deleted=0)
+    deleted = repository.cancel_import_batch(db, batch, user_id=user_id)
     return schemas.AdminScheduleRollbackOut(deleted=deleted)
